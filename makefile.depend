@@ -1,0 +1,10 @@
+# -*- mode: makefile -*-
+
+OBJ_FILES =  \
+	obj/mango.o \
+	obj/mango_problem.o \
+	obj/mango_optimize.o
+
+# Dependencies:
+obj/mango.o: obj/mango_problem.o
+obj/mango_optimize.o: obj/mango_problem.o
