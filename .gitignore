@@ -3,3 +3,5 @@
 *.mod
 *.MOD
 *#
+examples/bin/*
+lib/*
