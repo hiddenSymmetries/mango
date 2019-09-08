@@ -23,4 +23,12 @@ module mango_problem_mod
   end type mango_problem
 
 
+  character(len=*), parameter :: &
+       mango_algorithm_petsc_pounders = "petsc_pounders", &
+       mango_algorithm_petsc_nm = "petsc_nm", &
+       mango_algorithm_hopspack = "hopspack", &
+       mango_algorithm_nlopt_ln_cobyla = "nlopt_ln_cobyla"
+
+  double precision, parameter :: mango_huge = 1.0d+12
+
 end module mango_problem_mod

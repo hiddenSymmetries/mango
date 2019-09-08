@@ -14,7 +14,7 @@ obj/%.o: src/%.F90
 	$(FC) $(EXTRA_COMPILE_FLAGS) -I ../include -c $^ -o $@
 
 bin/%: obj/%.o ../lib/libmango.a
-	$(FC) -o $@ $< ../lib/libmango.a $(EXTRA_LINK_FLAGS)
+	$(FLINKER) -o $@ $< ../lib/libmango.a $(EXTRA_LINK_FLAGS)
 
 clean:
 	rm -f obj/* bin/* src/*~ *~
@@ -25,5 +25,6 @@ test_make:
 	@echo BIN_FILES is $(BIN_FILES)
 	@echo HOSTNAME is $(HOSTNAME)
 	@echo FC is $(FC)
+	@echo FLINKER is $(FLINKER)
 	@echo EXTRA_COMPILE_FLAGS is $(EXTRA_COMPILE_FLAGS)
 	@echo EXTRA_LINK_FLAGS is $(EXTRA_LINK_FLAGS)

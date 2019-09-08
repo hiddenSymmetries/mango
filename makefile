@@ -2,6 +2,7 @@ include makefile.system-dependent
 
 ifeq ($(MANGO_PETSC_AVAILABLE),T)
   EXTRA_COMPILE_FLAGS += -DMANGO_PETSC_AVAILABLE
+  EXTRA_LINK_FLAGS += $(PETSC_LIB)
 else ifneq ($(MANGO_PETSC_AVAILABLE),F)
   $(error MANGO_PETSC_AVAILABLE must be set to either T or F (case-sensitive))
 endif
@@ -53,7 +54,7 @@ lib/libmango.a: $(OBJ_FILES)
 examples: lib/libmango.a
 	$(MAKE) -C examples	
 
-clean:
+clean::
 	rm -f obj/* include/* lib/* *~ src/*~
 	$(MAKE) -C examples clean
 
@@ -67,6 +68,7 @@ test_make:
 	@echo OBJ_FILES is $(OBJ_FILES)
 	@echo HOSTNAME is $(HOSTNAME)
 	@echo FC is $(FC)
+	@echo FLINKER is $(FLINKER)
 	@echo MANGO_PETSC_AVAILABLE is $(MANGO_PETSC_AVAILABLE)
 	@echo MANGO_HOPSPACK_AVAILABLE is $(MANGO_HOPSPACK_AVAILABLE)
 	@echo MANGO_DAKOTA_AVAILABLE is $(MANGO_DAKOTA_AVAILABLE)

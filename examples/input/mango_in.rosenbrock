@@ -1,0 +1,3 @@
+&mango_in
+  algorithm="petsc_nm"
+/

@@ -8,6 +8,7 @@ endif
 
 ifeq ($(HOSTNAME),edison)
 	FC = ftn
+	FLINKER = $(FC)
 	## NERSC documentation recommends against specifying -O3
 	## -mkl MUST APPEAR AT THE END!!
 	EXTRA_COMPILE_FLAGS = -openmp -mkl
@@ -18,6 +19,7 @@ ifeq ($(HOSTNAME),edison)
 
 else ifeq ($(HOSTNAME),cori)
 	FC = ftn
+	FLINKER = $(FC)
 	## NERSC documentation recommends against specifying -O3
 	## -mkl MUST APPEAR AT THE END!!
 	EXTRA_COMPILE_FLAGS = -qopenmp -mkl
@@ -30,6 +32,7 @@ else ifeq ($(HOSTNAME),pppl)
 	NETCDF_F = /usr/pppl/gcc/6.1-pkgs/netcdf-fortran-4.4.4
 	NETCDF_C = /usr/pppl/gcc/6.1-pkgs/netcdf-c-4.4.1
 	FC = mpifort
+	FLINKER = $(FC)
 	EXTRA_COMPILE_FLAGS = -O2 -ffree-line-length-none -fexternal-blas -fopenmp -I$(NETCDF_F)/include -I$(NETCDF_C)/include
 	EXTRA_LINK_FLAGS =  -fopenmp -L$(ACML_HOME)/lib -lacml -L$(NETCDF_C)/lib -lnetcdf -L$(NETCDF_F)/lib -lnetcdff
 	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
@@ -38,15 +41,20 @@ else ifeq ($(HOSTNAME),pppl)
 	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -N 1 -n 1 -c 8 -p dawson
 else
 	FC = mpif90
+	FLINKER = $(FC)
 
-	MANGO_PETSC_AVAILABLE = F
+	MANGO_PETSC_AVAILABLE = T
 	MANGO_HOPSPACK_AVAILABLE = F
 	MANGO_DAKOTA_AVAILABLE = F
 	MANGO_NLOPT_AVAILABLE = F
 
-	#EXTRA_COMPILE_FLAGS = -fopenmp -I/opt/local/include -ffree-line-length-none -cpp
-	EXTRA_COMPILE_FLAGS = -fopenmp -I/opt/local/include -ffree-line-length-none -O0 -g
-	EXTRA_LINK_FLAGS =  -fopenmp -L/opt/local/lib -lnetcdff  -lnetcdf -framework Accelerate
+	PETSC_DIR=/opt/local/lib/petsc
+	include ${PETSC_DIR}/lib/petsc/conf/variables
+	include ${PETSC_DIR}/lib/petsc/conf/rules
+
+	EXTRA_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
+	#EXTRA_COMPILE_FLAGS = -ffree-line-length-none -O0 -g
+	EXTRA_LINK_FLAGS = 
 
 	# For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
 	REGCOIL_COMMAND_TO_SUBMIT_JOB =

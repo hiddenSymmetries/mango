@@ -13,8 +13,16 @@ subroutine mango_optimize(problem)
   print *,"Hello world from mango_optimize."
   print *,"problem%least_squared=",problem%least_squares
 
-  x(1) = 0.5
-  x(2) = 2
-  call problem%objective_function(x,f,failed)
+  select case (trim(problem%algorithm))
+  case (mango_algorithm_petsc_nm,mango_algorithm_petsc_pounders)
+     call mango_optimize_petsc(problem)
+  case (mango_algorithm_hopspack)
+     call mango_optimize_hopspack(problem)
+  case (mango_algorithm_nlopt_ln_cobyla)
+     call mango_optimize_nlopt(problem)
+  case default
+     print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)
+     stop
+  end select
 
 end subroutine mango_optimize
