@@ -1,10 +1,11 @@
-subroutine mango_optimize_hopspack(problem)
+subroutine mango_optimize_hopspack(problem, objective_function)
 
   use mango_problem_mod
 
   implicit none
 
   type(mango_problem) :: problem
+  procedure(mango_objective_function_interface) :: objective_function
 
   !-------------------------------------------
 

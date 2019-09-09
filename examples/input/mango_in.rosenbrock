@@ -1,3 +1,4 @@
 &mango_in
   algorithm="petsc_nm"
+  !algorithm="petsc_pounders"
 /
