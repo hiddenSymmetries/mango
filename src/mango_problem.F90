@@ -38,7 +38,20 @@ module mango_problem_mod
        mango_algorithm_petsc_pounders = "petsc_pounders", &
        mango_algorithm_petsc_nm = "petsc_nm", &
        mango_algorithm_hopspack = "hopspack", &
-       mango_algorithm_nlopt_ln_cobyla = "nlopt_ln_cobyla"
+       mango_algorithm_nlopt_gn_direct = "nlopt_gn_direct", &
+       mango_algorithm_nlopt_gn_direct_l = "nlopt_gn_direct_l", &
+       mango_algorithm_nlopt_gn_direct_l_rand = "nlopt_gn_direct_l_rand", &
+       mango_algorithm_nlopt_gn_direct_noscal = "nlopt_gn_direct_noscal", &
+       mango_algorithm_nlopt_gn_direct_l_noscal = "nlopt_gn_direct_l_noscal", &
+       mango_algorithm_nlopt_gn_direct_l_rand_noscal = "nlopt_gn_direct_l_rand_noscal", &
+       mango_algorithm_nlopt_gn_orig_direct = "nlopt_gn_orig_direct", &
+       mango_algorithm_nlopt_gn_orig_direct_l = "nlopt_gn_orig_direct_l", &
+       mango_algorithm_nlopt_gn_crs2_lm = "nlopt_gn_crs2_lm", &
+       mango_algorithm_nlopt_ln_cobyla = "nlopt_ln_cobyla", &
+       mango_algorithm_nlopt_ln_bobyqa = "nlopt_ln_bobyqa", &
+       mango_algorithm_nlopt_ln_praxis = "nlopt_ln_praxis", &
+       mango_algorithm_nlopt_ln_neldermead = "nlopt_ln_neldermead", &
+       mango_algorithm_nlopt_ln_sbplx = "nlopt_ln_sbplx"
 
   double precision, parameter :: mango_huge = 1.0d+12
 

@@ -23,7 +23,20 @@ subroutine mango_optimize(problem, objective_function)
      call mango_optimize_petsc(problem, objective_function)
   case (mango_algorithm_hopspack)
      call mango_optimize_hopspack(problem, objective_function)
-  case (mango_algorithm_nlopt_ln_cobyla)
+  case (mango_algorithm_nlopt_gn_direct, &
+       mango_algorithm_nlopt_gn_direct_l, &
+       mango_algorithm_nlopt_gn_direct_l_rand, &
+       mango_algorithm_nlopt_gn_direct_noscal, &
+       mango_algorithm_nlopt_gn_direct_l_noscal, &
+       mango_algorithm_nlopt_gn_direct_l_rand_noscal, &
+       mango_algorithm_nlopt_gn_orig_direct, &
+       mango_algorithm_nlopt_gn_orig_direct_l, &
+       mango_algorithm_nlopt_gn_crs2_lm, &
+       mango_algorithm_nlopt_ln_cobyla, &
+       mango_algorithm_nlopt_ln_bobyqa, &
+       mango_algorithm_nlopt_ln_praxis, &
+       mango_algorithm_nlopt_ln_neldermead, &
+       mango_algorithm_nlopt_ln_sbplx  )
      call mango_optimize_nlopt(problem, objective_function)
   case default
      print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)
@@ -65,7 +78,20 @@ subroutine mango_optimize_least_squares(problem, residual_function)
      call mango_optimize_petsc(problem, least_squares_to_single_objective)
   case (mango_algorithm_hopspack)
      call mango_optimize_hopspack(problem, least_squares_to_single_objective)
-  case (mango_algorithm_nlopt_ln_cobyla)
+  case (mango_algorithm_nlopt_gn_direct, &
+       mango_algorithm_nlopt_gn_direct_l, &
+       mango_algorithm_nlopt_gn_direct_l_rand, &
+       mango_algorithm_nlopt_gn_direct_noscal, &
+       mango_algorithm_nlopt_gn_direct_l_noscal, &
+       mango_algorithm_nlopt_gn_direct_l_rand_noscal, &
+       mango_algorithm_nlopt_gn_orig_direct, &
+       mango_algorithm_nlopt_gn_orig_direct_l, &
+       mango_algorithm_nlopt_gn_crs2_lm, &
+       mango_algorithm_nlopt_ln_cobyla, &
+       mango_algorithm_nlopt_ln_bobyqa, &
+       mango_algorithm_nlopt_ln_praxis, &
+       mango_algorithm_nlopt_ln_neldermead, &
+       mango_algorithm_nlopt_ln_sbplx  )
      call mango_optimize_nlopt(problem, least_squares_to_single_objective)
   case default
      print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)

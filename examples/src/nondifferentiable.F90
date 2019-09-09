@@ -1,6 +1,6 @@
 #define N 3
 
-program quadratic
+program nondifferentiable
 
   use mango
 #if defined(MANGO_PETSC_AVAILABLE)
@@ -10,7 +10,9 @@ program quadratic
 
   implicit none
 
-!  include 'mpif.h'
+#if !defined(MANGO_PETSC_AVAILABLE)
+  include 'mpif.h'
+#endif
   
   integer :: ierr
   type(mango_problem) :: my_problem
@@ -19,7 +21,7 @@ program quadratic
 
   !---------------------------------------------
 
-  print *,"Hello world from quadratic"
+  print *,"Hello world from nondifferentiable"
 
 #if defined(MANGO_PETSC_AVAILABLE)
   print *,"Using PETSc"
@@ -38,7 +40,7 @@ program quadratic
   allocate(my_problem%state_vector(N))
   my_problem%state_vector = 0.0d+0
 
-  call mango_read_namelist(my_problem,'../input/mango_in.quadratic')
+  call mango_read_namelist(my_problem,'../input/mango_in.nondifferentiable')
   call mango_optimize(my_problem, objective_function)
 
 #if defined(MANGO_PETSC_AVAILABLE)
@@ -51,7 +53,7 @@ program quadratic
 
   print *,"Good bye!"
 
-end program quadratic
+end program nondifferentiable
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -72,7 +74,7 @@ subroutine objective_function(x, f, failed)
   
   !---------------------------------------------
 
-  print *,"quadratic/objective_function: size(x)=",size(x)
+  print *,"nondifferentiable/objective_function: size(x)=",size(x)
 
   f = 0
   do j = 1, N
@@ -81,7 +83,7 @@ subroutine objective_function(x, f, failed)
 
   failed = .false.
 
-  !print *,"Hello from quadratic/objective_function."
-  print *,"quadratic/objective_function: x=",x,", f=",f
+  !print *,"Hello from nondifferentiable/objective_function."
+  print *,"nondifferentiable/objective_function: x=",x,", f=",f
 
 end subroutine objective_function

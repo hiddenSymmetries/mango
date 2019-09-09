@@ -10,7 +10,9 @@ program quadratic
 
   implicit none
 
-!  include 'mpif.h'
+#if !defined(MANGO_PETSC_AVAILABLE)
+  include 'mpif.h'
+#endif
   
   integer :: ierr
   type(mango_least_squares_problem) :: my_problem
