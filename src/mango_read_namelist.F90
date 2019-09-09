@@ -1,6 +1,6 @@
 subroutine mango_read_namelist(problem, filename)
 
-  use mango_problem_mod
+  use mango
 
   implicit none
 

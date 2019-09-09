@@ -1,6 +1,6 @@
 subroutine mango_optimize_petsc(problem, objective_function)
 
-  use mango_problem_mod
+  use mango
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsc/finclude/petsctao.h>
   use petsctao
@@ -96,7 +96,7 @@ end subroutine mango_optimize_petsc
 
 subroutine mango_optimize_least_squares_petsc(problem, residual_function)
 
-  use mango_problem_mod
+  use mango
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsc/finclude/petsctao.h>
   use petsctao

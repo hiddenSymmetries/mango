@@ -1,6 +1,6 @@
 subroutine mango_optimize(problem, objective_function)
 
-  use mango_problem_mod
+  use mango
 
   implicit none
 
@@ -49,7 +49,7 @@ end subroutine mango_optimize
 
 subroutine mango_optimize_least_squares(problem, residual_function)
 
-  use mango_problem_mod
+  use mango
 
   implicit none
 

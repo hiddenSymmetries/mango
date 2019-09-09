@@ -1,6 +1,6 @@
 subroutine mango_optimize_nlopt(problem, objective_function)
 
-  use mango_problem_mod
+  use mango
 
   implicit none
 
