@@ -1,4 +1,4 @@
-#define N 2
+#define N 3
 
 program quadratic
 
@@ -13,11 +13,9 @@ program quadratic
 !  include 'mpif.h'
   
   integer :: ierr
-  type(mango_least_squares_problem) :: my_problem
+  type(mango_problem) :: my_problem
   !procedure(objective_function_interface) :: objective_function
-  procedure(mango_residual_function_interface) :: residual_function
-
-  integer :: j
+  procedure(mango_objective_function_interface) :: objective_function
 
   !---------------------------------------------
 
@@ -40,15 +38,8 @@ program quadratic
   allocate(my_problem%state_vector(N))
   my_problem%state_vector = 0.0d+0
 
-  allocate(my_problem%targets(N))
-  allocate(my_problem%sigmas(N))
-  do j = 1, N
-     my_problem%targets(j) = j
-     my_problem%sigmas(j)  = j
-  end do
-
   call mango_read_namelist(my_problem,'../input/mango_in.quadratic')
-  call mango_optimize_least_squares(my_problem, residual_function)
+  call mango_optimize(my_problem, objective_function)
 
 #if defined(MANGO_PETSC_AVAILABLE)
   print *,"Using PETSc"
@@ -66,26 +57,31 @@ end program quadratic
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine residual_function(x, f, failed)
+subroutine objective_function(x, f, failed)
 
   use mango
 
   implicit none
 
   double precision, intent(in) :: x(:)
-  double precision, intent(out) :: f(:)
+  double precision, intent(out) :: f
   logical, intent(out) :: failed
   !type(mango_problem) :: problem
   !double precision, parameter :: a = 1, b=100
+  integer :: j
   
   !---------------------------------------------
 
-  print *,"quadratic/residual_function: size(x)=",size(x),", size(f)=",size(f)
+  print *,"quadratic/objective_function: size(x)=",size(x)
 
-  f = x
+  f = 0
+  do j = 1, N
+     f = f + abs(x(j) - j) / j
+  end do
+
   failed = .false.
 
   !print *,"Hello from quadratic/objective_function."
-  print *,"quadratic/residual_function: x=",x,", f=",f
+  print *,"quadratic/objective_function: x=",x,", f=",f
 
-end subroutine residual_function
+end subroutine objective_function

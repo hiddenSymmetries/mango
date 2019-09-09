@@ -42,7 +42,8 @@ program rosenbrock
 
   allocate(my_problem%sigmas(2))
   my_problem%sigmas(1) = 1.0d+0
-  my_problem%sigmas(2) = 1.0d-1
+  !my_problem%sigmas(2) = 1.0d-1
+  my_problem%sigmas(2) = 0.5d+0
 
   call mango_read_namelist(my_problem,'../input/mango_in.rosenbrock')
   call mango_optimize_least_squares(my_problem, residual_function)
