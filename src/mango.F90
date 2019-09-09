@@ -28,6 +28,7 @@ module mango
      character(len=100) :: algorithm
      character(len=200) :: output_filename
      integer :: output_unit = 11
+     integer :: function_evaluations = 0
      !procedure(objective_function_interface), pointer, nopass :: objective_function
   end type mango_problem
 

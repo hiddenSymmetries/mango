@@ -3,6 +3,7 @@
 # Dependencies:
 obj/mango_read_namelist.o: obj/mango.o
 obj/mango_optimize.o: obj/mango.o
+obj/mango_optimize_least_squares.o: obj/mango.o
 obj/mango_optimize_petsc.o: obj/mango.o
 obj/mango_optimize_hopspack.o: obj/mango.o
 obj/mango_optimize_nlopt.o: obj/mango.o

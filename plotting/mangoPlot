@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+myfigsize=(14,7)
+
+print
+print "usage: mangoPlot <1 or more mango_out.* files>"
+
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
+
+if len(sys.argv) < 2:
+    print "Error! You must specify at least 1 argument: the mango_out file."
+    exit(1)
+
+files_function_evaluations = []
+files_objective_function = []
+filenames = []
+
+for k in range(1,len(sys.argv)):
+    filename = sys.argv[k]
+    filenames.append(filename)
+    f = open(filename,'r')
+    lines = f.readlines()
+    f.close()
+
+    temp = lines[3].split(',')
+    N_parameters = int(temp[0])
+    print "N_parameters:",N_parameters
+
+    function_evaluations = []
+    objective_function = []
+    for j in range(5,len(lines)):
+        temp = lines[j].split(',')
+        function_evaluations.append(int(temp[0]))
+        objective_function.append(float(temp[N_parameters+1]))
+
+    files_function_evaluations.append(function_evaluations)
+    files_objective_function.append(objective_function)
+
+N_files = len(files_function_evaluations)
+
+######################################################3
+
+fig = plt.figure(figsize=myfigsize)
+fig.patch.set_facecolor('white')
+
+numCols = 1
+numRows = 2
+plotNum = 1
+
+import os
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+for j in range(N_files):
+    plt.plot(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
+plt.xlabel('Function evaluation')
+plt.ylabel('Objective function')
+plt.grid(True)
+if N_files > 1:
+    plt.legend(loc=0,fontsize=7)
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+for j in range(N_files):
+    plt.semilogy(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
+plt.xlabel('Function evaluation')
+plt.ylabel('Objective function')
+plt.grid(True)
+if N_files > 1:
+    plt.legend(loc=0,fontsize=7)
+
+if N_files == 1:
+    plt.figtext(0.5,0.995, os.path.abspath(filename), ha='center',va='top',fontsize=7)
+
+plt.tight_layout()
+
+##############################################################
+
+plt.show()
+
