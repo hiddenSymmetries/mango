@@ -25,7 +25,9 @@ module mango
      integer :: N_proc_groups
      double precision, allocatable :: state_vector(:)
      integer, allocatable :: mpi_sub_comms(:)
-     character(100) :: algorithm
+     character(len=100) :: algorithm
+     character(len=200) :: output_filename
+     integer :: output_unit = 11
      !procedure(objective_function_interface), pointer, nopass :: objective_function
   end type mango_problem
 

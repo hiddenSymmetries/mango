@@ -1,3 +1,9 @@
+.PHONY: all clean examples test retest test_make
+
+all: lib/libmango.a examples
+#	cp obj/mango.mod* include
+#	cp obj/mango.MOD* include
+
 include makefile.system-dependent
 
 ifeq ($(MANGO_PETSC_AVAILABLE),T)
@@ -30,12 +36,6 @@ EXTRA_COMPILE_FLAGS += -J obj -I obj
 
 export
 
-.PHONY: all clean examples test retest test_make
-
-all: lib/libmango.a examples
-#	cp obj/mango.mod* include
-#	cp obj/mango.MOD* include
-
 # Automatically detect all the examples:
 SRC_FILES = $(wildcard src/*.F90)
 OBJ_FILES = $(patsubst src/%.F90, obj/%.o, $(SRC_FILES))
@@ -43,7 +43,7 @@ OBJ_FILES = $(patsubst src/%.F90, obj/%.o, $(SRC_FILES))
 include makefile.dependencies
 
 obj/%.o: src/%.F90
-	$(FC) $(EXTRA_COMPILE_FLAGS) -c $^ -o $@
+	$(FC) $(EXTRA_COMPILE_FLAGS) -c $< -o $@
 #	$(FC) $(EXTRA_COMPILE_FLAGS) -c $<
 
 lib/libmango.a: $(OBJ_FILES)

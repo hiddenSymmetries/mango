@@ -27,6 +27,7 @@ subroutine mango_optimize_petsc(problem, objective_function)
 
   print *,"Hello world from mango_optimize_petsc."
 
+  call PETSCInitialize(PETSC_NULL_CHARACTER, ierr)
   call TaoCreate(PETSC_COMM_WORLD, my_tao, ierr)
 
   !call VecCreateSeq(PETSC_COMM_WORLD, 2, x0, ierr)                                                                                                                  
@@ -57,6 +58,8 @@ subroutine mango_optimize_petsc(problem, objective_function)
 
   call TaoDestroy(my_tao, ierr)
   call VecDestroy(tao_state_vec, ierr)
+
+  call PETScFinalize(ierr)
 
 contains
 

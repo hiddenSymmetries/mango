@@ -6,6 +6,7 @@ subroutine mango_optimize(problem, objective_function)
 
   type(mango_problem) :: problem
   procedure(mango_objective_function_interface) :: objective_function
+  integer :: j
 
   !-------------------------------------------
 
@@ -15,6 +16,19 @@ subroutine mango_optimize(problem, objective_function)
 
   problem%N_parameters = size(problem%state_vector)
   print *,"Detected N_parameters=",problem%N_parameters
+
+  ! Write header line of output file
+  open(unit = problem%output_unit, file = trim(problem%output_filename))
+  write (problem%output_unit,"(a)") "Least squares?"
+  write (problem%output_unit,"(a)") "no"
+  write (problem%output_unit,"(a)") "N_parameters:"
+  write (problem%output_unit,"(i0)") problem%N_parameters
+  write (problem%output_unit,"(a)",advance="no") "function_evaluation"
+  do j = 1, problem%N_parameters
+     write (problem%output_unit,"(a,i0,a)",advance="no") ",x(",j,")"
+  end do
+  write (problem%output_unit,"(a)") ",objective_function"
+  call flush(problem%output_unit)
 
   select case (trim(problem%algorithm))
   case (mango_algorithm_petsc_pounders)
@@ -43,6 +57,8 @@ subroutine mango_optimize(problem, objective_function)
      stop
   end select
 
+  close(problem%output_unit)
+
 end subroutine mango_optimize
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -55,6 +71,7 @@ subroutine mango_optimize_least_squares(problem, residual_function)
 
   type(mango_least_squares_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
+  integer :: j
 
   !-------------------------------------------
 
@@ -70,6 +87,23 @@ subroutine mango_optimize_least_squares(problem, residual_function)
   problem%N_terms = size(problem%targets)
   print *,"Detected N_terms=",problem%N_terms
   if (size(problem%sigmas) .ne. problem%N_terms) stop "size(sigmas) .ne. size(targets)"
+
+  ! Write header line of output file
+  open(unit = problem%output_unit, file = trim(problem%output_filename))
+  write (problem%output_unit,"(a)") "Least squares?"
+  write (problem%output_unit,"(a)") "yes"
+  write (problem%output_unit,"(a)") "N_parameters, N_terms:"
+  write (problem%output_unit,"(i0,a,i0)") problem%N_parameters, ", ", problem%N_terms
+  write (problem%output_unit,"(a)",advance="no") "function_evaluation"
+  do j = 1, problem%N_parameters
+     write (problem%output_unit,"(a,i0,a)",advance="no") ",x(",j,")"
+  end do
+  write (problem%output_unit,"(a)",advance="no") ",objective_function"
+  do j = 1, problem%N_terms
+     write (problem%output_unit,"(a,i0,a)",advance="no") ",F(",j,")"
+  end do
+  write (problem%output_unit,"(a)") ""
+  call flush(problem%output_unit)
 
   select case (trim(problem%algorithm))
   case (mango_algorithm_petsc_pounders)
@@ -97,6 +131,8 @@ subroutine mango_optimize_least_squares(problem, residual_function)
      print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)
      stop
   end select
+
+  close(problem%output_unit)
 
 contains
 
