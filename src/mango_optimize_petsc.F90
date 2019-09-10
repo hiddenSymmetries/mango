@@ -27,12 +27,13 @@ subroutine mango_optimize_petsc(problem, objective_function)
 
   print *,"Hello world from mango_optimize_petsc."
 
+  PETSC_COMM_WORLD = MPI_COMM_SELF  ! The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
   call PETSCInitialize(PETSC_NULL_CHARACTER, ierr)
-  call TaoCreate(PETSC_COMM_WORLD, my_tao, ierr)
+  call TaoCreate(PETSC_COMM_SELF, my_tao, ierr)
 
   !call VecCreateSeq(PETSC_COMM_WORLD, 2, x0, ierr)                                                                                                                  
-  call VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, problem%N_parameters, tao_state_vec, ierr)
-
+  !call VecCreateMPI(PETSC_COMM_SELF, PETSC_DECIDE, problem%N_parameters, tao_state_vec, ierr)
+  call VecCreateSeq(PETSC_COMM_SELF, problem%N_parameters, tao_state_vec, ierr)
   ! Set initial condition
   !call VecSet(tao_state_vec, 0.0d+0, ierr)
   call VecGetArrayF90(tao_state_vec, temp_array, ierr)
@@ -126,11 +127,15 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
 
   print *,"Hello world from mango_optimize_least_squares_petsc."
 
-  call TaoCreate(PETSC_COMM_WORLD, my_tao, ierr)
+  PETSC_COMM_WORLD = MPI_COMM_SELF  ! The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
+  call PETSCInitialize(PETSC_NULL_CHARACTER, ierr)
+  call TaoCreate(PETSC_COMM_SELF, my_tao, ierr)
 
-  !call VecCreateSeq(PETSC_COMM_WORLD, 2, x0, ierr)                                                                                                                  
-  call VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, problem%N_parameters, tao_state_vec, ierr)
-  call VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, problem%N_terms, tao_residual_vec, ierr)
+  !call VecCreateSeq(PETSC_COMM_SELF, 2, x0, ierr)
+  !call VecCreateMPI(PETSC_COMM_SELF, PETSC_DECIDE, problem%N_parameters, tao_state_vec, ierr)
+  !call VecCreateMPI(PETSC_COMM_SELF, PETSC_DECIDE, problem%N_terms, tao_residual_vec, ierr)
+  call VecCreateSeq(PETSC_COMM_SELF, problem%N_parameters, tao_state_vec, ierr)
+  call VecCreateSeq(PETSC_COMM_SELF, problem%N_terms, tao_residual_vec, ierr)
 
   ! Set initial condition
   !call VecSet(tao_state_vec, 0.0d+0, ierr)
@@ -140,7 +145,7 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
   call TaoSetInitialVector(my_tao, tao_state_vec, ierr)
 
   print *,"Here comes tao_state_vec:"
-  call VecView(tao_state_vec, PETSC_VIEWER_STDOUT_WORLD, ierr)
+  call VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF, ierr)
 
   select case (trim(problem%algorithm))
   case (mango_algorithm_petsc_nm)
@@ -163,6 +168,7 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
   call VecDestroy(tao_state_vec, ierr)
   call VecDestroy(tao_residual_vec, ierr)
 
+  call PETScFinalize(ierr)
 
 contains
 

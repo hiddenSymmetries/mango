@@ -1,6 +1,6 @@
 &mango_in
   !algorithm="petsc_nm"
-  !algorithm="petsc_pounders"
+  algorithm="petsc_pounders"
   !algorithm="nlopt_gn_direct"
   !algorithm="nlopt_gn_direct_l"
   !algorithm="nlopt_gn_direct_l_rand"
@@ -14,5 +14,5 @@
   !algorithm="nlopt_ln_bobyqa"
   !algorithm="nlopt_ln_praxis"
   !algorithm="nlopt_ln_neldermead"
-  algorithm="nlopt_ln_sbplx"
+  !algorithm="nlopt_ln_sbplx"
 /

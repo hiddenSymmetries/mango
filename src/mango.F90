@@ -20,7 +20,6 @@ module mango
 
   type :: mango_problem
      integer :: mpi_comm
-     !logical :: least_squares
      integer :: N_parameters
      integer :: N_proc_groups
      double precision, allocatable :: state_vector(:)
