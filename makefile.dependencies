@@ -1,6 +1,10 @@
 # -*- mode: makefile -*-
 
 # Dependencies:
+obj/mango_finite_difference_gradient.o: obj/mango.o
+obj/mango_group_leaders_loop.o: obj/mango.o
+obj/mango_mpi_init.o: obj/mango.o
+obj/mango_mpi_finalize.o: obj/mango.o
 obj/mango_read_namelist.o: obj/mango.o
 obj/mango_optimize.o: obj/mango.o
 obj/mango_optimize_least_squares.o: obj/mango.o

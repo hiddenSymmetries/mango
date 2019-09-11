@@ -56,6 +56,9 @@ subroutine mango_optimize_nlopt(problem, objective_function)
      call nlo_create(opt, NLOPT_LN_NELDERMEAD, problem%N_parameters)
   case (mango_algorithm_nlopt_ln_sbplx)
      call nlo_create(opt, NLOPT_LN_SBPLX, problem%N_parameters)
+     ! Local, derivative-based
+  case (mango_algorithm_nlopt_lD_LBFGS)
+     call nlo_create(opt, NLOPT_LD_LBFGS, problem%N_parameters)
   case default
      print "(a)","Error! Should not get here."
   end select
@@ -98,22 +101,26 @@ subroutine mango_optimize_nlopt(problem, objective_function)
 
 contains
 
-  subroutine mango_nlopt_objective_function(result, n, x, grad, need_gradient, f_data)
+  subroutine mango_nlopt_objective_function(f, n, x, grad, need_gradient, f_data)
 
     implicit none
 
-    integer :: need_gradient, n
-    double precision :: result, x(n), grad(n)
+    integer, intent(in) :: need_gradient, n
+    double precision, intent(in) :: x(n)
+    double precision :: f, grad(n)
     integer :: f_data
     logical :: failed
 
+    print *,"mango_nlopt_objective_function: size(x)=",size(x)
+    print *,"x=",x
     if (need_gradient.ne.0) then
-       print *,"mango_nlopt_objective_function: need_gradient is not yet supported in mango. need_gradient=",need_gradient
-       stop
+       !print *,"mango_nlopt_objective_function: need_gradient is not yet supported in mango. need_gradient=",need_gradient
+       !stop
+       call mango_finite_difference_gradient(problem, objective_function, x, f, grad)
+    else
+       call mango_objective_function_wrapper(problem, objective_function, x, f, failed)
+       if (failed) f = mango_huge
     end if
-
-    call objective_function(x, result, failed)
-    if (failed) result = mango_huge
 
   end subroutine mango_nlopt_objective_function
 

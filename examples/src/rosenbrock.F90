@@ -8,7 +8,7 @@ program rosenbrock
   
   integer :: ierr, N_procs, mpi_rank, data(1)
   logical :: proc0
-  type(mango_least_squares_problem) :: my_problem
+  type(mango_least_squares_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
 
   !---------------------------------------------
@@ -17,40 +17,37 @@ program rosenbrock
 
   call mpi_init(ierr)
 
-  call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
-  call mpi_comm_size(MPI_COMM_WORLD, N_procs, ierr)
-  proc0 = (mpi_rank==0)
+  call mango_read_namelist(problem,'../input/mango_in.rosenbrock')
 
-  if (proc0) then
-     !my_problem%objective_function => objective_function
-     my_problem%mpi_comm = MPI_COMM_WORLD
-     my_problem%algorithm = mango_algorithm_petsc_nm
-     my_problem%output_filename = '../output/mango_out.rosenbrock'
+  call mango_mpi_init(problem, MPI_COMM_WORLD)
+
+  problem%output_filename = '../output/mango_out.rosenbrock'
+
+  ! Set initial condition
+  allocate(problem%state_vector(2))
+  problem%state_vector = 0.0d+0
      
-     ! Set initial condition
-     allocate(my_problem%state_vector(2))
-     my_problem%state_vector = 0.0d+0
+  allocate(problem%targets(2))
+  problem%targets(1) = 1.0d+0
+  problem%targets(2) = 0.0d+0
      
-     allocate(my_problem%targets(2))
-     my_problem%targets(1) = 1.0d+0
-     my_problem%targets(2) = 0.0d+0
+  allocate(problem%sigmas(2))
+  problem%sigmas(1) = 1.0d+0
+  problem%sigmas(2) = 1.0d-1
+  !problem%sigmas(2) = 0.5d+0
      
-     allocate(my_problem%sigmas(2))
-     my_problem%sigmas(1) = 1.0d+0
-     my_problem%sigmas(2) = 1.0d-1
-     !my_problem%sigmas(2) = 0.5d+0
-     
-     call mango_read_namelist(my_problem,'../input/mango_in.rosenbrock')
-     call mango_optimize_least_squares(my_problem, residual_function)
+  if (problem%proc0_worker_groups) then
+     call mango_optimize_least_squares(problem, residual_function)
 
      ! Make workers stop
      data = -1
-     call mpi_bcast(data,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+     call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_worker_groups,ierr)
      if (ierr .ne. 0) print *,"Error A on proc0!"
   else
-     call worker()
+     call worker(problem)
   end if
 
+  call mango_mpi_finalize(problem)
   call mpi_finalize(ierr)
 
   print *,"Good bye!"
@@ -61,7 +58,7 @@ end program rosenbrock
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine residual_function(x, f, failed)
+subroutine residual_function(problem, x, f, failed)
 
   use mango
 
@@ -69,6 +66,7 @@ subroutine residual_function(x, f, failed)
 
   include 'mpif.h'
 
+  type(mango_least_squares_problem) :: problem
   double precision, intent(in) :: x(:)
   double precision, intent(out) :: f(:)
   logical, intent(out) :: failed
@@ -80,9 +78,9 @@ subroutine residual_function(x, f, failed)
 
   print *,"rosenbrock/residual_function: size(x)=",size(x),", size(f)=",size(f)
 
-  ! Mobilize workers:
-  data = 1
-  call mpi_bcast(data,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+  ! Mobilize the workers in the group with this group leader:
+  data = problem%worker_group
+  call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_worker_groups,ierr)
   if (ierr .ne. 0) print *,"Error on proc0 in residual_function!"
 
   !f = (a - x(1)) ** 2 + b * (x(2) - x(1)**2) ** 2
@@ -97,17 +95,20 @@ end subroutine residual_function
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine worker()
+subroutine worker(problem)
+
+  use mango
 
   implicit none
 
   include 'mpif.h'
 
+  type(mango_least_squares_problem) :: problem
   integer :: ierr, mpi_rank, data(1)
 
   call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
   do
-     call mpi_bcast(data,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+     call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_worker_groups,ierr)
      if (ierr .ne. 0) print *,"Error on proc",mpi_rank," in worker: bcast!"
      if (data(1) < 0) then
         print "(a,i4,a)", "Proc",mpi_rank," is exiting."

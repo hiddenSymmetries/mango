@@ -44,7 +44,7 @@ subroutine mango_optimize_least_squares(problem, residual_function)
 
   select case (trim(problem%algorithm))
   case (mango_algorithm_petsc_pounders)
-     call mango_optimize_least_squares_petsc(problem, residual_function_wrapper)
+     call mango_optimize_least_squares_petsc(problem, residual_function)
   case (mango_algorithm_petsc_nm)
      call mango_optimize_petsc(problem, least_squares_to_single_objective)
   case (mango_algorithm_hopspack)
@@ -75,10 +75,11 @@ contains
 
   ! ------------------------------------------------------
 
-  subroutine least_squares_to_single_objective(x, f, failed)
+  subroutine least_squares_to_single_objective(non_least_squares_problem, x, f, failed)
 
     implicit none
 
+    type(mango_problem) :: non_least_squares_problem
     double precision, intent(in) :: x(:)
     double precision, intent(out) :: f
     logical, intent(out) :: failed
@@ -88,39 +89,45 @@ contains
 
     print *,"Hello from least_squares_to_single_objective"
     allocate(residual_vector(problem%N_terms))
-    call residual_function_wrapper(x, residual_vector, failed)
+    !call mango_residual_function_wrapper(x, residual_vector, failed)
+    call residual_function(problem, x, residual_vector, failed)
     f = sum(((residual_vector - problem%targets) / problem%sigmas) ** 2)
     print *,"residual_vector:",residual_vector,", f:",f
     deallocate(residual_vector)
 
   end subroutine least_squares_to_single_objective
 
+end subroutine mango_optimize_least_squares
+
   !------------------------------------------------
 
-  subroutine residual_function_wrapper(x, f, failed)
+subroutine mango_residual_function_wrapper(problem, residual_function, x, f, failed)
 
-    implicit none
+  use mango
 
-    double precision, intent(in) :: x(:)
-    double precision, intent(out) :: f(:)
-    logical, intent(out) :: failed
-    integer :: j
+  implicit none
 
-    problem%function_evaluations = problem%function_evaluations + 1
-    call residual_function(x, f, failed)
+  type(mango_least_squares_problem) :: problem
+  procedure(mango_residual_function_interface) :: residual_function
+  double precision, intent(in) :: x(:)
+  double precision, intent(out) :: f(:)
+  logical, intent(out) :: failed
+  integer :: j
+
+  problem%function_evaluations = problem%function_evaluations + 1
+  call residual_function(problem, x, f, failed)
     
-    write (problem%output_unit,"(i7)",advance="no") problem%function_evaluations
-    do j = 1, problem%N_parameters
-       write (problem%output_unit,"(a,es24.15)",advance="no") ",", x(j)
-    end do
-    write (problem%output_unit,"(a,es24.15)",advance="no") ",", sum(((f - problem%targets) / problem%sigmas) ** 2)
-    do j = 1, problem%N_terms
-       write (problem%output_unit,"(a,es24.15)",advance="no") ",", f(j)
-    end do
-    write (problem%output_unit,"(a)") ""
-    call flush(problem%output_unit)
+  write (problem%output_unit,"(i7)",advance="no") problem%function_evaluations
+  do j = 1, problem%N_parameters
+     write (problem%output_unit,"(a,es24.15)",advance="no") ",", x(j)
+  end do
+  write (problem%output_unit,"(a,es24.15)",advance="no") ",", sum(((f - problem%targets) / problem%sigmas) ** 2)
+  do j = 1, problem%N_terms
+     write (problem%output_unit,"(a,es24.15)",advance="no") ",", f(j)
+  end do
+  write (problem%output_unit,"(a)") ""
+  call flush(problem%output_unit)
+  
+end subroutine mango_residual_function_wrapper
+  
 
-  end subroutine residual_function_wrapper
-
-
-end subroutine mango_optimize_least_squares

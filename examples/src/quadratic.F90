@@ -10,7 +10,7 @@ program quadratic
   
   integer :: ierr, N_procs, mpi_rank, data(1)
   logical :: proc0
-  type(mango_least_squares_problem) :: my_problem
+  type(mango_least_squares_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
 
   integer :: j
@@ -20,37 +20,35 @@ program quadratic
   print *,"Hello world from quadratic"
 
   call mpi_init(ierr)
-  call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
-  call mpi_comm_size(MPI_COMM_WORLD, N_procs, ierr)
-  proc0 = (mpi_rank==0)
 
-  if (proc0) then
-     !my_problem%objective_function => objective_function
-     my_problem%mpi_comm = MPI_COMM_WORLD
-     my_problem%algorithm = mango_algorithm_petsc_nm
-     my_problem%output_filename = '../output/mango_out.quadratic'
+  call mango_read_namelist(problem,'../input/mango_in.quadratic')
 
-     ! Set initial condition
-     allocate(my_problem%state_vector(N))
-     my_problem%state_vector = 0.0d+0
+  call mango_mpi_init(problem, MPI_COMM_WORLD)
 
-     allocate(my_problem%targets(N))
-     allocate(my_problem%sigmas(N))
-     do j = 1, N
-        my_problem%targets(j) = j
-        my_problem%sigmas(j)  = j
-     end do
+  problem%output_filename = '../output/mango_out.quadratic'
 
-     call mango_read_namelist(my_problem,'../input/mango_in.quadratic')
-     call mango_optimize_least_squares(my_problem, residual_function)
+  ! Set initial condition
+  allocate(problem%state_vector(N))
+  problem%state_vector = 0.0d+0
+
+  allocate(problem%targets(N))
+  allocate(problem%sigmas(N))
+  do j = 1, N
+     problem%targets(j) = j
+     problem%sigmas(j)  = j
+  end do
+
+  if (problem%proc0_worker_groups) then
+     call mango_optimize_least_squares(problem, residual_function)
 
      ! Make workers stop
      data = -1
-     call mpi_bcast(data,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+     call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_worker_groups,ierr)
   else
-     call worker()
+     call worker(problem)
   end if
 
+  call mango_mpi_finalize(problem)
   call mpi_finalize(ierr)
 
   print *,"Good bye!"
@@ -61,7 +59,7 @@ end program quadratic
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine residual_function(x, f, failed)
+subroutine residual_function(problem, x, f, failed)
 
   use mango
 
@@ -69,6 +67,7 @@ subroutine residual_function(x, f, failed)
 
   include 'mpif.h'
 
+  type(mango_least_squares_problem) :: problem
   double precision, intent(in) :: x(:)
   double precision, intent(out) :: f(:)
   logical, intent(out) :: failed
@@ -78,9 +77,9 @@ subroutine residual_function(x, f, failed)
 
   print *,"quadratic/residual_function: size(x)=",size(x),", size(f)=",size(f)
 
-  ! Mobilize workers:
-  data = 1
-  call mpi_bcast(data,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+  ! Mobilize the workers in the group with this group leader:
+  data = problem%worker_group
+  call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_worker_groups,ierr)
 
   f = x
   failed = .false.
@@ -92,17 +91,20 @@ end subroutine residual_function
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine worker()
+subroutine worker(problem)
+
+  use mango
 
   implicit none
 
   include 'mpif.h'
 
+  type(mango_least_squares_problem) :: problem
   integer :: ierr, mpi_rank, data(1)
 
   call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
   do
-     call mpi_bcast(data,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+     call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_worker_groups,ierr)
      if (data(1) < 0) then
         print "(a,i4,a)", "Proc",mpi_rank," is exiting."
         exit

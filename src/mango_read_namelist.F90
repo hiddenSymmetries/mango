@@ -9,8 +9,9 @@ subroutine mango_read_namelist(problem, filename)
 
   integer :: fileUnit, didFileAccessWork
   character(len=100) :: algorithm
+  integer :: N_worker_groups
 
-  namelist / mango_in / algorithm
+  namelist / mango_in / algorithm, N_worker_groups
 
   !---------------------------------------------
 
@@ -36,5 +37,6 @@ subroutine mango_read_namelist(problem, filename)
   close(unit = fileUnit)
 
   problem%algorithm = trim(algorithm)
+  problem%N_worker_groups = N_worker_groups
 
 end subroutine mango_read_namelist
