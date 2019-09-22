@@ -116,6 +116,8 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
   PetscInt :: user_context ! Not used
   Tao :: my_tao
   Vec :: tao_state_vec, tao_residual_vec
+  Mat :: tao_Jacobian_mat
+  double precision :: Jacobian_array(:,:)
   PetscScalar, pointer :: temp_array(:)
 #endif
 
@@ -136,6 +138,8 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
   !call VecCreateMPI(PETSC_COMM_SELF, PETSC_DECIDE, problem%N_terms, tao_residual_vec, ierr)
   call VecCreateSeq(PETSC_COMM_SELF, problem%N_parameters, tao_state_vec, ierr)
   call VecCreateSeq(PETSC_COMM_SELF, problem%N_terms, tao_residual_vec, ierr)
+  allocate(Jacobian_array(problem%N_terms, problem%N_parameters))
+  call MatCreateSeqDense(PETSC_COMM_SELF, problem%N_terms, problem%N_parameters, Jacobian_array, tao_Jacobian_mat, ierr)
 
   ! Set initial condition
   !call VecSet(tao_state_vec, 0.0d+0, ierr)
@@ -154,6 +158,11 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
      call TaoSetType(my_tao, TAOPOUNDERS, ierr)
      !call TaoSetResidualRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr) ! Recent versions of PETSc
      call TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr)
+  case (mango_algorithm_)
+     call TaoSetType(my_tao, TAOPOUNDERS, ierr)
+     !call TaoSetResidualRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr) ! Recent versions of PETSc
+     call TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr)
+     call TaoSetJacobianRoutine(my_tao, tao_Jacobian_Mat, tao_Jacobian_Mat, mango_petsc_Jacobian_function, user_context, ierr)
   case default
      print "(a)","Error! Should not get here."
   end select
@@ -167,6 +176,8 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
   call TaoDestroy(my_tao, ierr)
   call VecDestroy(tao_state_vec, ierr)
   call VecDestroy(tao_residual_vec, ierr)
+  call MatDestroy(tao_Jacobian_mat, ierr)
+  deallocate(Jacobian_array)
 
   call PETScFinalize(ierr)
 

@@ -6,24 +6,39 @@ subroutine mango_optimize_least_squares(problem, residual_function)
 
   type(mango_least_squares_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
-  integer :: j
+  integer :: j, ierr, dqta(1)
 
   !-------------------------------------------
+  
+  if (.not. problem%proc0_worker_groups) stop "The mango_optimize() subroutine should only be called by group leaders, not by all workers."
+
+  if (problem%proc0_world) then
+     if (.not. allocated(problem%state_vector)) stop "State vector has not been allocated."
+     if (.not. allocated(problem%targets)) stop "Targets vector has not been allocated."
+     if (.not. allocated(problem%sigmas)) stop "Sigmas vector has not been allocated."
+
+     problem%N_parameters = size(problem%state_vector)
+     print *,"Detected N_parameters=",problem%N_parameters
+
+     problem%N_terms = size(problem%targets)
+     print *,"Detected N_terms=",problem%N_terms
+     if (size(problem%sigmas) .ne. problem%N_terms) stop "size(sigmas) .ne. size(targets)"
+  end if
+
+  ! Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders:
+  call mpi_bcast(problem%N_parameters, 1, MPI_INTEGER, 0, problem%mpi_comm_group_leaders, ierr)
+  call mpi_bcast(problem%centered_differences, 1, MPI_LOGICAL, 0, problem%mpi_comm_group_leaders, ierr)
+  call mpi_bcast(problem%finite_difference_step_size, 1, MPI_DOUBLE_PRECISION, 0, problem%mpi_comm_group_leaders, ierr)
+
+  if (.not. problem%proc0_world) then
+     call mango_group_leaders_least_squares_loop(problem, objective_function)
+     return
+  end if
+  ! Only proc0_world continues past this point.
 
   print *,"Hello world from mango_optimize_least_squares."
 
-  if (.not. allocated(problem%state_vector)) stop "State vector has not been allocated."
-  if (.not. allocated(problem%targets)) stop "Targets vector has not been allocated."
-  if (.not. allocated(problem%sigmas)) stop "Sigmas vector has not been allocated."
-
   problem%function_evaluations = 0
-
-  problem%N_parameters = size(problem%state_vector)
-  print *,"Detected N_parameters=",problem%N_parameters
-
-  problem%N_terms = size(problem%targets)
-  print *,"Detected N_terms=",problem%N_terms
-  if (size(problem%sigmas) .ne. problem%N_terms) stop "size(sigmas) .ne. size(targets)"
 
   ! Write header line of output file
   open(unit = problem%output_unit, file = trim(problem%output_filename))
@@ -62,7 +77,8 @@ subroutine mango_optimize_least_squares(problem, residual_function)
        mango_algorithm_nlopt_ln_bobyqa, &
        mango_algorithm_nlopt_ln_praxis, &
        mango_algorithm_nlopt_ln_neldermead, &
-       mango_algorithm_nlopt_ln_sbplx  )
+       mango_algorithm_nlopt_ln_sbplx, &
+       mango_algorithm_nlopt_ld_lbfgs)
      call mango_optimize_nlopt(problem, least_squares_to_single_objective)
   case default
      print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)
@@ -70,6 +86,10 @@ subroutine mango_optimize_least_squares(problem, residual_function)
   end select
 
   close(problem%output_unit)
+
+  ! Tell the other group leaders to exit.
+  data = -1
+  call mpi_bcast(data,1,MPI_INTEGER,0,problem%mpi_comm_group_leaders,ierr)
 
 contains
 
