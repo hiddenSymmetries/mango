@@ -6,16 +6,17 @@ subroutine mango_group_leaders_least_squares_loop(problem, residual_function)
 
   include 'mpif.h'
 
-  type(mango_least_squares_problem) :: problem
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
-  double precision :: f
-  double precision, allocatable :: state_vector(:), gradients(:,:)
+  double precision, allocatable :: state_vector(:), Jacobian(:,:), f(:)
   integer :: ierr, data(1)
 
   !----------------------------------------------
 
   allocate(state_vector(problem%N_parameters))
-  allocate(gradients(problem%N_parameters,problem%N_terms))
+  allocate(f(problem%N_terms))
+  allocate(Jacobian(problem%N_parameters,problem%N_terms))
 
   do
      ! Wait for proc0_world to send us a message.
@@ -24,11 +25,11 @@ subroutine mango_group_leaders_least_squares_loop(problem, residual_function)
         print "(a,i4,a)", "Proc",problem%mpi_rank_world," (a group leader) is exiting."
         exit
      else
-        print "(a,i4,a)", "Proc",problem%mpi_rank_world," (a group leader) is starting finite-difference gradient calculation."
-        call mango_finite_difference_gradients(problem, residual_function, state_vector, f, gradients)
+        print "(a,i4,a)", "Proc",problem%mpi_rank_world," (a group leader) is starting finite-difference Jacobian calculation."
+        call mango_finite_difference_Jacobian(problem, residual_function, state_vector, f, Jacobian)
      end if
   end do
 
-  deallocate(state_vector, gradient)
+  deallocate(state_vector, f, Jacobian)
 
 end subroutine mango_group_leaders_least_squares_loop

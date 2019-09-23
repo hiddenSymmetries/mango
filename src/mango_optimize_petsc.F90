@@ -1,4 +1,4 @@
-subroutine mango_optimize_petsc(problem, objective_function)
+subroutine mango_optimize_petsc(problem, objective_function, residual_function)
 
   use mango
 #ifdef MANGO_PETSC_AVAILABLE
@@ -10,6 +10,7 @@ subroutine mango_optimize_petsc(problem, objective_function)
 
   type(mango_problem) :: problem
   procedure(mango_objective_function_interface) :: objective_function
+  procedure(mango_residual_function_interface) :: residual_function
 
 #ifdef MANGO_PETSC_AVAILABLE
   PetscErrorCode :: ierr
@@ -108,7 +109,8 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
 
   implicit none
 
-  type(mango_least_squares_problem) :: problem
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
 
 #ifdef MANGO_PETSC_AVAILABLE
@@ -117,7 +119,7 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
   Tao :: my_tao
   Vec :: tao_state_vec, tao_residual_vec
   Mat :: tao_Jacobian_mat
-  double precision :: Jacobian_array(:,:)
+  double precision, allocatable :: Jacobian_array(:,:)
   PetscScalar, pointer :: temp_array(:)
 #endif
 
@@ -158,11 +160,11 @@ subroutine mango_optimize_least_squares_petsc(problem, residual_function)
      call TaoSetType(my_tao, TAOPOUNDERS, ierr)
      !call TaoSetResidualRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr) ! Recent versions of PETSc
      call TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr)
-  case (mango_algorithm_)
-     call TaoSetType(my_tao, TAOPOUNDERS, ierr)
-     !call TaoSetResidualRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr) ! Recent versions of PETSc
-     call TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr)
-     call TaoSetJacobianRoutine(my_tao, tao_Jacobian_Mat, tao_Jacobian_Mat, mango_petsc_Jacobian_function, user_context, ierr)
+!!$  case (mango_algorithm_)
+!!$     call TaoSetType(my_tao, TAOPOUNDERS, ierr)
+!!$     !call TaoSetResidualRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr) ! Recent versions of PETSc
+!!$     call TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, mango_petsc_residual_function, user_context, ierr)
+!!$     call TaoSetJacobianRoutine(my_tao, tao_Jacobian_Mat, tao_Jacobian_Mat, mango_petsc_Jacobian_function, user_context, ierr)
   case default
      print "(a)","Error! Should not get here."
   end select

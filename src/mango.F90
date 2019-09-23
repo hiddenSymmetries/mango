@@ -44,15 +44,19 @@ module mango
      double precision :: finite_difference_step_size = 1.0d-8
      logical :: centered_differences = .false.
      !procedure(objective_function_interface), pointer, nopass :: objective_function
-  end type mango_problem
-
-  type, extends(mango_problem) :: mango_least_squares_problem
      double precision, allocatable :: targets(:), sigmas(:)
      integer :: N_terms
-  end type mango_least_squares_problem
+     logical :: least_squares = .false.
+  end type mango_problem
+
+!!$  type, extends(mango_problem) :: mango_least_squares_problem
+!!$     double precision, allocatable :: targets(:), sigmas(:)
+!!$     integer :: N_terms
+!!$  end type mango_least_squares_problem
 
   abstract interface
   !interface
+
   subroutine mango_objective_function_interface(problem,x,f,failed)
     import :: mango_problem
     type(mango_problem) :: problem
@@ -60,13 +64,17 @@ module mango
     double precision, intent(out) :: f
     logical, intent(out) :: failed
   end subroutine mango_objective_function_interface
+
   subroutine mango_residual_function_interface(problem,x,f,failed)
-    import :: mango_least_squares_problem
-    type(mango_least_squares_problem) :: problem
+    !import :: mango_least_squares_problem
+    !type(mango_least_squares_problem) :: problem
+    import :: mango_problem
+    type(mango_problem) :: problem
     double precision, intent(in) :: x(:)
     double precision, intent(out) :: f(:)
     logical, intent(out) :: failed
   end subroutine mango_residual_function_interface
+
   end interface
 
 end module mango

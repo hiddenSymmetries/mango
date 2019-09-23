@@ -4,13 +4,18 @@ subroutine mango_optimize_least_squares(problem, residual_function)
 
   implicit none
 
-  type(mango_least_squares_problem) :: problem
+  include 'mpif.h'
+
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
-  integer :: j, ierr, dqta(1)
+  integer :: j, ierr, data(1)
 
   !-------------------------------------------
+
+  problem%least_squares = .true.
   
-  if (.not. problem%proc0_worker_groups) stop "The mango_optimize() subroutine should only be called by group leaders, not by all workers."
+  if (.not. problem%proc0_worker_groups) stop "The mango_optimize_least_squares() subroutine should only be called by group leaders, not by all workers."
 
   if (problem%proc0_world) then
      if (.not. allocated(problem%state_vector)) stop "State vector has not been allocated."
@@ -27,11 +32,12 @@ subroutine mango_optimize_least_squares(problem, residual_function)
 
   ! Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders:
   call mpi_bcast(problem%N_parameters, 1, MPI_INTEGER, 0, problem%mpi_comm_group_leaders, ierr)
+  call mpi_bcast(problem%N_terms, 1, MPI_INTEGER, 0, problem%mpi_comm_group_leaders, ierr)
   call mpi_bcast(problem%centered_differences, 1, MPI_LOGICAL, 0, problem%mpi_comm_group_leaders, ierr)
   call mpi_bcast(problem%finite_difference_step_size, 1, MPI_DOUBLE_PRECISION, 0, problem%mpi_comm_group_leaders, ierr)
 
   if (.not. problem%proc0_world) then
-     call mango_group_leaders_least_squares_loop(problem, objective_function)
+     call mango_group_leaders_least_squares_loop(problem, residual_function)
      return
   end if
   ! Only proc0_world continues past this point.
@@ -61,7 +67,7 @@ subroutine mango_optimize_least_squares(problem, residual_function)
   case (mango_algorithm_petsc_pounders)
      call mango_optimize_least_squares_petsc(problem, residual_function)
   case (mango_algorithm_petsc_nm)
-     call mango_optimize_petsc(problem, least_squares_to_single_objective)
+     call mango_optimize_petsc(problem, least_squares_to_single_objective, residual_function)
   case (mango_algorithm_hopspack)
      call mango_optimize_hopspack(problem, least_squares_to_single_objective)
   case (mango_algorithm_nlopt_gn_direct, &
@@ -79,7 +85,7 @@ subroutine mango_optimize_least_squares(problem, residual_function)
        mango_algorithm_nlopt_ln_neldermead, &
        mango_algorithm_nlopt_ln_sbplx, &
        mango_algorithm_nlopt_ld_lbfgs)
-     call mango_optimize_nlopt(problem, least_squares_to_single_objective)
+     call mango_optimize_nlopt(problem, least_squares_to_single_objective, residual_function)
   case default
      print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)
      stop
@@ -127,7 +133,8 @@ subroutine mango_residual_function_wrapper(problem, residual_function, x, f, fai
 
   implicit none
 
-  type(mango_least_squares_problem) :: problem
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
   double precision, intent(in) :: x(:)
   double precision, intent(out) :: f(:)

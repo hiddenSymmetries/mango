@@ -11,9 +11,12 @@ subroutine mango_optimize(problem, objective_function)
   type(mango_problem) :: problem
   procedure(mango_objective_function_interface) :: objective_function
   integer :: j, ierr, data(1)
+  external mango_dummy_residual_function
 
   !-------------------------------------------
 
+  problem%least_squares = .false.
+  
   if (.not. problem%proc0_worker_groups) stop "The mango_optimize() subroutine should only be called by group leaders, not by all workers."
 
   if (problem%proc0_world) then
@@ -56,7 +59,7 @@ subroutine mango_optimize(problem, objective_function)
      stop "Error! The petsc_pounders algorithm is for least-squares problems only."
   case (mango_algorithm_petsc_nm)
      !call mango_optimize_petsc(problem, objective_function_wrapper)
-     call mango_optimize_petsc(problem, objective_function)
+     call mango_optimize_petsc(problem, objective_function, mango_dummy_residual_function)
   case (mango_algorithm_hopspack)
      !call mango_optimize_hopspack(problem, objective_function_wrapper)
      call mango_optimize_hopspack(problem, objective_function)
@@ -76,7 +79,7 @@ subroutine mango_optimize(problem, objective_function)
        mango_algorithm_nlopt_ln_sbplx, &
        mango_algorithm_nlopt_ld_lbfgs  )
      !call mango_optimize_nlopt(problem, objective_function_wrapper)
-     call mango_optimize_nlopt(problem, objective_function)
+     call mango_optimize_nlopt(problem, objective_function, mango_dummy_residual_function)
   case default
      print "(a,a)","Error! Unrecognized algorithm: ",trim(problem%algorithm)
      stop

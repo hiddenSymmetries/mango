@@ -1,4 +1,4 @@
-subroutine mango_optimize_nlopt(problem, objective_function)
+subroutine mango_optimize_nlopt(problem, objective_function, residual_function)
 
   use mango
 
@@ -10,6 +10,7 @@ subroutine mango_optimize_nlopt(problem, objective_function)
 
   type(mango_problem) :: problem
   procedure(mango_objective_function_interface) :: objective_function
+  procedure(mango_residual_function_interface) :: residual_function
 
 #ifdef MANGO_NLOPT_AVAILABLE
   integer*8 opt
@@ -116,7 +117,11 @@ contains
     if (need_gradient.ne.0) then
        !print *,"mango_nlopt_objective_function: need_gradient is not yet supported in mango. need_gradient=",need_gradient
        !stop
-       call mango_finite_difference_gradient(problem, objective_function, x, f, grad)
+       if (problem%least_squares) then
+          call mango_finite_difference_Jacobian_to_gradient(problem, residual_function, x, f, grad)
+       else
+          call mango_finite_difference_gradient(problem, objective_function, x, f, grad)
+       end if
     else
        call mango_objective_function_wrapper(problem, objective_function, x, f, failed)
        if (failed) f = mango_huge

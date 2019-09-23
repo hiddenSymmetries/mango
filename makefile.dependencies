@@ -1,8 +1,12 @@
 # -*- mode: makefile -*-
 
 # Dependencies:
+obj/mango_dummy_residual_function.o: obj/mango.o
 obj/mango_finite_difference_gradient.o: obj/mango.o
+obj/mango_finite_difference_Jacobian.o: obj/mango.o
+obj/mango_finite_difference_Jacobian_to_gradient.o: obj/mango.o
 obj/mango_group_leaders_loop.o: obj/mango.o
+obj/mango_group_leaders_least_squares_loop.o: obj/mango.o
 obj/mango_mpi_init.o: obj/mango.o
 obj/mango_mpi_finalize.o: obj/mango.o
 obj/mango_read_namelist.o: obj/mango.o

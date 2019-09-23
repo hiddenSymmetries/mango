@@ -1,5 +1,5 @@
 &mango_in
-!  N_worker_groups = 2
+  N_worker_groups = 2
 
   !algorithm="petsc_nm"
   !algorithm="petsc_pounders"

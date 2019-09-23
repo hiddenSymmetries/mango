@@ -8,7 +8,8 @@ program rosenbrock
   
   integer :: ierr, N_procs, mpi_rank, data(1)
   logical :: proc0
-  type(mango_least_squares_problem) :: problem
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
 
   !---------------------------------------------
@@ -66,11 +67,11 @@ subroutine residual_function(problem, x, f, failed)
 
   include 'mpif.h'
 
-  type(mango_least_squares_problem) :: problem
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   double precision, intent(in) :: x(:)
   double precision, intent(out) :: f(:)
   logical, intent(out) :: failed
-  !type(mango_problem) :: problem
   !double precision, parameter :: a = 1, b=100
   integer :: data(1), ierr
 
@@ -103,7 +104,8 @@ subroutine worker(problem)
 
   include 'mpif.h'
 
-  type(mango_least_squares_problem) :: problem
+  !type(mango_least_squares_problem) :: problem
+  type(mango_problem) :: problem
   integer :: ierr, mpi_rank, data(1)
 
   call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
