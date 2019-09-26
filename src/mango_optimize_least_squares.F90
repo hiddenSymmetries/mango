@@ -109,14 +109,13 @@ contains
     double precision, intent(in) :: x(:)
     double precision, intent(out) :: f
     logical, intent(out) :: failed
-
     double precision, allocatable :: residual_vector(:)
-
+    external mango_residual_function_wrapper
 
     print *,"Hello from least_squares_to_single_objective"
     allocate(residual_vector(problem%N_terms))
-    !call mango_residual_function_wrapper(x, residual_vector, failed)
-    call residual_function(problem, x, residual_vector, failed)
+    call mango_residual_function_wrapper(problem, residual_function, x, residual_vector, failed)
+    !call residual_function(problem, x, residual_vector, failed)
     f = sum(((residual_vector - problem%targets) / problem%sigmas) ** 2)
     print *,"residual_vector:",residual_vector,", f:",f
     deallocate(residual_vector)
@@ -136,8 +135,8 @@ subroutine mango_residual_function_wrapper(problem, residual_function, x, f, fai
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
   procedure(mango_residual_function_interface) :: residual_function
-  double precision, intent(in) :: x(:)
-  double precision, intent(out) :: f(:)
+  double precision, intent(in) :: x(problem%N_parameters)
+  double precision, intent(out) :: f(problem%N_terms)
   logical, intent(out) :: failed
   integer :: j
 

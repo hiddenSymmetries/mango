@@ -115,13 +115,16 @@ end subroutine mango_optimize
     print *,"x=",x
     problem%function_evaluations = problem%function_evaluations + 1
     call objective_function(problem, x, f, failed)
-    
-    write (problem%output_unit,"(i7)",advance="no") problem%function_evaluations
-    do j = 1, problem%N_parameters
-       write (problem%output_unit,"(a,es24.15)",advance="no") ",", x(j)
-    end do
-    write (problem%output_unit,"(a,es24.15)") ",", f
-    call flush(problem%output_unit)
+
+    if (.not. problem%least_squares) then
+       ! For least-squares problems, output is written using mango_residual_function_wrapper()
+       write (problem%output_unit,"(i7)",advance="no") problem%function_evaluations
+       do j = 1, problem%N_parameters
+          write (problem%output_unit,"(a,es24.15)",advance="no") ",", x(j)
+       end do
+       write (problem%output_unit,"(a,es24.15)") ",", f
+       call flush(problem%output_unit)
+    end if
 
   end subroutine mango_objective_function_wrapper
   !end subroutine objective_function_wrapper

@@ -200,7 +200,8 @@ contains
     call VecGetArrayF90(f, f_array, ierr)
     !print *,"Hello from mango_petsc_objective_function. x=",x_array
 
-    call residual_function(problem, x_array, f_array, failed)
+    !call residual_function(problem, x_array, f_array, failed)
+    call mango_residual_function_wrapper(problem, residual_function, x_array, f_array, failed)
     ! PETSc's definition of the residual function does not include sigmas or targets, so shift and scale the mango residuals appropriately:
     f_array = (f_array - problem%targets) / problem%sigmas
     if (failed) f_array = mango_huge

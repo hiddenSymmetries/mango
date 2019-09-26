@@ -1,0 +1,13 @@
+! N_procs, N_worker_groups:
+1,1
+2,1
+2,2
+! algorithms:
+petsc_pounders
+petsc_nm
+nlopt_ln_praxis
+nlopt_ln_neldermead
+nlopt_ld_lbfgs
+foo
+! True location(s) of optimum:
+1,2

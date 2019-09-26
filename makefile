@@ -59,10 +59,10 @@ clean::
 	$(MAKE) -C examples clean
 
 test: $(TARGET)
-	@echo "Beginning functional tests." && cd examples && export REGCOIL_RETEST=no && ./runExamples.py
+	@echo "Beginning functional tests." && cd examples/bin && export MANGO_RETEST=no && ./run_examples
 
 retest: $(TARGET)
-	@echo "Testing existing output files for examples without re-running then." && cd examples && export REGCOIL_RETEST=yes && ./runExamples.py
+	@echo "Testing existing output files for examples without re-running then." && cd examples/bin && export MANGO_RETEST=yes && ./run_examples
 
 test_make:
 	@echo OBJ_FILES is $(OBJ_FILES)
