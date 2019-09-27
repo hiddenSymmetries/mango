@@ -33,7 +33,12 @@ for k in range(1,len(sys.argv)):
     for j in range(5,len(lines)):
         temp = lines[j].split(',')
         function_evaluations.append(int(temp[0]))
-        objective_function.append(float(temp[N_parameters+1]))
+        try:
+            this_objective_function = float(temp[N_parameters+1])
+        except:
+            print "Warning: unable to convert "+temp[N_parameters+1]+" to float."
+            this_objective_function = np.nan
+        objective_function.append(this_objective_function)
 
     files_function_evaluations.append(function_evaluations)
     files_objective_function.append(objective_function)

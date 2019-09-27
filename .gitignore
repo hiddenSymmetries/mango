@@ -7,3 +7,4 @@ examples/bin/*
 lib/*
 mango_out.*
 examples/output/summary*
+examples/output/short_summary*

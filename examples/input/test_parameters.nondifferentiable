@@ -6,7 +6,7 @@ nlopt_ln_cobyla
 nlopt_ln_bobyqa
 nlopt_ln_sbplx
 nlopt_ln_neldermead
-nlopt_ln_praxis
 nlopt_ld_lbfgs
+nlopt_ln_praxis
 ! Location of true optimum
 1,2,3
