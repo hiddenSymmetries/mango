@@ -23,7 +23,8 @@ int main(int argc, char *argv[]) {
 
   /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
   //  myprob.set_algorithm(mango::NLOPT_LD_LBFGS);
-  myprob.set_algorithm("nlopt_ln_neldermead");
+  // myprob.set_algorithm("nlopt_ln_neldermead");
+  myprob.read_input_file("../input/mango_in.rosenbrock_c");
   myprob.mpi_init(MPI_COMM_WORLD);
 
   MPI_Finalize();

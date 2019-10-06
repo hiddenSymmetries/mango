@@ -16,6 +16,8 @@ void mango::problem::set_algorithm(algorithm_type algorithm_in) {
   std::cout << "Algorithm set (by integer) to " << algorithm << "\n";
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 void mango::problem::set_algorithm(std::string str) {
   bool found_match;
 

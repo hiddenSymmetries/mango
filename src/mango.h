@@ -58,9 +58,9 @@ namespace mango {
     ~problem();
     void set_algorithm(algorithm_type);
     void set_algorithm(std::string);
+    void read_input_file(std::string);
     void mpi_init(MPI_Comm);
     void optimize();
-    void read_input_file(char* filename);
   };
 }
 
