@@ -1,4 +1,4 @@
 &mango_in
-  N_worker_groups = 1
+  N_worker_groups = 2
   algorithm = "nlopt_ld_lbfgs"
 /

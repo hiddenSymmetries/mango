@@ -1,17 +1,23 @@
 # Automatically detect all the examples:
-SRC_FILES = $(wildcard src/*.F90)
-OBJ_FILES = $(patsubst src/%.F90, obj/%.o, $(SRC_FILES))
-BIN_FILES = $(patsubst src/%.F90, bin/%, $(SRC_FILES))
+F_SRC_FILES = $(wildcard src/*.F90)
+F_OBJ_FILES = $(patsubst src/%.F90, obj/%.o, $(F_SRC_FILES))
+F_BIN_FILES = $(patsubst src/%.F90, bin/%, $(F_SRC_FILES))
+C_SRC_FILES = $(wildcard src/*.cpp)
+C_OBJ_FILES = $(patsubst src/%.cpp, obj/%.o, $(C_SRC_FILES))
+C_BIN_FILES = $(patsubst src/%.cpp, bin/%, $(C_SRC_FILES))
 
 .PHONY: all clean test_make
 
-.PRECIOUS: $(OBJ_FILES)
+.PRECIOUS: $(F_OBJ_FILES) $(C_OBJ_FILES)
 # The above line prevents .o files from being automatically deleted
 
-all: $(BIN_FILES)
+all: $(F_BIN_FILES) $(C_BIN_FILES)
 
 obj/%.o: src/%.F90
-	$(FC) $(EXTRA_COMPILE_FLAGS) -I ../include -c $^ -o $@
+	$(FC) $(EXTRA_F_COMPILE_FLAGS) -I ../include -c $^ -o $@
+
+obj/%.o: src/%.cpp
+	$(CC) $(EXTRA_C_COMPILE_FLAGS) -I ../include -c $^ -o $@
 
 bin/%: obj/%.o ../lib/libmango.a
 	$(FLINKER) -o $@ $< ../lib/libmango.a $(EXTRA_LINK_FLAGS)
@@ -20,11 +26,17 @@ clean:
 	rm -f obj/* bin/* src/*~ *~
 
 test_make:
-	@echo SRC_FILES is $(SRC_FILES)
-	@echo OBJ_FILES is $(OBJ_FILES)
-	@echo BIN_FILES is $(BIN_FILES)
+	@echo F_SRC_FILES is $(F_SRC_FILES)
+	@echo F_OBJ_FILES is $(F_OBJ_FILES)
+	@echo F_BIN_FILES is $(F_BIN_FILES)
+	@echo C_SRC_FILES is $(C_SRC_FILES)
+	@echo C_OBJ_FILES is $(C_OBJ_FILES)
+	@echo C_BIN_FILES is $(C_BIN_FILES)
 	@echo HOSTNAME is $(HOSTNAME)
 	@echo FC is $(FC)
 	@echo FLINKER is $(FLINKER)
-	@echo EXTRA_COMPILE_FLAGS is $(EXTRA_COMPILE_FLAGS)
+	@echo CC is $(CC)
+	@echo CLINKER is $(CLINKER)
+	@echo EXTRA_C_COMPILE_FLAGS is $(EXTRA_C_COMPILE_FLAGS)
+	@echo EXTRA_F_COMPILE_FLAGS is $(EXTRA_F_COMPILE_FLAGS)
 	@echo EXTRA_LINK_FLAGS is $(EXTRA_LINK_FLAGS)

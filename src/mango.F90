@@ -1,80 +1,96 @@
 module mango
 
+  ! Modeled after
+  ! https://modelingguru.nasa.gov/docs/DOC-2642
+  ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objects
+
+  use, intrinsic :: ISO_C_Binding, only: C_int, C_ptr, C_NULL_ptr
   implicit none
-
-  !include 'mpif.h'
-
-  character(len=*), parameter :: &
-       mango_algorithm_petsc_pounders = "petsc_pounders", &
-       mango_algorithm_petsc_nm = "petsc_nm", &
-       mango_algorithm_hopspack = "hopspack", &
-       mango_algorithm_nlopt_gn_direct = "nlopt_gn_direct", &
-       mango_algorithm_nlopt_gn_direct_l = "nlopt_gn_direct_l", &
-       mango_algorithm_nlopt_gn_direct_l_rand = "nlopt_gn_direct_l_rand", &
-       mango_algorithm_nlopt_gn_direct_noscal = "nlopt_gn_direct_noscal", &
-       mango_algorithm_nlopt_gn_direct_l_noscal = "nlopt_gn_direct_l_noscal", &
-       mango_algorithm_nlopt_gn_direct_l_rand_noscal = "nlopt_gn_direct_l_rand_noscal", &
-       mango_algorithm_nlopt_gn_orig_direct = "nlopt_gn_orig_direct", &
-       mango_algorithm_nlopt_gn_orig_direct_l = "nlopt_gn_orig_direct_l", &
-       mango_algorithm_nlopt_gn_crs2_lm = "nlopt_gn_crs2_lm", &
-       mango_algorithm_nlopt_ln_cobyla = "nlopt_ln_cobyla", &
-       mango_algorithm_nlopt_ln_bobyqa = "nlopt_ln_bobyqa", &
-       mango_algorithm_nlopt_ln_praxis = "nlopt_ln_praxis", &
-       mango_algorithm_nlopt_ln_neldermead = "nlopt_ln_neldermead", &
-       mango_algorithm_nlopt_ln_sbplx = "nlopt_ln_sbplx", &
-       mango_algorithm_nlopt_ld_lbfgs = "nlopt_ld_lbfgs"
-
-  double precision, parameter :: mango_huge = 1.0d+12
-
-  type :: mango_problem
-     ! Should I separate this into mpi info vs numerics info?
-     integer :: mpi_comm_world
-     integer :: mpi_comm_worker_groups, mpi_comm_group_leaders
-     logical :: proc0_world, proc0_worker_groups
-     integer :: mpi_rank_world, mpi_rank_worker_groups, mpi_rank_group_leaders
-     integer :: N_procs_world, N_procs_worker_groups, N_procs_group_leaders
-     integer :: N_worker_groups = -1
-     integer :: worker_group
-     integer :: N_parameters
-     double precision, allocatable :: state_vector(:)
-     character(len=100) :: algorithm = mango_algorithm_nlopt_ln_neldermead
-     character(len=200) :: output_filename = 'mango_out'
-     integer :: output_unit = 11
-     integer :: function_evaluations = 0
-     double precision :: finite_difference_step_size = 1.0d-8
-     logical :: centered_differences = .false.
-     !procedure(objective_function_interface), pointer, nopass :: objective_function
-     double precision, allocatable :: targets(:), sigmas(:)
-     integer :: N_terms
-     logical :: least_squares = .false.
+  private
+  
+  type mango_problem
+     private
+     type(C_ptr) :: object = C_NULL_ptr
   end type mango_problem
 
-!!$  type, extends(mango_problem) :: mango_least_squares_problem
-!!$     double precision, allocatable :: targets(:), sigmas(:)
-!!$     integer :: N_terms
-!!$  end type mango_least_squares_problem
-
-  abstract interface
-  !interface
-
-  subroutine mango_objective_function_interface(problem,x,f,failed)
-    import :: mango_problem
-    type(mango_problem) :: problem
-    double precision, intent(in) :: x(:)
-    double precision, intent(out) :: f
-    logical, intent(out) :: failed
-  end subroutine mango_objective_function_interface
-
-  subroutine mango_residual_function_interface(problem,x,f,failed)
-    !import :: mango_least_squares_problem
-    !type(mango_least_squares_problem) :: problem
-    import :: mango_problem
-    type(mango_problem) :: problem
-    double precision, intent(in) :: x(:)
-    double precision, intent(out) :: f(:)
-    logical, intent(out) :: failed
-  end subroutine mango_residual_function_interface
-
+  interface
+     function C_mango_problem_create() result(this) bind(C,name="mango_problem_create")
+       import
+       type(C_ptr) :: this
+     end function C_mango_problem_create
+     subroutine C_mango_problem_destroy (this) bind(C,name="mango_problem_destroy")
+       import
+       type(C_ptr), value :: this
+     end subroutine C_mango_problem_destroy
+     subroutine C_mango_set_algorithm (this, algorithm) bind(C,name="mango_set_algorithm")
+       import
+       integer(C_int) :: algorithm
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_algorithm
+     subroutine C_mango_mpi_init (this, mpi_comm) bind(C,name="mango_mpi_init")
+       import
+       integer(C_int) :: mpi_comm
+       type(C_ptr), value :: this
+     end subroutine C_mango_mpi_init
   end interface
+
+!  interface mango_problem_create
+!     module procedure F_mango_problem_create
+!  end interface
+!  interface mango_problem_destroy
+!     module procedure F_mango_problem_destroy
+!  end interface
+!  interface mango_set_algorithm
+!     module procedure F_mango_set_algorithm
+!  end interface
+!  interface mango_mpi_init
+!     module procedure F_mango_mpi_init
+!  end interface
+
+  public :: mango_problem
+!  public :: create, destroy, set_algorithm, mpi_init
+  public :: mango_problem_create, mango_problem_destroy, mango_set_algorithm, mango_mpi_init
+  
+contains
+
+!  subroutine F_mango_problem_create(this)
+!    type(mango_problem), intent(out) :: this
+!    this%object = C_mango_problem_create()
+!  end subroutine F_mango_problem_create
+!  subroutine F_mango_problem_destroy(this)
+!    type(mango_problem), intent(inout) :: this
+!    call C_mango_problem_destroy(this%object)
+!    this%object = C_NULL_ptr
+!  end subroutine F_mango_problem_destroy
+!  subroutine F_mango_set_algorithm(this,algorithm)
+!    type(mango_problem), intent(in) :: this
+!    integer, intent(in) :: algorithm
+!    call C_mango_set_algorithm(this%object, int(algorithm,C_int))
+!  end subroutine F_mango_set_algorithm
+!  subroutine F_mango_mpi_init(this,mpi_comm)
+!    type(mango_problem), intent(in) :: this
+!    integer, intent(in) :: mpi_comm
+!    call C_mango_mpi_init(this%object, int(mpi_comm,C_int))
+!  end subroutine F_mango_mpi_init
+
+  subroutine mango_problem_create(this)
+    type(mango_problem), intent(out) :: this
+    this%object = C_mango_problem_create()
+  end subroutine mango_problem_create
+  subroutine mango_problem_destroy(this)
+    type(mango_problem), intent(inout) :: this
+    call C_mango_problem_destroy(this%object)
+    this%object = C_NULL_ptr
+  end subroutine mango_problem_destroy
+  subroutine mango_set_algorithm(this,algorithm)
+    type(mango_problem), intent(in) :: this
+    integer, intent(in) :: algorithm
+    call C_mango_set_algorithm(this%object, int(algorithm,C_int))
+  end subroutine mango_set_algorithm
+  subroutine mango_mpi_init(this,mpi_comm)
+    type(mango_problem), intent(in) :: this
+    integer, intent(in) :: mpi_comm
+    call C_mango_mpi_init(this%object, int(mpi_comm,C_int))
+  end subroutine mango_mpi_init
 
 end module mango
