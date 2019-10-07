@@ -10,6 +10,7 @@ program rosenbrock
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
+  double precision, dimension(2) :: state_vector = (/ 3.0, 4.0 /)
 
   !---------------------------------------------
 
@@ -17,7 +18,8 @@ program rosenbrock
 
   call mpi_init(ierr)
 
-  call mango_problem_create(problem)
+  call mango_problem_create(problem,2,state_vector)
+  print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
   call mango_read_input_file(problem, "../input/mango_in.rosenbrock_f")

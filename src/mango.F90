@@ -6,7 +6,7 @@ module mango
   ! https://modelingguru.nasa.gov/docs/DOC-2642
   ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objects
 
-  use, intrinsic :: ISO_C_Binding, only: C_int, C_ptr, C_NULL_ptr
+  use, intrinsic :: ISO_C_Binding, only: C_int, C_ptr, C_NULL_ptr, C_double
   implicit none
   private
   
@@ -16,10 +16,28 @@ module mango
   end type mango_problem
 
   interface
-     function C_mango_problem_create() result(this) bind(C,name="mango_problem_create")
+!     function C_mango_problem_create(N_parameters) result(this) bind(C,name="mango_problem_create")
+!       import
+!       integer(C_int) :: N_parameters
+!       type(C_ptr) :: this
+!     end function C_mango_problem_create
+!     function C_mango_problem_create_least_squares(N_parameters,N_terms) result(this) bind(C,name="mango_problem_create_least_squares")
+!       import
+!       integer(C_int) :: N_parameters, N_terms
+!       type(C_ptr) :: this
+!     end function C_mango_problem_create_least_squares
+     function C_mango_problem_create(N_parameters, state_vector) result(this) bind(C,name="mango_problem_create")
        import
+       integer(C_int) :: N_parameters
        type(C_ptr) :: this
+       real(C_double) :: state_vector(:)
      end function C_mango_problem_create
+     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas) result(this) bind(C,name="mango_problem_create_least_squares")
+       import
+       integer(C_int) :: N_parameters, N_terms
+       type(C_ptr) :: this
+       real(C_double) :: state_vector(:), targets(:), sigmas(:)
+     end function C_mango_problem_create_least_squares
      subroutine C_mango_problem_destroy (this) bind(C,name="mango_problem_destroy")
        import
        type(C_ptr), value :: this
@@ -47,14 +65,36 @@ module mango
   end interface
 
   public :: mango_problem
-  public :: mango_problem_create, mango_problem_destroy, mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_mpi_init
+  public :: mango_problem_create, mango_problem_create_least_squares, mango_problem_destroy, &
+       mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_mpi_init
   
 contains
 
-  subroutine mango_problem_create(this)
+!  subroutine mango_problem_create(this, N_parameters)
+!    type(mango_problem), intent(out) :: this
+!    integer :: N_parameters
+!    this%object = C_mango_problem_create(N_parameters)
+!  end subroutine mango_problem_create
+!
+!  subroutine mango_problem_create_least_squares(this, N_parameters, N_terms)
+!    type(mango_problem), intent(out) :: this
+!    integer :: N_parameters, N_terms
+!    this%object = C_mango_problem_create(N_parameters)
+!  end subroutine mango_problem_create_least_squares
+
+  subroutine mango_problem_create(this, N_parameters, state_vector)
     type(mango_problem), intent(out) :: this
-    this%object = C_mango_problem_create()
+    integer :: N_parameters
+    double precision :: state_vector(:)
+    this%object = C_mango_problem_create(N_parameters, state_vector)
   end subroutine mango_problem_create
+
+  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas)
+    type(mango_problem), intent(out) :: this
+    integer :: N_parameters, N_terms
+    double precision :: state_vector(:), targets(:), sigmas(:)
+    this%object = C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas)
+  end subroutine mango_problem_create_least_squares
 
   subroutine mango_problem_destroy(this)
     type(mango_problem), intent(inout) :: this

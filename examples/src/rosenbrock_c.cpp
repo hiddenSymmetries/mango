@@ -5,6 +5,8 @@
 int main(int argc, char *argv[]) {
   int ierr;
 
+  std::cout << "Hello world from rosenbrock_c.\n";
+
   ierr = MPI_Init(&argc, &argv);
   if (ierr != 0) {
     std::cout << "\nError in MPI_Init.\n";
@@ -19,7 +21,17 @@ int main(int argc, char *argv[]) {
   std::cout << MANGO_PETSC_NM << "\nHello world!\n";
   */
 
-  mango::problem myprob;
+  double state_vector[4] = {5.0, 10.0, 15.0, 20.0};
+
+  mango::problem myprob(4, state_vector);
+
+  //std::cout << "Here comes state vector:" << *(myprob.state_vector);
+  /*
+  myprob.state_vector[0] =  5.0;
+  myprob.state_vector[1] = 10.0;
+  myprob.state_vector[2] = 15.0;
+  myprob.state_vector[3] = 20.0;
+  */
 
   /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
   //  myprob.set_algorithm(mango::NLOPT_LD_LBFGS);

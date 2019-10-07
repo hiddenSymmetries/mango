@@ -52,9 +52,16 @@ namespace mango {
     bool proc0_worker_groups;
     int N_worker_groups;
     bool least_squares;
+    int N_parameters;
+    int N_terms;
   public:
+    double* state_vector;
+    double* targets;
+    double* sigmas;
+
     /*  problem() : N_worker_groups(987) {}; */
-    problem();
+    problem(int, double*); /* For non-least-squares problems */
+    problem(int, double*, int, double*, double*); /* For least-squares problems */
     ~problem();
     void set_algorithm(algorithm_type);
     void set_algorithm(std::string);
