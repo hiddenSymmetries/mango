@@ -2,6 +2,8 @@
 #include<mpi.h>
 #include "mango.h"
 
+void objective_function(int*, double*, double*);
+
 int main(int argc, char *argv[]) {
   int ierr;
 
@@ -23,7 +25,7 @@ int main(int argc, char *argv[]) {
 
   double state_vector[4] = {5.0, 10.0, 15.0, 20.0};
 
-  mango::problem myprob(4, state_vector);
+  mango::problem myprob(4, state_vector, &objective_function);
 
   //std::cout << "Here comes state vector:" << *(myprob.state_vector);
   /*
@@ -39,7 +41,19 @@ int main(int argc, char *argv[]) {
   myprob.read_input_file("../input/mango_in.rosenbrock_c");
   myprob.mpi_init(MPI_COMM_WORLD);
 
+  myprob.optimize();
+
   MPI_Finalize();
 
   return 0;
+}
+
+
+void objective_function(int* N, double* x, double* f) {
+  int j;
+  std::cout << "C objective function called with N="<< *N << "\n";
+  *f = 0;
+  for (j = 0; j < *N; j++) {
+    *f += (x[j]-2)*(x[j]-2);
+  }
 }

@@ -32,6 +32,8 @@ namespace mango {
     std::string name_string;
   } algorithm_properties;
 
+  typedef void (*objective_function_type)(int*, double*, double*);
+  
   void get_algorithm_properties(algorithm_type,algorithm_properties*);
   bool string_to_algorithm(std::string, algorithm_type*);
 
@@ -54,13 +56,14 @@ namespace mango {
     bool least_squares;
     int N_parameters;
     int N_terms;
+    objective_function_type objective_function;
   public:
     double* state_vector;
     double* targets;
     double* sigmas;
 
     /*  problem() : N_worker_groups(987) {}; */
-    problem(int, double*); /* For non-least-squares problems */
+    problem(int, double*, objective_function_type); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*); /* For least-squares problems */
     ~problem();
     void set_algorithm(algorithm_type);
