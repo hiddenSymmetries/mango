@@ -29,6 +29,7 @@ program rosenbrock
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
   call mango_read_input_file(problem, "../input/mango_in.rosenbrock_f")
+  call mango_set_output_filename(problem, "../output/mango_out.rosenbrock_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_optimize(problem)
 

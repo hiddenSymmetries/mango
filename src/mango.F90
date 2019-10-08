@@ -61,6 +61,11 @@ module mango
        type(C_ptr), value :: this
        character(C_char) :: filename(mango_interface_string_length)
      end subroutine C_mango_read_input_file
+     subroutine C_mango_set_output_filename(this, filename) bind(C,name="mango_set_output_filename")
+       import
+       type(C_ptr), value :: this
+       character(C_char) :: filename(mango_interface_string_length)
+     end subroutine C_mango_set_output_filename
      subroutine C_mango_mpi_init (this, mpi_comm) bind(C,name="mango_mpi_init")
        import
        integer(C_int) :: mpi_comm
@@ -74,8 +79,8 @@ module mango
 
   public :: mango_problem
   public :: mango_problem_create, mango_problem_create_least_squares, mango_problem_destroy, &
-       mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_mpi_init, &
-       mango_optimize
+       mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
+       mango_mpi_init, mango_optimize
   
 
   abstract interface
@@ -178,6 +183,20 @@ contains
     end do
     call C_mango_read_input_file(this%object, filename_padded)
   end subroutine mango_read_input_file
+
+  subroutine mango_set_output_filename(this,filename)
+    ! Passing strings between fortran and C is fraught, so I opted to pass fixed-size character arrays instead.
+    type(mango_problem), intent(in) :: this
+    character(len=*), intent(in) :: filename
+    character(C_char) :: filename_padded(mango_interface_string_length)
+    integer :: j
+    filename_padded = char(0);
+    if (len(filename) > mango_interface_string_length-1) stop "String is too long!" ! -1 because C expects strings to be terminated with char(0);
+    do j = 1, len(filename)
+       filename_padded(j) = filename(j:j)
+    end do
+    call C_mango_set_output_filename(this%object, filename_padded)
+  end subroutine mango_set_output_filename
 
   subroutine mango_mpi_init(this,mpi_comm)
     type(mango_problem), intent(in) :: this

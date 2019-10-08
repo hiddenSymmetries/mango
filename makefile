@@ -57,7 +57,7 @@ obj/%.o: src/%.f90
 	$(FC) $(EXTRA_F_COMPILE_FLAGS) -c $< -o $@
 #	$(FC) $(EXTRA_COMPILE_FLAGS) -c $<
 
-obj/%.o: src/%.cpp include/mango.h
+obj/%.o: src/%.cpp include/mango.hpp
 	$(CC) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 #	$(FC) $(EXTRA_COMPILE_FLAGS) -c $<
 

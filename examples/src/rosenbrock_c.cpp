@@ -1,6 +1,6 @@
 #include<iostream>
 #include<mpi.h>
-#include "mango.h"
+#include "mango.hpp"
 
 void objective_function(int*, double*, double*);
 
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
   //  myprob.set_algorithm(mango::NLOPT_LD_LBFGS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
   myprob.read_input_file("../input/mango_in.rosenbrock_c");
+  myprob.output_filename = "../output/mango_out.rosenbrock_c";
   myprob.mpi_init(MPI_COMM_WORLD);
 
   myprob.optimize();

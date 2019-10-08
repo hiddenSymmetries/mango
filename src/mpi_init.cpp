@@ -1,12 +1,11 @@
 #include<iostream>
 #include<mpi.h>
-#include "mango.h"
+#include "mango.hpp"
 
 #define bold_line "*******************************************************************************\n"
 
 void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
   int ierr;
-  algorithm_properties properties;
 
   /* mpi_comm_world = mpi_comm_world_in; */
   ierr = MPI_Comm_dup(mpi_comm_world_in, &mpi_comm_world);
@@ -21,6 +20,11 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
   proc0_world = (mpi_rank_world == 0);
 
   std::cout << "N_worker_groups:" << N_worker_groups;
+
+  /* Make sure all procs agree on certain variables that will be used here. */
+  MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_world);
+  MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_world);
+  get_algorithm_properties(); /* Now that all procs agree on algorithm, all procs will get the correct algorithm properties. */
 
   /* Ensure N_worker_groups is within the range [1, N_procs_world] */
   if (N_worker_groups > N_procs_world) N_worker_groups = N_procs_world;
@@ -38,9 +42,8 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
     exit(1);
   }
 
-  get_algorithm_properties(algorithm,&properties);
-  std::cout << "Algorithm chosen: " << properties.name_string << "\n";
-  if (properties.uses_derivatives) {
+  std::cout << "Algorithm chosen: " << algorithm_name << "\n";
+  if (algorithm_uses_derivatives) {
     if (N_procs_world > 1 && N_worker_groups == 1 && proc0_world) {
       std::cout << bold_line;
       std::cout << bold_line;

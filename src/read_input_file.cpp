@@ -1,7 +1,7 @@
 #include<string>
 #include<fstream>
 #include<iostream>
-#include "mango.h"
+#include "mango.hpp"
 
 void mango::problem::read_input_file(std::string filename) {
   std::ifstream file;
