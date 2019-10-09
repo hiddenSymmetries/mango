@@ -126,7 +126,7 @@ contains
 
     ! For info on passing function pointers, see
     ! https://gcc.gnu.org/onlinedocs/gcc-4.6.1/gfortran/C_005fFUNLOC.html#C_005fFUNLOC
-    print *,"mango.F90 subroutine mango_problem_create: C_funloc(objective_function)=",C_funloc(objective_function)
+    !print *,"mango.F90 subroutine mango_problem_create: C_funloc(objective_function)=",C_funloc(objective_function)
     print *,"state_vector size in mango.F90:",size(state_vector_copy)
     print *,"state_vector in mango.F90:",state_vector_copy
     call objective_function(2, x, f)

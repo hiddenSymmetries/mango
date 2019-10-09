@@ -21,7 +21,7 @@ program rosenbrock
   !---------------------------------------------
 
   print *,"Hello world from rosenbrock_f"
-  print *,"c_funloc(objective_function):",c_funloc(objective_function)
+  !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
 
   call mango_problem_create(problem,N_dim,state_vector,dummy,objective_function)
@@ -53,7 +53,7 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f) bind(C)
+subroutine objective_function(N, x, f)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N

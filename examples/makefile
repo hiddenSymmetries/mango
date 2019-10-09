@@ -13,14 +13,17 @@ C_BIN_FILES = $(patsubst src/%.cpp, bin/%, $(C_SRC_FILES))
 
 all: $(F_BIN_FILES) $(C_BIN_FILES)
 
-obj/%.o: src/%.F90
+obj/%.fo: src/%.F90
 	$(FC) $(EXTRA_F_COMPILE_FLAGS) -I ../include -c $^ -o $@
 
-obj/%.o: src/%.cpp
+obj/%.co: src/%.cpp
 	$(CC) $(EXTRA_C_COMPILE_FLAGS) -I ../include -c $^ -o $@
 
-bin/%: obj/%.o ../lib/libmango.a
-	$(FLINKER) -o $@ $< ../lib/libmango.a $(EXTRA_LINK_FLAGS)
+bin/%: obj/%.co ../lib/libmango.a
+	$(CLINKER) -o $@ $< ../lib/libmango.a $(EXTRA_C_LINK_FLAGS)
+
+bin/%: obj/%.fo ../lib/libmango.a
+	$(FLINKER) -o $@ $< ../lib/libmango.a $(EXTRA_F_LINK_FLAGS)
 
 clean:
 	rm -f obj/* bin/* src/*~ *~
@@ -39,4 +42,5 @@ test_make:
 	@echo CLINKER is $(CLINKER)
 	@echo EXTRA_C_COMPILE_FLAGS is $(EXTRA_C_COMPILE_FLAGS)
 	@echo EXTRA_F_COMPILE_FLAGS is $(EXTRA_F_COMPILE_FLAGS)
-	@echo EXTRA_LINK_FLAGS is $(EXTRA_LINK_FLAGS)
+	@echo EXTRA_LINK_FLAGS is $(EXTRA_C_LINK_FLAGS)
+	@echo EXTRA_LINK_FLAGS is $(EXTRA_F_LINK_FLAGS)
