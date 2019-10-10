@@ -2,7 +2,7 @@
 #include<mpi.h>
 #include "mango.hpp"
 
-void objective_function(int*, double*, double*);
+void objective_function(int*, const double*, double*, int*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
   std::cout << MANGO_PETSC_NM << "\nHello world!\n";
   */
 
-  double state_vector[4] = {5.0, 10.0, 15.0, 20.0};
+  double state_vector[2] = {0.0, 0.0};
 
-  mango::problem myprob(4, state_vector, &objective_function);
+  mango::problem myprob(2, state_vector, &objective_function);
 
   //std::cout << "Here comes state vector:" << *(myprob.state_vector);
   /*
@@ -50,11 +50,9 @@ int main(int argc, char *argv[]) {
 }
 
 
-void objective_function(int* N, double* x, double* f) {
+void objective_function(int* N, const double* x, double* f, int* failed) {
   int j;
   std::cout << "C objective function called with N="<< *N << "\n";
-  *f = 0;
-  for (j = 0; j < *N; j++) {
-    *f += (x[j]-2)*(x[j]-2);
-  }
+  *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]);
+  *failed = false;
 }

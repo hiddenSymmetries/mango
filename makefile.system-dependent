@@ -48,8 +48,8 @@ else ifeq ($(CLUSTER),DRACO)
 
 	CC = mpiicpc
         FC = mpiifort
-	CLINKER = $(CC)
-	FLINKER = $(FC)
+	#CLINKER = $(CC)
+	#FLINKER = $(FC)
 	EXTRA_C_COMPILE_FLAGS = -O0 -g
 	EXTRA_F_COMPILE_FLAGS = -O0 -g -module obj
 	EXTRA_C_LINK_FLAGS = 
@@ -75,10 +75,12 @@ else
 	include ${PETSC_DIR}/lib/petsc/conf/variables
 	include ${PETSC_DIR}/lib/petsc/conf/rules
 
-	CC = mpicxx
-	FC = mpif90
-	CLINKER = $(CC)
-	FLINKER = $(FC)
+	#CC = mpicxx
+	#FC = mpif90
+	#CLINKER = $(CC)
+	#FLINKER = $(CC)
+	FLINKER += -lstdc++
+	CLINKER += -lstdc++
 	EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
 	EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
 	#EXTRA_COMPILE_FLAGS = -ffree-line-length-none -O0 -g

@@ -82,7 +82,8 @@ void mango::problem::optimize() {
 
   std::cout << "\nAbout to call objective function from C.\n";
   double f;
+  int failed;
   std::cout << "optimize.cpp: objective_function=" << (long int)objective_function << "\n";
-  objective_function(&N_parameters, state_vector, &f);
+  objective_function(&N_parameters, state_vector, &f, &failed);
   std::cout << "Value of objective function: " << f << "\n";
 }

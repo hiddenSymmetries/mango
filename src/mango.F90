@@ -84,11 +84,12 @@ module mango
   
 
   abstract interface
-  subroutine objective_function_interface(N_parameters, state_vector, f)
+  subroutine objective_function_interface(N_parameters, state_vector, f, failed)
     integer, intent(in) :: N_parameters
     double precision, intent(in) :: state_vector(N_parameters)
     !double precision, intent(in) :: state_vector(:)
     double precision, intent(out) :: f
+    integer, intent(out) :: failed
   end subroutine objective_function_interface
   end interface
 
@@ -115,6 +116,7 @@ contains
     double precision :: f
     real(C_double) :: state_vector_copy(N_parameters)
     procedure(objective_function_interface) :: objective_function
+    integer :: failed_temp = 0
     !external objective_function
 
     if (size(state_vector) .ne. N_parameters) then
@@ -129,7 +131,7 @@ contains
     !print *,"mango.F90 subroutine mango_problem_create: C_funloc(objective_function)=",C_funloc(objective_function)
     print *,"state_vector size in mango.F90:",size(state_vector_copy)
     print *,"state_vector in mango.F90:",state_vector_copy
-    call objective_function(2, x, f)
+    call objective_function(2, x, f, failed_temp)
     print *,"Done calling objective fn from mango.F90. f=",f
     !this%object = C_mango_problem_create(int(N_parameters,C_int), real(state_vector,C_double), C_funloc(objective_function))
     !this%object = C_mango_problem_create(int(N_parameters,C_int), c_loc(state_vector(1)), C_funloc(objective_function))

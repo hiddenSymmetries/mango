@@ -28,7 +28,8 @@ extern "C" {
     }
     std::cout << "\ndummy=" << *dummy << "  About to call objective function from interface.cpp\n";
     double f;
-    objective_function(N_parameters, state_vector, &f);
+    int failed_temp;
+    objective_function(N_parameters, state_vector, &f, &failed_temp);
     std::cout << "Value of objective function: " << f << "\n";
 
     return new mango::problem(*N_parameters, state_vector, objective_function);

@@ -19,14 +19,28 @@ namespace mango {
   typedef enum {
     PETSC_NM,
     PETSC_POUNDERS,
-    NLOPT_LN_NELDERMEAD,
+    NLOPT_GN_DIRECT,
+    NLOPT_GN_DIRECT_L,
+    NLOPT_GN_DIRECT_L_RAND,
+    NLOPT_GN_DIRECT_NOSCAL,
+    NLOPT_GN_DIRECT_L_NOSCAL,
+    NLOPT_GN_DIRECT_L_RAND_NOSCAL,
+    NLOPT_GN_ORIG_DIRECT,
+    NLOPT_GN_ORIG_DIRECT_L,
+    NLOPT_GN_CRS2_LM,
+    NLOPT_LN_COBYLA,
+    NLOPT_LN_BOBYQA,
     NLOPT_LN_PRAXIS,
+    NLOPT_LN_NELDERMEAD,
+    NLOPT_LN_SBPLX,
     NLOPT_LD_LBFGS,
     HOPSPACK,
     NUM_ALGORITHMS  /* Not an actual algorithm, just counting. */
   } algorithm_type;
 
-  typedef void (*objective_function_type)(int*, double*, double*);
+  const double NUMBER_FOR_FAILED = 1.0e+12;
+
+  typedef void (*objective_function_type)(int*, const double*, double*, int*);
 
   class problem {
   private:
@@ -63,6 +77,7 @@ namespace mango {
     void optimize_nlopt();
     void optimize_hopspack();
     void optimize_gsl();
+    /* double nlopt_objective_function(unsigned, const double*, double*, void*); */
 
   public:
     double* state_vector;
@@ -82,6 +97,7 @@ namespace mango {
     void set_output_filename(std::string);
     void mpi_init(MPI_Comm);
     void optimize();
+    void objective_function_wrapper(const double*, double*, bool*);
   };
 }
 

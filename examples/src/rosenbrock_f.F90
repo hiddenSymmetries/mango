@@ -1,9 +1,9 @@
-#define N_dim 3
+#define N_dim 2
 
 program rosenbrock
 
   use mango
-  use iso_c_binding
+  !use iso_c_binding
 
   implicit none
 
@@ -13,7 +13,7 @@ program rosenbrock
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
-  double precision, dimension(N_dim) :: state_vector = (/ 3.0, 4.0, 17.3 /)
+  double precision, dimension(N_dim) :: state_vector = (/ 0.0d+0, 0.0d+0 /)
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: dummy = 13
@@ -53,16 +53,19 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f)
+subroutine objective_function(N, x, f, failed)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N
   real(C_double), intent(in) :: x(N)
   real(C_double), intent(out) :: f
+  integer(C_int), intent(out) :: failed
 
   print *,"Hi from fortran. N=",N," size(x)=",size(x)
-  f = sum((x-2)*(x-2))
-  print *,"In fortran, x=",x,", f=",f
+  !f = sum((x-2)*(x-2))
+  !print *,"In fortran, x=",x,", f=",f
+  f = (x(1) - 1) * (x(1) - 1) + 100 * (x(2) - x(1)*x(1)) * (x(2) - x(1)*x(1))
+  failed = 0
 
 end subroutine objective_function
 
