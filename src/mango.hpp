@@ -50,6 +50,7 @@ namespace mango {
     algorithm_type algorithm;
     bool algorithm_uses_derivatives;
     bool least_squares_algorithm;
+    bool least_squares;
     int package;
     std::string algorithm_name;
     int N_procs_world;
@@ -62,7 +63,6 @@ namespace mango {
     bool proc0_world;
     bool proc0_worker_groups;
     int N_worker_groups;
-    bool least_squares;
     int N_parameters;
     int N_terms;
     objective_function_type objective_function;
@@ -79,6 +79,7 @@ namespace mango {
     void optimize_nlopt();
     void optimize_hopspack();
     void optimize_gsl();
+    void write_file_line(const double*, double);
     /* double nlopt_objective_function(unsigned, const double*, double*, void*); 
     void objective_function_wrapper(const double*, double*, bool*); */
 
@@ -100,7 +101,9 @@ namespace mango {
     void set_output_filename(std::string);
     void mpi_init(MPI_Comm);
     void optimize();
+    bool is_least_squares();
     void objective_function_wrapper(const double*, double*, bool*); 
+    void finite_difference_gradient(const double*, double*, double*);
   };
 }
 

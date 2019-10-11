@@ -13,7 +13,7 @@ program rosenbrock
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
-  double precision, dimension(N_dim) :: state_vector = (/ -2.0d+0, -3.0d+0 /)
+  double precision, dimension(N_dim) :: state_vector = (/ 0.0d+0, 0.0d+0 /)
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: dummy = 13
@@ -31,7 +31,17 @@ program rosenbrock
   call mango_read_input_file(problem, "../input/mango_in.rosenbrock_f")
   call mango_set_output_filename(problem, "../output/mango_out.rosenbrock_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
-  call mango_optimize(problem)
+
+!  if (mango_proc0_worker_groups(problem)) then
+     call mango_optimize(problem)
+
+!     ! Make workers stop
+!     data = -1
+!     call mpi_bcast(data,1,MPI_INTEGER,0,mango_mpi_comm_worker_groups(problem),ierr)
+!     if (ierr .ne. 0) print *,"Error A on proc0!"
+!  else
+!     call worker(problem)
+!  end if
 
   call mango_problem_destroy(problem)
 

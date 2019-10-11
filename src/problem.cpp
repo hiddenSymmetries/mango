@@ -62,3 +62,7 @@ void mango::problem::defaults() {
 void mango::problem::set_output_filename(std::string filename) {
   output_filename = filename;
 }
+
+bool mango::problem::is_least_squares() {
+  return least_squares;
+}

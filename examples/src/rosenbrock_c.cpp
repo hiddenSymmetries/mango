@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   std::cout << MANGO_PETSC_NM << "\nHello world!\n";
   */
 
-  double state_vector[2] = {-2.0, -3.0};
+  double state_vector[2] = {0.0, 0.0};
 
   mango::problem myprob(2, state_vector, &objective_function, argc, argv);
 
@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
   myprob.read_input_file("../input/mango_in.rosenbrock_c");
   myprob.output_filename = "../output/mango_out.rosenbrock_c";
   myprob.mpi_init(MPI_COMM_WORLD);
+  /* myprob.centered_differences = true; */
 
   myprob.optimize();
 

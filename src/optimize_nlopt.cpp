@@ -106,8 +106,7 @@ void mango::problem::optimize_nlopt() {
     std::cout << "nlopt: maxtime reached.\n";
     break;
   case nlopt::FAILURE:
-    std::cout << "nlopt failure!\n";
-    exit(1);
+    std::cout << "WARNING!!! NLOPT reported a generic failure. Results may or may not make sense.\n";
     break;
   case nlopt::INVALID_ARGS:
     std::cout << "nlopt failure: invalid arguments!\n";
@@ -143,8 +142,18 @@ double nlopt_objective_function(unsigned n, const double* x, double* grad, void*
   bool failed;
   double f;
 
-  this_problem->objective_function_wrapper(x, &f, &failed);
-  /* objective_function_wrapper(x, &f, &failed); */
+  if (grad == NULL) {
+    /* Gradient is not required. */
+    this_problem->objective_function_wrapper(x, &f, &failed);
+    /* objective_function_wrapper(x, &f, &failed); */
+  } else {
+    /* Gradient is required. */
+    if (this_problem->is_least_squares()) {
+      /* mango_finite_difference_Jacobian_to_gradient(problem, residual_function, x, f, grad) goes here. */
+    } else {
+      this_problem->finite_difference_gradient(x, &f, grad);
+    }
+  }
 
   if (failed) f = mango::NUMBER_FOR_FAILED;
 
