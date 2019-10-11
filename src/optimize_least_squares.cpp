@@ -4,7 +4,8 @@
 void least_squares_to_single_objective(int*, const double*, double*, int*);
 
 void mango::problem::optimize_least_squares() {
-  
+  int j;
+
   if (!proc0_world) {
     group_leaders_least_squares_loop();
     return;
@@ -14,6 +15,14 @@ void mango::problem::optimize_least_squares() {
   std::cout << "Hello world from optimize_least_squares()\n";
   function_evaluations = 0;
 
+  /* Verify that the sigmas array is all nonzero. */
+  for (j=0; j<N_terms; j++) {
+    if (sigmas[j] == 0.0) {
+      std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
+      exit(1);
+    }
+  }
+
   /* Open output file */
   output_file.open(output_filename);
   if (!output_file.is_open()) {
@@ -22,11 +31,11 @@ void mango::problem::optimize_least_squares() {
   }
   /* Write header line of output file */
   output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation";
-  for (int j=0; j<N_parameters; j++) {
+  for (j=0; j<N_parameters; j++) {
     output_file << ",x(" << j+1 << ")";
   }
   output_file << ",objective_function";
-  for (int j=0; j<N_terms; j++) {
+  for (j=0; j<N_terms; j++) {
     output_file << ",F(" << j+1 << ")";
   }
   output_file << "\n" << std::flush;

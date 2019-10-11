@@ -108,6 +108,8 @@ namespace mango {
     void mpi_init(MPI_Comm);
     void optimize();
     bool is_least_squares();
+    int get_N_parameters();
+    int get_N_terms();
     void objective_function_wrapper(const double*, double*, bool*); 
     void residual_function_wrapper(const double*, double*, bool*); 
     void finite_difference_gradient(const double*, double*, double*);

@@ -1,6 +1,7 @@
 #define N_dims 3
 
 #include<iostream>
+#include<iomanip>
 #include<cstring>
 #include<mpi.h>
 #include "mango.hpp"
@@ -32,8 +33,8 @@ int main(int argc, char *argv[]) {
   double sigmas[N_dims];
   double targets[N_dims];
   for (int j=0; j<N_dims; j++) {
-    sigmas[j] = (double) j;
-    targets[j] = (double) j;
+    sigmas[j] = (double) j+1;
+    targets[j] = (double) j+1;
   }
 
   mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, &residual_function, argc, argv);
@@ -64,9 +65,21 @@ int main(int argc, char *argv[]) {
 
 void residual_function(int* N, const double* x, int* M, double* f, int* failed) {
   int j;
-  std::cout << "C residual function called with N="<< *N << "\n";
-  for (int j=1; j <= *N; j++) {
+  std::cout << "C residual function called with N="<< *N << ", M=" << *M << "\n";
+  for (j=0; j < *N; j++) {
     f[j] = x[j];
   }
   *failed = false;
+  
+  std::cout << "state_vector:";
+  for (j=0; j < *N; j++) {
+    std::cout << std::setw(24) << std::setprecision(15) << x[j];
+  }
+  std::cout << "\n";
+  std::cout << "residual:";
+  for (j=0; j < *M; j++) {
+    std::cout << std::setw(24) << std::setprecision(15) << f[j];
+  }
+  std::cout << "\n" << std::flush;
+  
 }

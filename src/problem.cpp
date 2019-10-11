@@ -68,3 +68,11 @@ void mango::problem::set_output_filename(std::string filename) {
 bool mango::problem::is_least_squares() {
   return least_squares;
 }
+
+int mango::problem::get_N_parameters() {
+  return N_parameters;
+}
+
+int mango::problem::get_N_terms() {
+  return N_terms;
+}
