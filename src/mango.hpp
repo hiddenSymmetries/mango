@@ -41,6 +41,7 @@ namespace mango {
   const double NUMBER_FOR_FAILED = 1.0e+12;
 
   typedef void (*objective_function_type)(int*, const double*, double*, int*);
+  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*);
 
   class problem {
   private:
@@ -66,12 +67,14 @@ namespace mango {
     int N_parameters;
     int N_terms;
     objective_function_type objective_function;
+    residual_function_type residual_function;
     int function_evaluations;
     std::ofstream output_file;
     int argc;
     char** argv;
     
     void group_leaders_loop();
+    void group_leaders_least_squares_loop();
     void optimize_least_squares();
     void defaults();
     void get_algorithm_properties();
@@ -79,7 +82,10 @@ namespace mango {
     void optimize_nlopt();
     void optimize_hopspack();
     void optimize_gsl();
+    void optimize_least_squares_petsc();
+    void optimize_least_squares_gsl();
     void write_file_line(const double*, double);
+    void write_least_squares_file_line(const double*, double*);
     /* double nlopt_objective_function(unsigned, const double*, double*, void*); 
     void objective_function_wrapper(const double*, double*, bool*); */
 
@@ -93,7 +99,7 @@ namespace mango {
 
     /*  problem() : N_worker_groups(987) {}; */
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
-    problem(int, double*, int, double*, double*); /* For least-squares problems */
+    problem(int, double*, int, double*, double*, residual_function_type, int, char**); /* For least-squares problems */
     ~problem();
     void set_algorithm(algorithm_type);
     void set_algorithm(std::string);
@@ -103,6 +109,7 @@ namespace mango {
     void optimize();
     bool is_least_squares();
     void objective_function_wrapper(const double*, double*, bool*); 
+    void residual_function_wrapper(const double*, double*, bool*); 
     void finite_difference_gradient(const double*, double*, double*);
   };
 }

@@ -9,8 +9,9 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_
   argv = argv_in;
   N_parameters = N_parameters_in;
   objective_function = objective_function_in;
+  residual_function = NULL;
   std::cout << "problem.cpp: objective_function=" << (long int)objective_function << "\n";
-  
+
   least_squares = false;
   /*  state_vector = new double[N_parameters];   */
   state_vector = state_vector_in;
@@ -21,11 +22,12 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_
 }
 
 /* Constructor for least-squares problems */
-mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_terms_in, double* targets_in, double* sigmas_in) {
+mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_terms_in, double* targets_in, double* sigmas_in, residual_function_type residual_function_in, int argc_in, char* argv_in[]) {
   defaults();
   N_parameters = N_parameters_in;
   N_terms = N_terms_in;
   objective_function = NULL;
+  residual_function = residual_function_in;
 
   least_squares = true;
   /*

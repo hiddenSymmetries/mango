@@ -34,13 +34,14 @@ module mango
        !real(C_double) :: state_vector(:)
        !real(C_double) :: state_vector(N_parameters)
        real(C_double) :: state_vector
-       type(C_funptr), value :: objective_function
+       type(C_funptr), value :: objective_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
      end function C_mango_problem_create
-     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas) result(this) bind(C,name="mango_problem_create_least_squares")
+     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas, residual_function) result(this) bind(C,name="mango_problem_create_least_squares")
        import
        integer(C_int) :: N_parameters, N_terms
        type(C_ptr) :: this
-       real(C_double) :: state_vector(:), targets(:), sigmas(:)
+       real(C_double) :: state_vector, targets, sigmas
+       type(C_funptr), value :: residual_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
      end function C_mango_problem_create_least_squares
      subroutine C_mango_problem_destroy (this) bind(C,name="mango_problem_destroy")
        import
@@ -87,10 +88,16 @@ module mango
   subroutine objective_function_interface(N_parameters, state_vector, f, failed)
     integer, intent(in) :: N_parameters
     double precision, intent(in) :: state_vector(N_parameters)
-    !double precision, intent(in) :: state_vector(:)
     double precision, intent(out) :: f
     integer, intent(out) :: failed
   end subroutine objective_function_interface
+  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed)
+    integer, intent(in) :: N_parameters, N_terms
+    double precision, intent(in) :: state_vector(N_parameters)
+    !double precision, intent(in) :: state_vector(:)
+    double precision, intent(out) :: f(N_terms)
+    integer, intent(out) :: failed
+  end subroutine residual_function_interface
   end interface
 
 contains
@@ -139,11 +146,12 @@ contains
     this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector(1), int(dummy,C_int), C_funloc(objective_function))
   end subroutine mango_problem_create
 
-  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas)
+  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, residual_function)
     type(mango_problem), intent(out) :: this
-    integer :: N_parameters, N_terms
-    double precision :: state_vector(:), targets(:), sigmas(:)
-    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), real(state_vector,C_double), int(N_terms,C_int), real(targets,C_double), real(sigmas,C_double))
+    integer, intent(in) :: N_parameters, N_terms
+    real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:)
+    procedure(residual_function_interface) :: residual_function
+    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), C_funloc(residual_function))
   end subroutine mango_problem_create_least_squares
 
   subroutine mango_problem_destroy(this)

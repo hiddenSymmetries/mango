@@ -5,7 +5,7 @@
 #include<mpi.h>
 #include "mango.hpp"
 
-void objective_function(int*, const double*, double*, int*);
+void residual_function(int*, const double*, int*, double*, int*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -29,7 +29,14 @@ int main(int argc, char *argv[]) {
   double state_vector[N_dims];
   memset(state_vector, 0, N_dims*sizeof(double)); /* Initial condition = 0. */
 
-  mango::problem myprob(N_dims, state_vector, &objective_function, argc, argv);
+  double sigmas[N_dims];
+  double targets[N_dims];
+  for (int j=0; j<N_dims; j++) {
+    sigmas[j] = (double) j;
+    targets[j] = (double) j;
+  }
+
+  mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, &residual_function, argc, argv);
 
   //std::cout << "Here comes state vector:" << *(myprob.state_vector);
   /*
@@ -55,12 +62,11 @@ int main(int argc, char *argv[]) {
 }
 
 
-void objective_function(int* N, const double* x, double* f, int* failed) {
+void residual_function(int* N, const double* x, int* M, double* f, int* failed) {
   int j;
-  std::cout << "C objective function called with N="<< *N << "\n";
-  *f = 0;
+  std::cout << "C residual function called with N="<< *N << "\n";
   for (int j=1; j <= *N; j++) {
-    *f += (x[j-1] - j) * (x[j-1] - j) / (j*j);
+    f[j] = x[j];
   }
   *failed = false;
 }
