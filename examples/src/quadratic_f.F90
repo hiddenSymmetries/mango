@@ -13,10 +13,10 @@ program quadratic
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
-  double precision, dimension(N_dim) :: state_vector
+  double precision, dimension(N_dim) :: state_vector, targets, sigmas
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
-  integer :: dummy = 13
+  integer :: j
 
   !---------------------------------------------
 
@@ -25,7 +25,11 @@ program quadratic
   call mpi_init(ierr)
 
   state_vector = 0
-  call mango_problem_create(problem,N_dim,state_vector,dummy,objective_function)
+  do j = 1, N_dim
+     targets(j) = j
+     sigmas(j) = j
+  end do
+  call mango_problem_create_least_squares(problem,N_dim,state_vector,N_dim,targets,sigmas,residual_function)
   print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
@@ -64,26 +68,21 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f, failed)
+subroutine residual_function(N_parameters, x, N_terms, f, failed)
   use iso_c_binding
   implicit none
-  integer(C_int), intent(in) :: N
-  real(C_double), intent(in) :: x(N)
-  real(C_double), intent(out) :: f
+  integer(C_int), intent(in) :: N_parameters, N_terms
+  real(C_double), intent(in) :: x(N_parameters)
+  real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
   integer :: j
 
-  print *,"Hi from fortran. N=",N," size(x)=",size(x)
-  !f = sum((x-2)*(x-2))
-  !print *,"In fortran, x=",x,", f=",f
+  print *,"Hi from fortran. N=",N_parameters," size(x)=",size(x), ", size(f)=",size(f)
 
-  f = 0
-  do j = 1, N
-     f = f + (x(j) - j) * (x(j) - j) / (j*j)
-  end do
+  f = x(1:N_terms)
 
   failed = 0
 
-end subroutine objective_function
+end subroutine residual_function
 
 end program quadratic
