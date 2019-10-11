@@ -1,11 +1,16 @@
 #include<iostream>
-#include "nlopt.hpp"
 #include "mango.hpp"
 
+#ifdef MANGO_NLOPT_AVAILABLE
+#include "nlopt.hpp"
+#endif
+
 /* double mango::problem::nlopt_objective_function(unsigned, const double*, double*, void*); */
-double nlopt_objective_function(unsigned, const double*, double*, void*);
+double nlopt_objective_function(unsigned, const double*, double*, void*); 
+
 
 void mango::problem::optimize_nlopt() {
+#ifdef MANGO_NLOPT_AVAILABLE
 
   /*  int* f_data = NULL;
       nlopt::opt opt_instance(nlopt::LN_NELDERMEAD, N_parameters); */
@@ -125,10 +130,15 @@ void mango::problem::optimize_nlopt() {
   }
 
   nlopt_destroy(opt);
+
+#else
+  std::cout << "Error! A NLOPT algorithm was requested, but Mango was compiled without NLOPT support.\n";
+  exit(1);
+#endif
 }
 
 /*double mango::problem::nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { */
-double nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) {
+double nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { 
   mango::problem* this_problem = (mango::problem*) f_data; 
   bool failed;
   double f;

@@ -68,6 +68,8 @@ namespace mango {
     objective_function_type objective_function;
     int function_evaluations;
     std::ofstream output_file;
+    int argc;
+    char** argv;
     
     void group_leaders_loop();
     void optimize_least_squares();
@@ -77,7 +79,8 @@ namespace mango {
     void optimize_nlopt();
     void optimize_hopspack();
     void optimize_gsl();
-    /* double nlopt_objective_function(unsigned, const double*, double*, void*); */
+    /* double nlopt_objective_function(unsigned, const double*, double*, void*); 
+    void objective_function_wrapper(const double*, double*, bool*); */
 
   public:
     double* state_vector;
@@ -88,7 +91,7 @@ namespace mango {
     std::string output_filename;
 
     /*  problem() : N_worker_groups(987) {}; */
-    problem(int, double*, objective_function_type); /* For non-least-squares problems */
+    problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*); /* For least-squares problems */
     ~problem();
     void set_algorithm(algorithm_type);
@@ -97,7 +100,7 @@ namespace mango {
     void set_output_filename(std::string);
     void mpi_init(MPI_Comm);
     void optimize();
-    void objective_function_wrapper(const double*, double*, bool*);
+    void objective_function_wrapper(const double*, double*, bool*); 
   };
 }
 

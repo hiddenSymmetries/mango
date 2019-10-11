@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
   std::cout << MANGO_PETSC_NM << "\nHello world!\n";
   */
 
-  double state_vector[2] = {0.0, 0.0};
+  double state_vector[2] = {-2.0, -3.0};
 
-  mango::problem myprob(2, state_vector, &objective_function);
+  mango::problem myprob(2, state_vector, &objective_function, argc, argv);
 
   //std::cout << "Here comes state vector:" << *(myprob.state_vector);
   /*

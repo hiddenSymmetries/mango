@@ -32,7 +32,7 @@ extern "C" {
     objective_function(N_parameters, state_vector, &f, &failed_temp);
     std::cout << "Value of objective function: " << f << "\n";
 
-    return new mango::problem(*N_parameters, state_vector, objective_function);
+    return new mango::problem(*N_parameters, state_vector, objective_function, 0, NULL);
   }
   mango::problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas) {
     return new mango::problem(*N_parameters, state_vector, *N_terms, targets, sigmas);

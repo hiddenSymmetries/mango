@@ -79,15 +79,13 @@ else
 	#FC = mpif90
 	#CLINKER = $(CC)
 	#FLINKER = $(CC)
-	FLINKER += -lstdc++
-	CLINKER += -lstdc++
 	EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
 	EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
 	#EXTRA_COMPILE_FLAGS = -ffree-line-length-none -O0 -g
 	EXTRA_C_COMPILE_FLAGS += -I/usr/local/include
 	EXTRA_F_COMPILE_FLAGS += -I/usr/local/include
-	EXTRA_C_LINK_FLAGS = -lnlopt
-	EXTRA_F_LINK_FLAGS = -lnlopt
+	EXTRA_C_LINK_FLAGS = $(EXTRA_LINK_FLAGS) -lnlopt -lstdc++
+	EXTRA_F_LINK_FLAGS = $(EXTRA_LINK_FLAGS) -lnlopt -lstdc++
 
 
 	# For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.

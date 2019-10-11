@@ -3,8 +3,10 @@
 #include "mango.hpp"
 
 /* Constructor for non-least-squares problems */
-mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_function_type objective_function_in) {
+mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_function_type objective_function_in, int argc_in, char* argv_in[]) {
   defaults();
+  argc = argc_in;
+  argv = argv_in;
   N_parameters = N_parameters_in;
   objective_function = objective_function_in;
   std::cout << "problem.cpp: objective_function=" << (long int)objective_function << "\n";
