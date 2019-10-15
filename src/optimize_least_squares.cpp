@@ -1,7 +1,7 @@
 #include<iostream>
 #include "mango.hpp"
 
-void least_squares_to_single_objective(int*, const double*, double*, int*);
+/* void least_squares_to_single_objective(int*, const double*, double*, int*); */
 
 void mango::problem::optimize_least_squares() {
   int j;
@@ -41,12 +41,12 @@ void mango::problem::optimize_least_squares() {
   output_file << "\n" << std::flush;
 
   /* Sanity test */
-  if (!least_squares_algorithm) {
+  /* if (!least_squares_algorithm) {
     std::cout << "Error in optimize_least_squares(). Should not get here!\n";
     exit(1);
-  }
+    }*/
 
-  objective_function = &least_squares_to_single_objective;
+  objective_function = (mango::objective_function_type) &mango::problem::least_squares_to_single_objective;
 
   switch (package) {
   case PACKAGE_PETSC:
@@ -98,6 +98,7 @@ void mango::problem::optimize_least_squares() {
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
 
-void least_squares_to_single_objective(int* N, const double* x, double* f, int* failed) {
+void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed) {
+  /*void least_squares_to_single_objective(int* N, const double* x, double* f, int* failed) { */
   /*  double* residuals = new double[ */
 }

@@ -5,6 +5,10 @@
 #include<string>
 #include<fstream>
 
+#ifdef MANGO_PETSC_AVAILABLE
+#include <petsctao.h>
+#endif
+
 namespace mango {
 
   typedef enum {
@@ -86,8 +90,16 @@ namespace mango {
     void optimize_least_squares_gsl();
     void write_file_line(const double*, double);
     void write_least_squares_file_line(const double*, double*);
-    /* double nlopt_objective_function(unsigned, const double*, double*, void*); 
-    void objective_function_wrapper(const double*, double*, bool*); */
+    static double nlopt_objective_function(unsigned, const double*, double*, void*); 
+#ifdef MANGO_PETSC_AVAILABLE
+    static PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);
+    static PetscErrorCode mango_petsc_residual_function(Tao, Vec, Vec, void*);
+#endif
+    /*void objective_function_wrapper(const double*, double*, bool*); */
+    void objective_function_wrapper(const double*, double*, bool*); 
+    void residual_function_wrapper(const double*, double*, bool*); 
+    void least_squares_to_single_objective(int*, const double*, double*, int*);
+    void finite_difference_gradient(const double*, double*, double*);
 
   public:
     double* state_vector;
@@ -97,7 +109,6 @@ namespace mango {
     double finite_difference_step_size;
     std::string output_filename;
 
-    /*  problem() : N_worker_groups(987) {}; */
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*, residual_function_type, int, char**); /* For least-squares problems */
     ~problem();
@@ -110,9 +121,6 @@ namespace mango {
     bool is_least_squares();
     int get_N_parameters();
     int get_N_terms();
-    void objective_function_wrapper(const double*, double*, bool*); 
-    void residual_function_wrapper(const double*, double*, bool*); 
-    void finite_difference_gradient(const double*, double*, double*);
   };
 }
 

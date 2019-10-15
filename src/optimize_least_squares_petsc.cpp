@@ -5,9 +5,11 @@
 #include <petsctao.h>
 #endif
 
+/*
 #ifdef MANGO_PETSC_AVAILABLE
 PetscErrorCode mango_petsc_residual_function(Tao, Vec, Vec, void*);
 #endif
+*/
 
 static  char help[]="";
 
@@ -83,7 +85,7 @@ void mango::problem::optimize_least_squares_petsc() {
 */
 
 #ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango_petsc_residual_function(Tao my_tao, Vec x, Vec f, void* user_context) {
+PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, Vec f, void* user_context) {
 
   int j;
   double* x_array;

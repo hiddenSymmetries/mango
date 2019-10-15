@@ -1,0 +1,6 @@
+! N_procs, N_worker_groups:
+1,1
+! algorithms:
+petsc_pounders
+! True location(s) of optimum:
+1,2

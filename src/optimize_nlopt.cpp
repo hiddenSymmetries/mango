@@ -82,7 +82,8 @@ void mango::problem::optimize_nlopt() {
      We can get around the latter issue by using the C++ nlopt:: constants and casting them
      from nlopt::algorithm to nlopt_algorithm. */
   nlopt_opt opt = nlopt_create((nlopt_algorithm)mango_nlopt_algorithm, N_parameters);
-  nlopt_set_min_objective(opt, &nlopt_objective_function, (void*)this);
+  /*  nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this); */
+  nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this);
   double final_objective_function;
   nlopt_result result = nlopt_optimize(opt, state_vector, &final_objective_function);
 
@@ -136,11 +137,13 @@ void mango::problem::optimize_nlopt() {
 #endif
 }
 
-/*double mango::problem::nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { */
-double nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { 
+double mango::problem::nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { 
+/*double nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { */
   mango::problem* this_problem = (mango::problem*) f_data; 
   bool failed;
   double f;
+
+  std::cout << "Hello from nlopt_objective_function\n" << std::flush;
 
   if (grad == NULL) {
     /* Gradient is not required. */
@@ -156,6 +159,8 @@ double nlopt_objective_function(unsigned n, const double* x, double* grad, void*
   }
 
   if (failed) f = mango::NUMBER_FOR_FAILED;
+
+  std::cout << "Good-bye from nlopt_objective_function\n" << std::flush;
 
   return f;
 }

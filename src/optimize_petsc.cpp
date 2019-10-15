@@ -4,9 +4,11 @@
 #include <petsctao.h>
 #endif
 
+/*
 #ifdef MANGO_PETSC_AVAILABLE
 PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);
 #endif
+*/
 
 static  char help[]="";
 
@@ -84,7 +86,7 @@ void mango::problem::optimize_petsc() {
 */
 
 #ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
+PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
 
   double* x_array;
   VecGetArray(x, &x_array);
