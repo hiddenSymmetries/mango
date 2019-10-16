@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+
+import glob
+import os
+import subprocess
+import sys
+import shutil
+
+print("Running mango examples.")
+print()
+candidate_examples = glob.glob('bin/*')
+examples = []
+for item in candidate_examples:
+    shortname = item[4:]
+    if os.path.isfile('input/test_parameters.'+shortname):
+        examples.append(shortname)
+
+if len(examples)==0:
+    print("No examples were found for which there is an executable in examples/bin and a test_parameters.* file in examples/input/")
+    exit(0)
+
+print("Here are the examples that will be run:")
+for example in examples:
+    print("   "+example)
+
+line1="######################################################################################################"
+line2="------------------------------------------------------------------------------------------------------"
+
+def comment_line(str):
+    str1=str.strip()
+    if str1[0]=="!" or str1[0]=="%" or str1[0]=="#":
+        return True
+    else:
+        return False
+
+def first_n_items(str,N):
+    splitstr = str.split(',')
+    if len(splitstr) <= N:
+        return str
+    else:
+        return (",".join(splitstr[:N]))+"\n"
+
+for example in examples:
+
+    print()
+    print(line1)
+    print("Begnning example "+example)
+    print(line1)
+
+    filename = 'input/test_parameters.'+example
+    print("Reading "+filename)
+    with open(filename,'r') as f:
+        lines = f.readlines()
+
+    N_procss = []
+    N_worker_groupss = []
+    algorithms = []
+    true_optima = []
+
+    # Skip comment line(s):
+    for j in range(len(lines)):
+        if not comment_line(lines[j]):
+            break
+    j0=j
+    # Read line(s) with N_procss, N_worker_groups:
+    for j in range(j0,len(lines)):
+        if comment_line(lines[j]):
+            break
+        splitline = lines[j].split(",")
+        if len(splitline) != 2:
+            print("In examples/"+filename+" line "+str(j)+", expected a 2-item comma-separated list N_procs,N_worker_groups")
+            exit(1)
+
+        try:
+            N_procss.append(int(splitline[0]))
+        except:
+            print("In examples/"+filename+" line "+str(j)+", unable to convert the first item to an integer.")
+            raise
+
+        try:
+            N_worker_groupss.append(int(splitline[1]))
+        except:
+            print("In examples/"+filename+" line "+str(j)+", unable to convert the second item to an integer.")
+            raise
+
+    # Skip comment line(s):
+    j0=j
+    for j in range(j0,len(lines)):
+        if not comment_line(lines[j]):
+            break
+    # Read line(s) with algorithm(s):
+    j0=j
+    for j in range(j0,len(lines)):
+        if comment_line(lines[j]):
+            break
+        algorithms.append(lines[j].strip())
+    # Skip comment line(s):
+    j0=j
+    for j in range(j0,len(lines)):
+        if not comment_line(lines[j]):
+            break
+    # Read line(s) with true optima
+    j0=j
+    for j in range(j0,len(lines)):
+        if comment_line(lines[j]):
+            break
+        splitline = lines[j].strip().split(",")
+        try:
+            optimum = list(map(float,splitline))
+        except:
+            print("In examples/"+filename+" line "+str(j)+", failed converting items to float.")
+            raise
+        true_optima.append(optimum)
+
+    # Done reading the test_parameters.* file.
+    print("N_procs:        ",N_procss)
+    print("N_worker_groups:",N_worker_groupss)
+    print("Algorithms:",algorithms)
+    print("True optima:",true_optima)
+    print()
+
+    # Remove previous summary files, if they exist:
+    filenames = ['output/summary.'+example, 'output/summary_mpi.'+example, 'output/short_summary.'+example, 'output/short_summary_mpi.'+example]
+    for file in filenames:
+        if os.path.isfile(file):
+            os.remove(file)
+
+    # Initialize the contents of the summary files for output
+    summary_header = []
+    summary_contents = []
+    summary_mpi_contents = []
+    short_summary_contents = []
+    short_summary_mpi_contents = []
+
+    for j_algorithm in range(len(algorithms)):
+        algorithm = algorithms[j_algorithm]
+        algorithm_with_spaces = (algorithm+",").ljust(25)
+        for j_procs in range(len(N_procss)):
+            N_procs = N_procss[j_procs]
+            N_worker_groups = N_worker_groupss[j_procs]
+            mpi_string = (str(N_procs)+",").rjust(6) + (str(N_worker_groups)+",").rjust(6)
+            print()
+            print(line2)
+            print("Beginning example "+example+" with algorithm="+algorithm+", N_procs="+str(N_procs)+", N_worker_groups="+str(N_worker_groups))
+            print(line2)
+
+            # Write input file
+            input_filename = "input/mango_in."+example
+            try:
+                with open(input_filename,'w') as f:
+                    f.write(str(N_worker_groups))
+                    f.write(algorithm)
+            except:
+                print("Error writing input file examples/"+input_filename)
+                raise
+
+            # Remove a previous output file, if it exists
+            output_filename = 'output/mango_out.'+example
+            if os.path.isfile(output_filename):
+                os.remove(output_filename)
+
+            # Run example
+            try:
+                os.chdir('bin')
+            except:
+                print("Error changing to the bin directory!")
+                raise
+            command = "mpiexec -n "+str(N_procs) + " ./"+example
+            print("Submitting command "+command)
+            sys.stdout.flush()
+            try:
+                subprocess.call(command.split())
+            except:
+                print("An error occured running the example!")
+                raise
+            os.chdir('..')
+
+            # Copy output file and extract its contents
+            lines = []
+            if os.path.isfile(output_filename):
+                new_output_filename = output_filename+"_"+algorithm+"_"+str(N_procs)+"_"+str(N_worker_groups)
+                shutil.copyfile(output_filename,new_output_filename)
+
+                with open(output_filename) as f:
+                    lines = f.readlines()
+
+            if len(lines) > 5:
+                # This run succeeded
+                summary_header = lines[:5]
+                summary_mpi_contents.append(algorithm_with_spaces + mpi_string + lines[-1])
+                if j_procs==0:
+                    summary_contents.append(algorithm_with_spaces+lines[-1])
+            else:
+                # This run failed
+                summary_mpi_contents.append(algorithm_with_spaces + mpi_string + " FAILED\n")
+                if j_procs==0:
+                    summary_contents.append(algorithm_with_spaces+" FAILED\n")
+
+    # Write summary files
+    N_parameters = 0
+    if (len(summary_header)>0):
+        N_parameters = int(summary_header[3])
+
+    with open("output/summary."+example,'w') as f:
+        if len(summary_header)>0:
+            f.write("".join(summary_header[:-1]))
+            f.write("algorithm,"+summary_header[-1])
+            f.write("".join(summary_contents))
+        else:
+            f.write('No jobs succeeded!')
+    with open("output/summary_mpi."+example,'w') as f:
+        if len(summary_header)>0:
+            f.write("".join(summary_header[:-1]))
+            f.write("algorithm,N_procs,N_worker_groups,"+summary_header[-1])
+            f.write("".join(summary_mpi_contents))
+        else:
+            f.write('No jobs succeeded!')
+    with open("output/short_summary."+example,'w') as f:
+        if len(summary_header)>0:
+            f.write("".join(summary_header[:-1]))
+            line = "algorithm,"+summary_header[-1]
+            f.write(first_n_items(line,N_parameters+3))
+            for line in summary_contents:
+                f.write(first_n_items(line,N_parameters+3))
+        else:
+            f.write('No jobs succeeded!')
+    with open("output/short_summary_mpi."+example,'w') as f:
+        if len(summary_header)>0:
+            f.write("".join(summary_header[:-1]))
+            line = "algorithm,N_procs,N_worker_groups,"+summary_header[-1]
+            f.write(first_n_items(line,N_parameters+5))
+            for line in summary_mpi_contents:
+                f.write(first_n_items(line,N_parameters+5))
+        else:
+            f.write('No jobs succeeded!')
+
+print()
+print(line1)
+print(line1)
+print("Done running examples.")

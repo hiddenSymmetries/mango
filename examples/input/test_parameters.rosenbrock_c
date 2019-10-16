@@ -1,5 +1,5 @@
 ! N_procs, N_worker_groups:
-1,1
+2,2
 ! algorithms:
 petsc_nm
 nlopt_ln_bobyqa

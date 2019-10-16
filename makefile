@@ -76,10 +76,10 @@ clean::
 	$(MAKE) -C examples clean
 
 test: $(TARGET)
-	@echo "Beginning functional tests." && cd examples/bin && export MANGO_RETEST=no && ./run_examples
+	@echo "Beginning functional tests." && cd examples && export MANGO_RETEST=no && ./run_examples
 
 retest: $(TARGET)
-	@echo "Testing existing output files for examples without re-running then." && cd examples/bin && export MANGO_RETEST=yes && ./run_examples
+	@echo "Testing existing output files for examples without re-running then." && cd examples && export MANGO_RETEST=yes && ./run_examples
 
 test_make:
 	@echo F_OBJ_FILES is $(F_OBJ_FILES)
