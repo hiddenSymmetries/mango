@@ -64,13 +64,14 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f, failed)
+subroutine objective_function(N, x, f, failed, problem)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N
   real(C_double), intent(in) :: x(N)
   real(C_double), intent(out) :: f
   integer(C_int), intent(out) :: failed
+  type(mango_problem), value, intent(in) :: problem
   integer :: j
 
   print *,"Hi from fortran. N=",N," size(x)=",size(x)

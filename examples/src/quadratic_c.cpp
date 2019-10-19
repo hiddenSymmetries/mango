@@ -6,7 +6,7 @@
 #include<mpi.h>
 #include "mango.hpp"
 
-void residual_function(int*, const double*, int*, double*, int*);
+void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void residual_function(int* N, const double* x, int* M, double* f, int* failed) {
+void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem) {
   int j;
   std::cout << "C residual function called with N="<< *N << ", M=" << *M << "\n";
   for (j=0; j < *N; j++) {

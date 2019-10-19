@@ -1,10 +1,15 @@
 ! N_procs, N_worker_groups:
 1,1
 ! algorithms:
+foo
 petsc_nm
+blorp
+nlopt_ln_cobyla
 nlopt_ln_bobyqa
-nlopt_ln_praxis
+nlopt_ln_sbplx
 nlopt_ln_neldermead
 nlopt_ld_lbfgs
-! True optimum
-1,1
+nlopt_ln_praxis
+glurb
+! Location of true optimum
+1,2,3

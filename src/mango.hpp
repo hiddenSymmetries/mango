@@ -44,8 +44,10 @@ namespace mango {
 
   const double NUMBER_FOR_FAILED = 1.0e+12;
 
-  typedef void (*objective_function_type)(int*, const double*, double*, int*);
-  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*);
+  class problem;
+
+  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::problem*);
+  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::problem*);
 
   class problem {
   private:
@@ -98,7 +100,7 @@ namespace mango {
     /*void objective_function_wrapper(const double*, double*, bool*); */
     void objective_function_wrapper(const double*, double*, bool*); 
     void residual_function_wrapper(const double*, double*, bool*); 
-    void least_squares_to_single_objective(int*, const double*, double*, int*);
+    static void least_squares_to_single_objective(int*, const double*, double*, int*, mango::problem*);
     void finite_difference_gradient(const double*, double*, double*);
 
   public:

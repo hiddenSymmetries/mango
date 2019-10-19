@@ -46,7 +46,8 @@ void mango::problem::optimize_least_squares() {
     exit(1);
     }*/
 
-  objective_function = (mango::objective_function_type) &mango::problem::least_squares_to_single_objective;
+  /*  objective_function = (mango::objective_function_type) &mango::problem::least_squares_to_single_objective; */
+  objective_function = &mango::problem::least_squares_to_single_objective;
 
   switch (package) {
   case PACKAGE_PETSC:
@@ -80,17 +81,20 @@ void mango::problem::optimize_least_squares() {
   int data = -1;
   MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
 
-  std::cout << "Here comes state_vector from optimize.cpp: " << state_vector[0];
+  std::cout << "Here comes state_vector from optimize_least_squares.cpp: " << state_vector[0];
   for (int j=1; j<N_parameters; j++) {
     std::cout << ", " << state_vector[j];
   }
+  std::cout << "\n";
 
+  /*
   std::cout << "\nAbout to call objective function from C.\n";
   double f;
   int failed;
   std::cout << "optimize.cpp: objective_function=" << (long int)objective_function << "\n";
-  objective_function(&N_parameters, state_vector, &f, &failed);
+  objective_function(&N_parameters, state_vector, &f, &failed, this);
   std::cout << "Value of objective function: " << f << "\n";
+  */
 }
 
 /*
@@ -98,7 +102,28 @@ void mango::problem::optimize_least_squares() {
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
 
-void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed) {
-  /*void least_squares_to_single_objective(int* N, const double* x, double* f, int* failed) { */
-  /*  double* residuals = new double[ */
+void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem) {
+  /* Note that this function is static, so we must use this_problem rather than this. */
+
+  int N_terms = this_problem->get_N_terms();
+
+  std::cout << "Hello from least_squares_to_single_objective\n";
+  double* residuals = new double[N_terms];
+
+  bool failed_bool;
+  this_problem->residual_function_wrapper(x, residuals, &failed_bool);
+  if (failed_bool) {
+    *failed_int = 1; 
+  } else {
+    *failed_int = 0;
+  }
+
+  double term;
+  *f = 0;
+  for (int j=0; j<N_terms; j++) {
+    term = (residuals[j] - this_problem->targets[j]) / this_problem->sigmas[j];
+    *f += term*term;
+  }
+
+  delete[] residuals;
 }

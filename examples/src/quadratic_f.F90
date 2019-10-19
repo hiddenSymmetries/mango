@@ -68,13 +68,14 @@ contains
 !
 !end subroutine objective_function
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters, N_terms
   real(C_double), intent(in) :: x(N_parameters)
   real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
+  type(mango_problem), value, intent(in) :: problem
   integer :: j
 
   print *,"Hi from fortran. N=",N_parameters," size(x)=",size(x), ", size(f)=",size(f)

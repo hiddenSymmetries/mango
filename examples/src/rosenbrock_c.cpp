@@ -2,7 +2,7 @@
 #include<mpi.h>
 #include "mango.hpp"
 
-void objective_function(int*, const double*, double*, int*);
+void objective_function(int*, const double*, double*, int*, mango::problem*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void objective_function(int* N, const double* x, double* f, int* failed) {
+void objective_function(int* N, const double* x, double* f, int* failed, mango::problem* this_problem) {
   int j;
   std::cout << "C objective function called with N="<< *N << "\n";
   *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]);

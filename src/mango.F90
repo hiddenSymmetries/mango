@@ -85,18 +85,22 @@ module mango
   
 
   abstract interface
-  subroutine objective_function_interface(N_parameters, state_vector, f, failed)
+  subroutine objective_function_interface(N_parameters, state_vector, f, failed, this)
+    import
     integer, intent(in) :: N_parameters
     double precision, intent(in) :: state_vector(N_parameters)
     double precision, intent(out) :: f
     integer, intent(out) :: failed
+    type(mango_problem), value, intent(in) :: this
   end subroutine objective_function_interface
-  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed)
+  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this)
+    import
     integer, intent(in) :: N_parameters, N_terms
     double precision, intent(in) :: state_vector(N_parameters)
     !double precision, intent(in) :: state_vector(:)
     double precision, intent(out) :: f(N_terms)
     integer, intent(out) :: failed
+    type(mango_problem), value, intent(in) :: this
   end subroutine residual_function_interface
   end interface
 
@@ -133,17 +137,18 @@ contains
     end if
     state_vector_copy = state_vector
 
+    !this%object = C_mango_problem_create(int(N_parameters,C_int), real(state_vector,C_double), C_funloc(objective_function))
+    !this%object = C_mango_problem_create(int(N_parameters,C_int), c_loc(state_vector(1)), C_funloc(objective_function))
+    !this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector_copy(1), int(dummy,C_int), C_funloc(objective_function))
+    this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector(1), int(dummy,C_int), C_funloc(objective_function))
+
     ! For info on passing function pointers, see
     ! https://gcc.gnu.org/onlinedocs/gcc-4.6.1/gfortran/C_005fFUNLOC.html#C_005fFUNLOC
     !print *,"mango.F90 subroutine mango_problem_create: C_funloc(objective_function)=",C_funloc(objective_function)
     print *,"state_vector size in mango.F90:",size(state_vector_copy)
     print *,"state_vector in mango.F90:",state_vector_copy
-    call objective_function(2, x, f, failed_temp)
+    call objective_function(2, x, f, failed_temp, this)
     print *,"Done calling objective fn from mango.F90. f=",f
-    !this%object = C_mango_problem_create(int(N_parameters,C_int), real(state_vector,C_double), C_funloc(objective_function))
-    !this%object = C_mango_problem_create(int(N_parameters,C_int), c_loc(state_vector(1)), C_funloc(objective_function))
-    !this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector_copy(1), int(dummy,C_int), C_funloc(objective_function))
-    this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector(1), int(dummy,C_int), C_funloc(objective_function))
   end subroutine mango_problem_create
 
   subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, residual_function)

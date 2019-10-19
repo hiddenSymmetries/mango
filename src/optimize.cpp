@@ -83,6 +83,6 @@ void mango::problem::optimize() {
   double f;
   int failed;
   std::cout << "optimize.cpp: objective_function=" << (long int)objective_function << "\n";
-  objective_function(&N_parameters, state_vector, &f, &failed);
+  objective_function(&N_parameters, state_vector, &f, &failed, this);
   std::cout << "Value of objective function: " << f << "\n";
 }

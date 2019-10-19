@@ -148,7 +148,7 @@ for example in examples:
             input_filename = "input/mango_in."+example
             try:
                 with open(input_filename,'w') as f:
-                    f.write(str(N_worker_groups))
+                    f.write(str(N_worker_groups) + "\n")
                     f.write(algorithm)
             except:
                 print("Error writing input file examples/"+input_filename)

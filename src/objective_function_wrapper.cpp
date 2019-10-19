@@ -3,9 +3,10 @@
 #include "mango.hpp"
 
 void mango::problem::objective_function_wrapper(const double* x, double* f, bool* failed) {
-  function_evaluations++;
+  if (!least_squares) function_evaluations++;
+
   int failed_int;
-  objective_function(&N_parameters, x, f, &failed_int);
+  objective_function(&N_parameters, x, f, &failed_int, this);
   *failed = (failed_int != 0);
 
   if (!least_squares) {
