@@ -1,6 +1,7 @@
 ! N_procs, N_worker_groups:
 1,1
 ! algorithms:
+petsc_pounders
 petsc_nm
 nlopt_ln_bobyqa
 nlopt_ln_praxis

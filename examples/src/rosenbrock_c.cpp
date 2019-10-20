@@ -2,7 +2,7 @@
 #include<mpi.h>
 #include "mango.hpp"
 
-void objective_function(int*, const double*, double*, int*, mango::problem*);
+void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -24,8 +24,10 @@ int main(int argc, char *argv[]) {
   */
 
   double state_vector[2] = {0.0, 0.0};
+  double targets[2] = {1.0, 0.0};
+  double sigmas[2] = {1.0, 0.1};
 
-  mango::problem myprob(2, state_vector, &objective_function, argc, argv);
+  mango::problem myprob(2, state_vector, 2, targets, sigmas, &residual_function, argc, argv);
 
   //std::cout << "Here comes state vector:" << *(myprob.state_vector);
   /*
@@ -51,9 +53,11 @@ int main(int argc, char *argv[]) {
 }
 
 
-void objective_function(int* N, const double* x, double* f, int* failed, mango::problem* this_problem) {
+void residual_function(int* N_parameters, const double* x, int* N_terms, double* f, int* failed, mango::problem* this_problem) {
   int j;
-  std::cout << "C objective function called with N="<< *N << "\n";
-  *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]);
+  std::cout << "C residual function called with N="<< *N_parameters << "\n";
+  /*   *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]); */
+  f[0] = x[0];
+  f[1] = x[1] - x[0] * x[0];
   *failed = false;
 }

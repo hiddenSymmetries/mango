@@ -152,7 +152,7 @@ double mango::problem::nlopt_objective_function(unsigned n, const double* x, dou
   } else {
     /* Gradient is required. */
     if (this_problem->is_least_squares()) {
-      /* mango_finite_difference_Jacobian_to_gradient(problem, residual_function, x, f, grad) goes here. */
+      this_problem->finite_difference_Jacobian_to_gradient(x, &f, grad);
     } else {
       this_problem->finite_difference_gradient(x, &f, grad);
     }

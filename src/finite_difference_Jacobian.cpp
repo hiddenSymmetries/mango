@@ -5,14 +5,14 @@
 #include "mango.hpp"
 #include<cmath>
 
-void mango::problem::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
+void mango::problem::finite_difference_Jacobian(const double* state_vector, double* base_case_residual_function, double* Jacobian) {
 
   /* gradient should have been allocated already, with size N_parameters. */
 
   int data;
   int j_evaluation, j_parameter;
 
-  std::cout << "Hello from finite_difference_gradient from proc " << mpi_rank_world << "\n";
+  std::cout << "Hello from finite_difference_Jacobian from proc " << mpi_rank_world << "\n";
 
   if (proc0_world) {
     /* Tell the group leaders to start this subroutine  */
@@ -33,12 +33,12 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   }
 
   double* perturbed_state_vector = new double[N_parameters];
-  double* objective_functions = new double[N_evaluations];
+  double* residual_functions = new double[N_terms * N_evaluations];
   /*  double* state_vectors = new double[N_parameters,N_evaluations]; */
   double* state_vectors = new double[N_parameters * N_evaluations];
 
-  *base_case_objective_function = 0;
-  memset(objective_functions, 0, N_evaluations*sizeof(double));
+  memset(base_case_residual_function, 0, N_terms*sizeof(double));
+  memset(residual_functions, 0, N_terms * N_evaluations*sizeof(double));
 
   /*
   std::cout << "Here comes state_vector in 1D when it should be 0: ";
@@ -82,49 +82,53 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     }
   }
 
-  /* Each proc now evaluates the objective function for its share of the perturbed state vectors. */
-  double f;
+  /* Each proc now evaluates the residual function for its share of the perturbed state vectors. */
   int failed_int;
   for(j_evaluation=0; j_evaluation < N_evaluations; j_evaluation++) {
     if ((j_evaluation % N_worker_groups) == mpi_rank_group_leaders) {
-      objective_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &f, &failed_int, this);
-      objective_functions[j_evaluation] = f;
+      /* Note that the use of &residual_functions[j_evaluation*N_terms] in the next line means that j_terms must be the least-signficiant dimension in residual_functions. */
+      residual_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &N_terms, &residual_functions[j_evaluation*N_terms], &failed_int, this);
     }
   }
 
   /* Send results back to the world master.
-     Make sure not to reduce over MPI_COMM_WORLD, since then the objective function values will be multiplied by # of workers per worker group.
+     Make sure not to reduce over MPI_COMM_WORLD, since then the residual function values will be multiplied by # of workers per worker group.
   */
   if (proc0_world) {
-    MPI_Reduce(MPI_IN_PLACE, objective_functions, N_evaluations, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
+    MPI_Reduce(MPI_IN_PLACE, residual_functions, N_evaluations * N_terms, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
   } else {
-    MPI_Reduce(objective_functions, objective_functions, N_evaluations, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
+    MPI_Reduce(residual_functions, residual_functions, N_evaluations * N_terms, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
   }
 
   /* Record the results in order in the output file. */
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
       function_evaluations += 1;
-      write_file_line(&state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation]);
+      write_least_squares_file_line(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms]);
     }
   }
   
   /* Finally, evaluate the finite difference derivatives. */
-  *base_case_objective_function = objective_functions[0];
+  memcpy(base_case_residual_function, residual_functions, N_terms*sizeof(double));
   if (centered_differences) {
     for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {
-      gradient[j_parameter] = (objective_functions[j_parameter+1] - objective_functions[j_parameter+1+N_parameters]) / (2 * finite_difference_step_size);
+      for (int j_term=0; j_term<N_terms; j_term++) {
+	Jacobian[j_parameter*N_terms+j_term] = (residual_functions[(j_parameter+1)*N_terms+j_term] - residual_functions[(j_parameter+1+N_parameters)*N_terms+j_term])
+	  / (2 * finite_difference_step_size);
+      }
     }
   } else {
     /* 1-sided finite differences */
     for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {
-      gradient[j_parameter] = (objective_functions[j_parameter+1] - *base_case_objective_function) / finite_difference_step_size;
+      for (int j_term=0; j_term<N_terms; j_term++) {
+	Jacobian[j_parameter*N_terms+j_term] = (residual_functions[(j_parameter+1)*N_terms+j_term] - base_case_residual_function[j_term]) / finite_difference_step_size;
+      }
     }
   }
 
   /* Clean up. */
   delete[] perturbed_state_vector;
-  delete[] objective_functions;
+  delete[] residual_functions;
   delete[] state_vectors;
 
 }

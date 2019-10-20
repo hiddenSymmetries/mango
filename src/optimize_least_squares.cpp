@@ -103,7 +103,7 @@ void mango::problem::optimize_least_squares() {
 */
 
 void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem) {
-  /* Note that this function is static, so we must use this_problem rather than this. */
+  /* Note that this function is static, so "this" does not exist, and hence we must use "this_problem" instead. */
 
   int N_terms = this_problem->get_N_terms();
 

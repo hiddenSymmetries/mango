@@ -1,5 +1,3 @@
-#define N_dim 2
-
 program rosenbrock
 
   use mango
@@ -13,7 +11,9 @@ program rosenbrock
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
-  double precision, dimension(N_dim) :: state_vector = (/ 0.0d+0, 0.0d+0 /)
+  double precision, dimension(2) :: state_vector = (/ 0.0d+0, 0.0d+0 /)
+  double precision, dimension(2) :: targets      = (/ 1.0d+0, 0.0d+0 /)
+  double precision, dimension(2) :: sigmas       = (/ 1.0d+0, 0.1d+0 /)
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: dummy = 13
@@ -24,7 +24,8 @@ program rosenbrock
   !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
 
-  call mango_problem_create(problem,N_dim,state_vector,dummy,objective_function)
+  !call mango_problem_create(problem,2,state_vector,dummy,objective_function)
+  call mango_problem_create_least_squares(problem, 2, state_vector, 2, targets, sigmas, residual_function)
   print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
@@ -63,21 +64,22 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f, failed, problem)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   use iso_c_binding
   implicit none
-  integer(C_int), intent(in) :: N
-  real(C_double), intent(in) :: x(N)
-  real(C_double), intent(out) :: f
+  integer(C_int), intent(in) :: N_parameters
+  real(C_double), intent(in) :: x(N_parameters)
+  integer(C_int), intent(in) :: N_terms
+  real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
 
-  print *,"Hi from fortran. N=",N," size(x)=",size(x)
-  !f = sum((x-2)*(x-2))
-  !print *,"In fortran, x=",x,", f=",f
-  f = (x(1) - 1) * (x(1) - 1) + 100 * (x(2) - x(1)*x(1)) * (x(2) - x(1)*x(1))
+  print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
+  !f = (x(1) - 1) * (x(1) - 1) + 100 * (x(2) - x(1)*x(1)) * (x(2) - x(1)*x(1))
+  f(1) = x(1)
+  f(2) = x(2) - x(1) * x(1)
   failed = 0
 
-end subroutine objective_function
+end subroutine residual_function
 
 end program rosenbrock

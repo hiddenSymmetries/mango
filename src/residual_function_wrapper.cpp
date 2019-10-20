@@ -32,7 +32,7 @@ void mango::problem::write_least_squares_file_line(const double* x, double* resi
   /* Combine the residuals into the total objective function. */
   total_objective_function = 0;
   for (j=0; j<N_terms; j++) {
-    temp = (x[j] - targets[j]) / sigmas[j];
+    temp = (residuals[j] - targets[j]) / sigmas[j];
     total_objective_function += temp*temp;
   }
 
