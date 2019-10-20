@@ -1,4 +1,0 @@
-&mango_in
-  N_worker_groups = 2
-  algorithm = "foo"
-/

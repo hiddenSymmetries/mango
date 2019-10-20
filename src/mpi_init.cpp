@@ -2,7 +2,7 @@
 #include<mpi.h>
 #include "mango.hpp"
 
-#define bold_line "*******************************************************************************\n"
+#define bold_line "****************************************************************************************\n"
 
 void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
   int ierr;
@@ -19,7 +19,7 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
   ierr = MPI_Comm_rank(mpi_comm_world, &mpi_rank_world);
   proc0_world = (mpi_rank_world == 0);
 
-  std::cout << "N_worker_groups:" << N_worker_groups;
+  if (proc0_world) std::cout << "Number of worker groups, before validation: " << N_worker_groups << "\n";
 
   /* Make sure all procs agree on certain variables that will be used here. */
   MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_world);
@@ -31,8 +31,6 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
   /* Negative or 0 value for N_worker_groups on input means treat each proc as a worker group */
   if (N_worker_groups < 1) N_worker_groups = N_procs_world;
 
-  std::cout << "N_procs=" << N_procs_world << ", mpi_rank=" << mpi_rank_world << "\n";
-
   if (algorithm < 0) {
     std::cout << "\nAlgorithm cannot be negative.\n";
     exit(1);
@@ -42,13 +40,13 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
     exit(1);
   }
 
-  std::cout << "Algorithm chosen: " << algorithm_name << "\n";
-  if (algorithm_uses_derivatives) {
+  if (proc0_world) std::cout << "Algorithm chosen: " << algorithm_name << "\n";
+  if (algorithm_uses_derivatives) { /* May want to change this, since HOPSPACK does not use derivatives but it does exploit concurrent function evaluations. */
     if (N_procs_world > 1 && N_worker_groups == 1 && proc0_world) {
       std::cout << bold_line;
       std::cout << bold_line;
-      std::cout << "WARNING!!! You have chosen an algorithm that can exploit concurrent function evaluations";
-      std::cout << "but you have set N_worker_groups=1. You probably want a larger value.";
+      std::cout << "WARNING!!! You have chosen an algorithm that can exploit concurrent function evaluations\n";
+      std::cout << "but you have set N_worker_groups=1. You probably want a larger value.\n";
       std::cout << bold_line;
       std::cout << bold_line;
     }
@@ -57,7 +55,7 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
     N_worker_groups = 1;
   }
 
-  if (proc0_world) std::cout << "Number of worker groups: " << N_worker_groups << "\n";
+  if (proc0_world) std::cout << "Number of worker groups, after validation: " << N_worker_groups << "\n";
 
   worker_group = (mpi_rank_world * N_worker_groups) / N_procs_world; /* Note integer division, so there is an implied floor() */
 

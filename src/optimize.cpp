@@ -10,18 +10,20 @@ void mango::problem::optimize() {
 
   /* Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders: */
   MPI_Bcast(&N_parameters, 1, MPI_INT, 0, mpi_comm_group_leaders);
+  MPI_Bcast(&N_terms, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&centered_differences, 1, MPI_C_BOOL, 0, mpi_comm_group_leaders);
   MPI_Bcast(&finite_difference_step_size, 1, MPI_DOUBLE, 0, mpi_comm_group_leaders);
   MPI_Bcast(&least_squares, 1, MPI_C_BOOL, 0, mpi_comm_group_leaders);
-  /* Make sure all procs agree on certain variables that will be used here. */
-  MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_world);
-  MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_world);
-  get_algorithm_properties(); /* Now that all procs agree on algorithm, all procs will get the correct algorithm properties. */
+  MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_group_leaders);
+  MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_group_leaders);
+  get_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
 
   if (least_squares) {
     optimize_least_squares();
     return;
   }
+
+  std::cout << "Proc " << mpi_rank_world << " is entering optimize(), and thinks proc0_world=" << proc0_world << "\n";
 
   if (!proc0_world) {
     group_leaders_loop();

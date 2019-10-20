@@ -8,6 +8,8 @@ void mango::problem::group_leaders_loop() {
   int data;
   double dummy;
 
+  std::cout << "Proc " << mpi_rank_world << " in entering group_leaders_loop.\n";
+
   bool keep_going = true;
   while (keep_going) {
     /* Wait for proc 0 to send us a message. */

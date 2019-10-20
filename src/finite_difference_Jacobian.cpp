@@ -7,7 +7,8 @@
 
 void mango::problem::finite_difference_Jacobian(const double* state_vector, double* base_case_residual_function, double* Jacobian) {
 
-  /* gradient should have been allocated already, with size N_parameters. */
+  /* base_case_residual_function should have been allocated already, with size N_terms. */
+  /* Jacobian should have been allocated already, with size N_parameters * N_terms. */
 
   int data;
   int j_evaluation, j_parameter;
@@ -20,10 +21,12 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
     MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
   }
 
-  /* Only proc0_world has a meaningful state vector at this point. */
-  MPI_Bcast(&state_vector, N_parameters, MPI_DOUBLE, 0, mpi_comm_group_leaders);
-
-  std::cout << "centered_differences:" << centered_differences << "\n";
+  /* Only proc0_world has a meaningful state vector at this point.
+     Copy it to the other processors. In the process we make a copy of the state vector,
+     so the original state vector can be const. */
+  double* state_vector_copy = new double[N_parameters];
+  if (proc0_world) memcpy(state_vector_copy, state_vector, N_parameters*sizeof(double));
+  MPI_Bcast(state_vector_copy, N_parameters, MPI_DOUBLE, 0, mpi_comm_group_leaders);
 
   int N_evaluations;
   if (centered_differences) {
@@ -50,7 +53,7 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
 
   /* Build the set of state vectors that will be considered. */
   for (j_evaluation = 1; j_evaluation <= N_evaluations; j_evaluation++) {
-    memcpy(perturbed_state_vector, state_vector, N_parameters*sizeof(double));
+    memcpy(perturbed_state_vector, state_vector_copy, N_parameters*sizeof(double));
     if (j_evaluation == 1) {
       /* This is the base case, so do not perturb the state vector. */
     } else if (j_evaluation <= N_parameters + 1) {
@@ -130,5 +133,6 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   delete[] perturbed_state_vector;
   delete[] residual_functions;
   delete[] state_vectors;
+  delete[] state_vector_copy;
 
 }

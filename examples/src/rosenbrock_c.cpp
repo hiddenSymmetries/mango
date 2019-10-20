@@ -1,8 +1,11 @@
 #include<iostream>
+#include<iomanip>
 #include<mpi.h>
 #include "mango.hpp"
 
 void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
+
+void worker(mango::problem*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -15,37 +18,30 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  /*  int N_procs, mpi_rank;
-  MPI_Comm_size(MPI_COMM_WORLD, &N_procs);
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  std::cout << "N_procs=" << N_procs << "mpi_rank=" << mpi_rank;
-
-  std::cout << MANGO_PETSC_NM << "\nHello world!\n";
-  */
-
   double state_vector[2] = {0.0, 0.0};
   double targets[2] = {1.0, 0.0};
   double sigmas[2] = {1.0, 0.1};
 
   mango::problem myprob(2, state_vector, 2, targets, sigmas, &residual_function, argc, argv);
 
-  //std::cout << "Here comes state vector:" << *(myprob.state_vector);
-  /*
-  myprob.state_vector[0] =  5.0;
-  myprob.state_vector[1] = 10.0;
-  myprob.state_vector[2] = 15.0;
-  myprob.state_vector[3] = 20.0;
-  */
 
   /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
-  //  myprob.set_algorithm(mango::NLOPT_LD_LBFGS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
   myprob.read_input_file("../input/mango_in.rosenbrock_c");
   myprob.output_filename = "../output/mango_out.rosenbrock_c";
   myprob.mpi_init(MPI_COMM_WORLD);
   /* myprob.centered_differences = true; */
 
-  myprob.optimize();
+  if (myprob.is_proc0_worker_groups()) {
+    myprob.optimize();
+    /* Make workers stop */
+
+    int data[1];
+    data[0] = -1;
+    MPI_Bcast(data, 1, MPI_INT, 0, myprob.get_mpi_comm_worker_groups());
+  } else {
+    worker(&myprob);
+  }
 
   MPI_Finalize();
 
@@ -60,4 +56,21 @@ void residual_function(int* N_parameters, const double* x, int* N_terms, double*
   f[0] = x[0];
   f[1] = x[1] - x[0] * x[0];
   *failed = false;
+}
+
+
+void worker(mango::problem* myprob) {
+  bool keep_going = true;
+  int data[1];
+
+  while (keep_going) {
+    MPI_Bcast(data, 1, MPI_INT, 0, myprob->get_mpi_comm_worker_groups());
+    if (data[0] < 0) {
+      std::cout << "Proc " << std::setw(5) << myprob->get_mpi_rank_world() << " is exiting.\n";
+      keep_going = false;
+    } else {
+      std::cout<< "Proc " << std::setw(5) << myprob->get_mpi_rank_world() << " is doing calculation " << data[0] << "\n";
+      /* For this problem, the workers don't actually do any work. */
+    }
+  }
 }

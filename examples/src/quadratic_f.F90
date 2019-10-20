@@ -21,7 +21,6 @@ program quadratic
   !---------------------------------------------
 
   print *,"Hello world from quadratic_f"
-  !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
 
   state_vector = 0
@@ -56,17 +55,6 @@ program quadratic
 
 contains
 
-!subroutine objective_function(N, x, f)
-!  implicit none
-!  integer, intent(in) :: N
-!  double precision, intent(in) :: x(N)
-!  double precision, intent(out) :: f
-!
-!  print *,"Hi from fortran. N=",N," size(x)=",size(x)
-!  f = sum((x-2)*(x-2))
-!  print *,"In fortran, x=",x,", f=",f
-!
-!end subroutine objective_function
 
 subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   use iso_c_binding

@@ -125,6 +125,18 @@ namespace mango {
     bool is_least_squares();
     int get_N_parameters();
     int get_N_terms();
+    MPI_Comm get_mpi_comm_world();
+    MPI_Comm get_mpi_comm_worker_groups();
+    MPI_Comm get_mpi_comm_group_leaders();
+    bool is_proc0_world();
+    bool is_proc0_worker_groups();
+    int get_mpi_rank_world();
+    int get_mpi_rank_worker_groups();
+    int get_mpi_rank_group_leaders();
+    int get_N_procs_world();
+    int get_N_procs_worker_groups();
+    int get_N_procs_group_leaders();
+    int get_worker_group();
   };
 }
 

@@ -12,7 +12,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   int data;
   int j_evaluation, j_parameter;
 
-  std::cout << "Hello from finite_difference_gradient from proc " << mpi_rank_world << "\n";
+  std::cout << "Hello from finite_difference_gradient from proc " << mpi_rank_world << "\n" << std::flush;
 
   if (proc0_world) {
     /* Tell the group leaders to start this subroutine  */
@@ -20,10 +20,11 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
   }
 
-  /* Only proc0_world has a meaningful state vector at this point. */
-  MPI_Bcast(&state_vector, N_parameters, MPI_DOUBLE, 0, mpi_comm_group_leaders);
-
-  std::cout << "centered_differences:" << centered_differences << "\n";
+  /* Only proc0_world has a meaningful state vector at this point. 
+     Copy it to the other processors. */
+  double* state_vector_copy = new double[N_parameters];
+  if (proc0_world) memcpy(state_vector_copy, state_vector, N_parameters*sizeof(double));
+  MPI_Bcast(state_vector_copy, N_parameters, MPI_DOUBLE, 0, mpi_comm_group_leaders);
 
   int N_evaluations;
   if (centered_differences) {
@@ -50,7 +51,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
 
   /* Build the set of state vectors that will be considered. */
   for (j_evaluation = 1; j_evaluation <= N_evaluations; j_evaluation++) {
-    memcpy(perturbed_state_vector, state_vector, N_parameters*sizeof(double));
+    memcpy(perturbed_state_vector, state_vector_copy, N_parameters*sizeof(double));
     if (j_evaluation == 1) {
       /* This is the base case, so do not perturb the state vector. */
     } else if (j_evaluation <= N_parameters + 1) {
@@ -122,9 +123,17 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     }
   }
 
+  if (proc0_world) {
+    std::cout << "Here comes the finite-difference gradient: ";
+    for(j_parameter=0; j_parameter<N_parameters; j_parameter++) {
+      std::cout << std::setw(25) << std::setprecision(15) << gradient[j_parameter];
+      }
+    std::cout << "\n";
+  }
+
   /* Clean up. */
   delete[] perturbed_state_vector;
   delete[] objective_functions;
   delete[] state_vectors;
-
+  delete[] state_vector_copy;
 }

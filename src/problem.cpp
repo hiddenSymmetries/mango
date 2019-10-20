@@ -8,9 +8,9 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_
   argc = argc_in;
   argv = argv_in;
   N_parameters = N_parameters_in;
+  N_terms = -1;
   objective_function = objective_function_in;
   residual_function = NULL;
-  std::cout << "problem.cpp: objective_function=" << (long int)objective_function << "\n";
   least_squares = false;
   state_vector = state_vector_in;
   targets = NULL;
@@ -35,13 +35,6 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
 /* Destructor */
 mango::problem::~problem() {
   std::cout << "Mango problem is being destroyed.\n";
-  /*
-  delete state_vector;
-  if (least_squares) {
-    delete targets;
-    delete sigmas;
-  }
-  */
 }
 
 void mango::problem::defaults() {
@@ -68,3 +61,52 @@ int mango::problem::get_N_parameters() {
 int mango::problem::get_N_terms() {
   return N_terms;
 }
+
+MPI_Comm mango::problem::get_mpi_comm_world() {
+  return mpi_comm_world;
+}
+
+MPI_Comm mango::problem::get_mpi_comm_worker_groups() {
+  return mpi_comm_worker_groups;
+}
+
+MPI_Comm mango::problem::get_mpi_comm_group_leaders() {
+  return mpi_comm_group_leaders;
+}
+
+bool mango::problem::is_proc0_world() {
+  return proc0_world;
+}
+
+bool mango::problem::is_proc0_worker_groups() {
+  return proc0_worker_groups;
+}
+
+int mango::problem::get_mpi_rank_world() {
+  return mpi_rank_world;
+}
+
+int mango::problem::get_mpi_rank_worker_groups() {
+  return mpi_rank_worker_groups;
+}
+
+int mango::problem::get_mpi_rank_group_leaders() {
+  return mpi_rank_group_leaders;
+}
+
+int mango::problem::get_N_procs_world() {
+  return N_procs_world;
+}
+
+int mango::problem::get_N_procs_worker_groups() {
+  return N_procs_worker_groups;
+}
+
+int mango::problem::get_N_procs_group_leaders() {
+  return N_procs_group_leaders;
+}
+
+int mango::problem::get_worker_group() {
+  return worker_group;
+}
+
