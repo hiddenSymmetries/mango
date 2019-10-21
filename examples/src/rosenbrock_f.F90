@@ -21,7 +21,6 @@ program rosenbrock
   !---------------------------------------------
 
   print *,"Hello world from rosenbrock_f"
-  !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
 
   !call mango_problem_create(problem,2,state_vector,dummy,objective_function)
@@ -33,16 +32,16 @@ program rosenbrock
   call mango_set_output_filename(problem, "../output/mango_out.rosenbrock_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
 
-!  if (mango_proc0_worker_groups(problem)) then
+  if (mango_is_proc0_worker_groups(problem)) then
      call mango_optimize(problem)
 
-!     ! Make workers stop
-!     data = -1
-!     call mpi_bcast(data,1,MPI_INTEGER,0,mango_mpi_comm_worker_groups(problem),ierr)
-!     if (ierr .ne. 0) print *,"Error A on proc0!"
-!  else
-!     call worker(problem)
-!  end if
+     ! Make workers stop
+     data = -1
+     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
+     if (ierr .ne. 0) print *,"Error A on proc0!"
+  else
+     call worker(problem)
+  end if
 
   call mango_problem_destroy(problem)
 
@@ -83,3 +82,29 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
 end subroutine residual_function
 
 end program rosenbrock
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+subroutine worker(problem)
+
+  use mango
+
+  implicit none
+
+  include 'mpif.h'
+
+  type(mango_problem) :: problem
+  integer :: ierr, data(1)
+
+  do
+     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
+     if (data(1) < 0) then
+        print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
+        exit
+     else
+        print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
+     end if
+  end do
+
+end subroutine worker

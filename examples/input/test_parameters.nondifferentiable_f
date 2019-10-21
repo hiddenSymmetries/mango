@@ -1,5 +1,11 @@
 ! N_procs, N_worker_groups:
 1,1
+2,1
+2,2
+5,1
+5,2
+5,3
+5,5
 ! algorithms:
 foo
 petsc_nm

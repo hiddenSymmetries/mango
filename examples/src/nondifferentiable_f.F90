@@ -32,17 +32,18 @@ program nondifferentiable
   call mango_read_input_file(problem, "../input/mango_in.nondifferentiable_f")
   call mango_set_output_filename(problem, "../output/mango_out.nondifferentiable_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
+  call mango_set_centered_differences(problem, .true.)
 
-!  if (mango_proc0_worker_groups(problem)) then
+  if (mango_is_proc0_worker_groups(problem)) then
      call mango_optimize(problem)
 
-!     ! Make workers stop
-!     data = -1
-!     call mpi_bcast(data,1,MPI_INTEGER,0,mango_mpi_comm_worker_groups(problem),ierr)
-!     if (ierr .ne. 0) print *,"Error A on proc0!"
-!  else
-!     call worker(problem)
-!  end if
+     ! Make workers stop
+     data = -1
+     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
+     if (ierr .ne. 0) print *,"Error A on proc0!"
+  else
+     call worker(problem)
+  end if
 
   call mango_problem_destroy(problem)
 
@@ -75,8 +76,6 @@ subroutine objective_function(N, x, f, failed, problem)
   integer :: j
 
   print *,"Hi from fortran. N=",N," size(x)=",size(x)
-  !f = sum((x-2)*(x-2))
-  !print *,"In fortran, x=",x,", f=",f
 
   f = 0
   do j = 1, N
@@ -88,3 +87,29 @@ subroutine objective_function(N, x, f, failed, problem)
 end subroutine objective_function
 
 end program nondifferentiable
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+subroutine worker(problem)
+
+  use mango
+
+  implicit none
+
+  include 'mpif.h'
+
+  type(mango_problem) :: problem
+  integer :: ierr, data(1)
+
+  do
+     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
+     if (data(1) < 0) then
+        print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
+        exit
+     else
+        print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
+     end if
+  end do
+
+end subroutine worker

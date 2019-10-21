@@ -1,12 +1,11 @@
 module mango
 
-#define mango_interface_string_length 128
+#define mango_interface_string_length 256
 
   ! Modeled after
   ! https://modelingguru.nasa.gov/docs/DOC-2642
   ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objects
 
-  !use, intrinsic :: ISO_C_Binding, only: C_int, C_ptr, C_NULL_ptr, C_double
   use, intrinsic :: ISO_C_Binding
   implicit none
   private
@@ -76,12 +75,77 @@ module mango
        import
        type(C_ptr), value :: this
      end subroutine C_mango_optimize
+     function C_mango_get_mpi_rank_world(this) result(mpi_rank) bind(C,name="mango_get_mpi_rank_world")
+       import
+       integer(C_int) :: mpi_rank
+       type(C_ptr), value :: this
+     end function C_mango_get_mpi_rank_world
+     function C_mango_get_mpi_rank_worker_groups(this) result(mpi_rank) bind(C,name="mango_get_mpi_rank_worker_groups")
+       import
+       integer(C_int) :: mpi_rank
+       type(C_ptr), value :: this
+     end function C_mango_get_mpi_rank_worker_groups
+     function C_mango_get_mpi_rank_group_leaders(this) result(mpi_rank) bind(C,name="mango_get_mpi_rank_group_leaders")
+       import
+       integer(C_int) :: mpi_rank
+       type(C_ptr), value :: this
+     end function C_mango_get_mpi_rank_group_leaders
+     function C_mango_get_N_procs_world(this) result(N_procs) bind(C,name="mango_get_N_procs_world")
+       import
+       integer(C_int) :: N_procs
+       type(C_ptr), value :: this
+     end function C_mango_get_N_procs_world
+     function C_mango_get_N_procs_worker_groups(this) result(N_procs) bind(C,name="mango_get_N_procs_worker_groups")
+       import
+       integer(C_int) :: N_procs
+       type(C_ptr), value :: this
+     end function C_mango_get_N_procs_worker_groups
+     function C_mango_get_N_procs_group_leaders(this) result(N_procs) bind(C,name="mango_get_N_procs_group_leaders")
+       import
+       integer(C_int) :: N_procs
+       type(C_ptr), value :: this
+     end function C_mango_get_N_procs_group_leaders
+     function C_mango_is_proc0_world(this) result(proc0) bind(C,name="mango_is_proc0_world")
+       import
+       integer(C_int) :: proc0
+       type(C_ptr), value :: this
+     end function C_mango_is_proc0_world
+     function C_mango_is_proc0_worker_groups(this) result(proc0) bind(C,name="mango_is_proc0_worker_groups")
+       import
+       integer(C_int) :: proc0
+       type(C_ptr), value :: this
+     end function C_mango_is_proc0_worker_groups
+     function C_mango_get_mpi_comm_world(this) result(comm) bind(C,name="mango_get_mpi_comm_world")
+       import
+       integer(C_int) :: comm
+       type(C_ptr), value :: this
+     end function C_mango_get_mpi_comm_world
+     function C_mango_get_mpi_comm_worker_groups(this) result(comm) bind(C,name="mango_get_mpi_comm_worker_groups")
+       import
+       integer(C_int) :: comm
+       type(C_ptr), value :: this
+     end function C_mango_get_mpi_comm_worker_groups
+     function C_mango_get_mpi_comm_group_leaders(this) result(comm) bind(C,name="mango_get_mpi_comm_group_leaders")
+       import
+       integer(C_int) :: comm
+       type(C_ptr), value :: this
+     end function C_mango_get_mpi_comm_group_leaders
+     subroutine C_mango_set_centered_differences(this, centered_differences_int) bind(C,name="mango_set_centered_differences")
+       import
+       type(C_ptr), value :: this
+       integer(C_int) :: centered_differences_int
+     end subroutine C_mango_set_centered_differences
   end interface
 
   public :: mango_problem
   public :: mango_problem_create, mango_problem_create_least_squares, mango_problem_destroy, &
        mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
-       mango_mpi_init, mango_optimize
+       mango_mpi_init, mango_optimize, &
+       mango_get_mpi_rank_world, mango_get_mpi_rank_worker_groups, mango_get_mpi_rank_group_leaders, &
+       mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
+       mango_is_proc0_world, mango_is_proc0_worker_groups, &
+       mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
+       mango_set_centered_differences
   
 
   abstract interface
@@ -223,5 +287,85 @@ contains
     type(mango_problem), intent(in) :: this
     call C_mango_optimize(this%object)
   end subroutine mango_optimize
+
+  integer function mango_get_mpi_rank_world(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_mpi_rank_world = C_mango_get_mpi_rank_world(this%object)
+  end function mango_get_mpi_rank_world
+
+  integer function mango_get_mpi_rank_worker_groups(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_mpi_rank_worker_groups = C_mango_get_mpi_rank_worker_groups(this%object)
+  end function mango_get_mpi_rank_worker_groups
+
+  integer function mango_get_mpi_rank_group_leaders(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_mpi_rank_group_leaders = C_mango_get_mpi_rank_group_leaders(this%object)
+  end function mango_get_mpi_rank_group_leaders
+
+  integer function mango_get_N_procs_world(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_procs_world = C_mango_get_N_procs_world(this%object)
+  end function mango_get_N_procs_world
+
+  integer function mango_get_N_procs_worker_groups(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_procs_worker_groups = C_mango_get_N_procs_worker_groups(this%object)
+  end function mango_get_N_procs_worker_groups
+
+  integer function mango_get_N_procs_group_leaders(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_procs_group_leaders = C_mango_get_N_procs_group_leaders(this%object)
+  end function mango_get_N_procs_group_leaders
+
+  logical function mango_is_proc0_world(this)
+    type(mango_problem), intent(in) :: this
+    integer :: result
+    result = C_mango_is_proc0_world(this%object)
+    if (result == 0) then
+       mango_is_proc0_world = .false.
+    elseif (result == 1) then
+       mango_is_proc0_world = .true.
+    else
+       stop "Error in mango_is_proc0_world"
+    end if
+  end function mango_is_proc0_world
+
+  logical function mango_is_proc0_worker_groups(this)
+    type(mango_problem), intent(in) :: this
+    integer :: result
+    result = C_mango_is_proc0_worker_groups(this%object)
+    if (result == 0) then
+       mango_is_proc0_worker_groups = .false.
+    elseif (result == 1) then
+       mango_is_proc0_worker_groups = .true.
+    else
+       stop "Error in mango_is_proc0_worker_groups"
+    end if
+  end function mango_is_proc0_worker_groups
+
+  integer function mango_get_mpi_comm_world(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_mpi_comm_world = C_mango_get_mpi_comm_world(this%object)
+  end function mango_get_mpi_comm_world
+
+  integer function mango_get_mpi_comm_worker_groups(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_mpi_comm_worker_groups = C_mango_get_mpi_comm_worker_groups(this%object)
+  end function mango_get_mpi_comm_worker_groups
+
+  integer function mango_get_mpi_comm_group_leaders(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_mpi_comm_group_leaders = C_mango_get_mpi_comm_group_leaders(this%object)
+  end function mango_get_mpi_comm_group_leaders
+
+  subroutine mango_set_centered_differences(this, centered_differences)
+    type(mango_problem), intent(in) :: this
+    logical, intent(in) :: centered_differences
+    integer(C_int) :: logical_to_int
+    logical_to_int = 0
+    if (centered_differences) logical_to_int = 1
+    call C_mango_set_centered_differences(this%object, logical_to_int)
+  end subroutine mango_set_centered_differences
 
 end module mango

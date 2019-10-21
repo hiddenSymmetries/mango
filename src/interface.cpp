@@ -1,7 +1,7 @@
 #include<iostream>
 #include "mango.hpp"
 
-#define mango_interface_string_length 128
+#define mango_interface_string_length 256
 
 /* 
 C interfaces to C++ subroutines 
@@ -68,4 +68,60 @@ extern "C" {
   void mango_optimize(mango::problem *This) {
     This->optimize();
   }
+
+  int mango_get_mpi_rank_world(mango::problem *This) {
+    return This->get_mpi_rank_world();
+  }
+
+  int mango_get_mpi_rank_worker_groups(mango::problem *This) {
+    return This->get_mpi_rank_worker_groups();
+  }
+
+  int mango_get_mpi_rank_group_leaders(mango::problem *This) {
+    return This->get_mpi_rank_group_leaders();
+  }
+
+  int mango_get_N_procs_world(mango::problem *This) {
+    return This->get_N_procs_world();
+  }
+
+  int mango_get_N_procs_worker_groups(mango::problem *This) {
+    return This->get_N_procs_worker_groups();
+  }
+
+  int mango_get_N_procs_group_leaders(mango::problem *This) {
+    return This->get_N_procs_group_leaders();
+  }
+
+  int mango_is_proc0_world(mango::problem *This) {
+    return This->is_proc0_world() ? 1 : 0;
+  }
+
+  int mango_is_proc0_worker_groups(mango::problem *This) {
+    return This->is_proc0_worker_groups() ? 1 : 0;
+  }
+
+  int mango_get_mpi_comm_world(mango::problem *This) {
+    return (int) This->get_mpi_comm_world();
+  }
+
+  int mango_get_mpi_comm_worker_groups(mango::problem *This) {
+    return (int) This->get_mpi_comm_worker_groups();
+  }
+
+  int mango_get_mpi_comm_group_leaders(mango::problem *This) {
+    return (int) This->get_mpi_comm_group_leaders();
+  }
+
+  void mango_set_centered_differences(mango::problem *This, int* centered_differences_int) {
+    if (*centered_differences_int==1) {
+      This->centered_differences = true;
+    } else if (*centered_differences_int==0) {
+      This->centered_differences = false;
+    } else {
+      std::cout << "Error in interface.cpp mango_set_centered_differences: centered_difference_int = " << centered_differences_int << "\n";
+      exit(1);
+    }
+  }
+
 }
