@@ -36,11 +36,6 @@ program rosenbrock
   if (mango_is_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
 
-     print *,"Best state vector:",state_vector
-     print *,"Best objective function: ",best_objective_function
-     print *,"Best residual function: ",best_residual_function
-     print *,"Best function evaluation was ",mango_get_best_function_evaluation(problem)
-
      ! Make workers stop
      data = -1
      call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
@@ -49,7 +44,14 @@ program rosenbrock
      call worker(problem)
   end if
 
-  call mango_problem_destroy(problem)
+  if (mango_is_proc0_world(problem)) then
+     print *,"Best state vector:",state_vector
+     print *,"Best objective function: ",best_objective_function
+     print *,"Best residual function: ",best_residual_function
+     print *,"Best function evaluation was ",mango_get_best_function_evaluation(problem)
+  end if
+
+  call  mango_problem_destroy(problem)
 
   call mpi_finalize(ierr)
 

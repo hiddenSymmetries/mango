@@ -40,14 +40,9 @@ int main(int argc, char *argv[]) {
   myprob.centered_differences = true; 
   myprob.max_function_evaluations = 2000;
 
+  double best_objective_function;
   if (myprob.is_proc0_worker_groups()) {
-    double best_objective_function = myprob.optimize();
-
-    std::cout << "Best state vector: " << std::setprecision(16);
-    for (int j=0; j<N_dims; j++) std::cout << state_vector[j] << "  ";
-    std::cout << "\nBest objective function: " << best_objective_function << "\nBest residual vector:";
-    for (int j=0; j<N_dims; j++) std::cout << best_residual_function[j] << "  ";
-    std::cout << "\nBest function evaluation was " << myprob.get_best_function_evaluation() << "\n";
+    best_objective_function = myprob.optimize();
 
     /* Make workers stop */
     int data[1];
@@ -55,6 +50,14 @@ int main(int argc, char *argv[]) {
     MPI_Bcast(data, 1, MPI_INT, 0, myprob.get_mpi_comm_worker_groups());
   } else {
     worker(&myprob);
+  }
+
+  if (myprob.is_proc0_world()) {
+    std::cout << "Best state vector: " << std::setprecision(16);
+    for (int j=0; j<N_dims; j++) std::cout << state_vector[j] << "  ";
+    std::cout << "\nBest objective function: " << best_objective_function << "\nBest residual vector:";
+    for (int j=0; j<N_dims; j++) std::cout << best_residual_function[j] << "  ";
+    std::cout << "\nBest function evaluation was " << myprob.get_best_function_evaluation() << "\n";
   }
 
   MPI_Finalize();

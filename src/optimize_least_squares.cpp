@@ -9,6 +9,7 @@ void mango::problem::optimize_least_squares() {
 
   if (!proc0_world) {
     group_leaders_least_squares_loop();
+    return;
   }
   /* Only proc0_world continues past this point. */
 

@@ -4,8 +4,6 @@
 *.MOD
 *#
 examples/bin/*
-examples/obj/*.co
-examples/obj/*.fo
 lib/*
 mango_out.*
 examples/output/summary*
