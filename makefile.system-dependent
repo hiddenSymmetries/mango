@@ -28,17 +28,22 @@ else ifeq ($(HOSTNAME),cori)
 	# For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
 	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
 
-else ifeq ($(HOSTNAME),pppl)
-	NETCDF_F = /usr/pppl/gcc/6.1-pkgs/netcdf-fortran-4.4.4
-	NETCDF_C = /usr/pppl/gcc/6.1-pkgs/netcdf-c-4.4.1
-	FC = mpifort
+else ifneq (,$(findstring pppl,$(HOSTNAME)))
+        MANGO_PETSC_AVAILABLE = F
+        MANGO_HOPSPACK_AVAILABLE = F
+        MANGO_DAKOTA_AVAILABLE = F
+        MANGO_NLOPT_AVAILABLE = T
+
+	CC = mpicc
+	FC = mpif90
+	CLINKER = $(CC)
 	FLINKER = $(FC)
-	EXTRA_COMPILE_FLAGS = -O2 -ffree-line-length-none -fexternal-blas -fopenmp -I$(NETCDF_F)/include -I$(NETCDF_C)/include
-	EXTRA_LINK_FLAGS =  -fopenmp -L$(ACML_HOME)/lib -lacml -L$(NETCDF_C)/lib -lnetcdf -L$(NETCDF_F)/lib -lnetcdff
-	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
-        LIBSTELL_DIR=/u/slazerso/bin/libstell_dir
-        LIBSTELL_FOR_REGCOIL=/u/slazerso/bin/libstell.a
-	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -N 1 -n 1 -c 8 -p dawson
+
+        EXTRA_C_COMPILE_FLAGS = -O0 -g -I/u/mlandrem/nlopt/nlopt-2.6.1/install/include
+        EXTRA_F_COMPILE_FLAGS = -O0 -g -ffree-line-length-none
+        EXTRA_C_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnlopt
+        EXTRA_F_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnlopt
+
 else ifeq ($(CLUSTER),DRACO)
 	# On Draco, you seem to need 'module load gcc'.
 	MANGO_PETSC_AVAILABLE = F

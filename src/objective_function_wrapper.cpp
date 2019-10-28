@@ -1,5 +1,6 @@
 #include<iostream>
 #include<iomanip>
+#include<cstring>
 #include "mango.hpp"
 
 void mango::problem::objective_function_wrapper(const double* x, double* f, bool* failed) {

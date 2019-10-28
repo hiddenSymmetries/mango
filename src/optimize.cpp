@@ -1,6 +1,7 @@
 #include<iostream>
 #include<math.h>
 #include<limits>
+#include<cstring>
 #include "mango.hpp"
 
 double mango::problem::optimize() {

@@ -9,6 +9,7 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_
   argv = argv_in;
   N_parameters = N_parameters_in;
   N_terms = -1;
+  best_state_vector = new double[N_parameters];
   objective_function = objective_function_in;
   residual_function = NULL;
   least_squares = false;
@@ -25,6 +26,7 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
   argv = argv_in;
   N_parameters = N_parameters_in;
   N_terms = N_terms_in;
+  best_state_vector = new double[N_parameters];
   objective_function = NULL;
   residual_function = residual_function_in;
   least_squares = true;
@@ -47,7 +49,6 @@ void mango::problem::defaults() {
   finite_difference_step_size = 1.0e-7;
   output_filename = "mango_out.";
   max_function_evaluations = 10000;
-  best_state_vector = new double[N_parameters];
   best_function_evaluation = -1;
 }
 

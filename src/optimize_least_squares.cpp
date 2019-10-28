@@ -1,4 +1,5 @@
 #include<iostream>
+#include<cstring>
 #include "mango.hpp"
 
 /* void least_squares_to_single_objective(int*, const double*, double*, int*); */
