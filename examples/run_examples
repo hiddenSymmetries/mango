@@ -6,9 +6,29 @@ import subprocess
 import sys
 import shutil
 
+print()
+print("usage: " + os.path.basename(__file__) + " <1 or more examples to run>")
+print("Wildcards (*) are accepted in the example names. For a wildcard as a first character, enclose the string in single or double quotes. Do not include bin/ in the example names. If no examples are specified, all examples will be run")
+
 print("Running mango examples.")
 print()
-candidate_examples = glob.glob('bin/*')
+
+if len(sys.argv) < 2:
+    # Find all examples
+    candidate_examples = glob.glob('bin/*')
+else:
+    candidate_examples = []
+    for k in range(1,len(sys.argv)):
+        candidate_files = glob.glob('bin/'+sys.argv[k])
+        #print("For sys.argv="+sys.argv[k]+", candidate_files=",candidate_files)
+        if len(candidate_files) < 1:
+            print("WARNING: No files were found matching the argument "+sys.argv[k])
+        for j in range(len(candidate_files)):
+            filename = candidate_files[j]
+            if os.path.isfile(filename):
+                candidate_examples.append(filename)
+
+
 examples = []
 for item in candidate_examples:
     shortname = item[4:]
