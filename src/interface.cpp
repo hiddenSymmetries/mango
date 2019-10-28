@@ -113,6 +113,14 @@ extern "C" {
     return (int) This->get_mpi_comm_group_leaders();
   }
 
+  int mango_get_N_parameters(mango::problem *This) {
+    return (int) This->get_N_parameters();
+  }
+
+  int mango_get_N_terms(mango::problem *This) {
+    return (int) This->get_N_terms();
+  }
+
   void mango_set_centered_differences(mango::problem *This, int* centered_differences_int) {
     if (*centered_differences_int==1) {
       This->centered_differences = true;

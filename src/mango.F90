@@ -130,6 +130,16 @@ module mango
        integer(C_int) :: comm
        type(C_ptr), value :: this
      end function C_mango_get_mpi_comm_group_leaders
+     function C_mango_get_N_parameters(this) result(N) bind(C,name="mango_get_N_parameters")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_get_N_parameters
+     function C_mango_get_N_terms(this) result(N) bind(C,name="mango_get_N_terms")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_get_N_terms
      subroutine C_mango_set_centered_differences(this, centered_differences_int) bind(C,name="mango_set_centered_differences")
        import
        type(C_ptr), value :: this
@@ -145,7 +155,7 @@ module mango
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
        mango_is_proc0_world, mango_is_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
-       mango_set_centered_differences
+       mango_get_N_parameters, mango_get_N_terms, mango_set_centered_differences
   
 
   abstract interface
@@ -358,6 +368,16 @@ contains
     type(mango_problem), intent(in) :: this
     mango_get_mpi_comm_group_leaders = C_mango_get_mpi_comm_group_leaders(this%object)
   end function mango_get_mpi_comm_group_leaders
+
+  integer function mango_get_N_parameters(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_parameters = C_mango_get_N_parameters(this%object)
+  end function mango_get_N_parameters
+
+  integer function mango_get_N_terms(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_terms = C_mango_get_N_terms(this%object)
+  end function mango_get_N_terms
 
   subroutine mango_set_centered_differences(this, centered_differences)
     type(mango_problem), intent(in) :: this
