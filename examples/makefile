@@ -8,8 +8,11 @@ C_BIN_FILES = $(patsubst src/%.cpp, bin/%, $(C_SRC_FILES))
 
 .PHONY: all clean test_make
 
-.PRECIOUS: $(F_OBJ_FILES) $(C_OBJ_FILES)
-# The above line prevents .o files from being automatically deleted
+.SECONDARY:
+# The above line prevents .co and .fo files from being automatically deleted
+
+#.PRECIOUS: $(F_OBJ_FILES) $(C_OBJ_FILES)
+## The above line prevents .o files from being automatically deleted
 
 all: $(F_BIN_FILES) $(C_BIN_FILES)
 

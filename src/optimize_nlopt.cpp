@@ -5,7 +5,6 @@
 #include "nlopt.hpp"
 #endif
 
-/* double mango::problem::nlopt_objective_function(unsigned, const double*, double*, void*); */
 double nlopt_objective_function(unsigned, const double*, double*, void*); 
 
 
@@ -173,8 +172,8 @@ void mango::problem::optimize_nlopt() {
 #endif
 }
 
+
 double mango::problem::nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { 
-/*double nlopt_objective_function(unsigned n, const double* x, double* grad, void* f_data) { */
   mango::problem* this_problem = (mango::problem*) f_data; 
   bool failed;
   double f;
@@ -184,14 +183,9 @@ double mango::problem::nlopt_objective_function(unsigned n, const double* x, dou
   if (grad == NULL) {
     /* Gradient is not required. */
     this_problem->objective_function_wrapper(x, &f, &failed);
-    /* objective_function_wrapper(x, &f, &failed); */
   } else {
     /* Gradient is required. */
-    if (this_problem->is_least_squares()) {
-      this_problem->finite_difference_Jacobian_to_gradient(x, &f, grad);
-    } else {
-      this_problem->finite_difference_gradient(x, &f, grad);
-    }
+    this_problem->finite_difference_gradient(x, &f, grad);
   }
 
   if (failed) f = mango::NUMBER_FOR_FAILED;

@@ -37,8 +37,9 @@ extern "C" {
     return new mango::problem(*N_parameters, state_vector, objective_function, 0, NULL);
   }
 
-  mango::problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, mango::residual_function_type residual_function) {
-    return new mango::problem(*N_parameters, state_vector, *N_terms, targets, sigmas, residual_function, 0, NULL);
+  mango::problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, 
+						     double* best_residual_function, mango::residual_function_type residual_function) {
+    return new mango::problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
   }
 
   void mango_problem_destroy(mango::problem *This) {
@@ -65,8 +66,8 @@ extern "C" {
     This->mpi_init(*comm);
   }
 
-  void mango_optimize(mango::problem *This) {
-    This->optimize();
+  double mango_optimize(mango::problem *This) {
+    return This->optimize();
   }
 
   int mango_get_mpi_rank_world(mango::problem *This) {
@@ -119,6 +120,14 @@ extern "C" {
 
   int mango_get_N_terms(mango::problem *This) {
     return (int) This->get_N_terms();
+  }
+
+  int mango_get_worker_group(mango::problem *This) {
+    return (int) This->get_worker_group();
+  }
+
+  int mango_get_best_function_evaluation(mango::problem *This) {
+    return (int) This->get_best_function_evaluation();
   }
 
   void mango_set_max_function_evaluations(mango::problem *This, int *N) {

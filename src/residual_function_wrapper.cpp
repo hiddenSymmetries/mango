@@ -14,6 +14,7 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
     std::cout << std::setw(24) << std::setprecision(15) << x[j];
   }
   std::cout << "\n";
+
   /*
   std::cout << "residual:";
   for (j=0; j < N_terms; j++) {
@@ -22,12 +23,21 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   std::cout << "\n" << std::flush;
   */
 
-  write_least_squares_file_line(x, f);
+  double objective_value = write_least_squares_file_line(x, f);
+
+  if (! *failed && (!at_least_one_success || objective_value < best_objective_function)) {
+    at_least_one_success = true;
+    best_objective_function = objective_value;
+    best_function_evaluation = function_evaluations;
+    memcpy(best_state_vector, x, N_parameters * sizeof(double));
+    memcpy(best_residual_function, f, N_terms * sizeof(double)); 
+  }
+
 }
 
 
 
-void mango::problem::write_least_squares_file_line(const double* x, double* residuals) {
+double mango::problem::write_least_squares_file_line(const double* x, double* residuals) {
   double total_objective_function, temp;
   int j;
 
@@ -48,4 +58,6 @@ void mango::problem::write_least_squares_file_line(const double* x, double* resi
     output_file << "," << std::setw(26) << std::setprecision(16) << std::scientific << residuals[j];
   }
   output_file << "\n" << std::flush;
+
+  return(total_objective_function);
 }

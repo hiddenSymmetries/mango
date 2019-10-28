@@ -18,7 +18,8 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_
 }
 
 /* Constructor for least-squares problems */
-mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_terms_in, double* targets_in, double* sigmas_in, residual_function_type residual_function_in, int argc_in, char* argv_in[]) {
+mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_terms_in, double* targets_in, double* sigmas_in, 
+			double* best_residual_function_in, residual_function_type residual_function_in, int argc_in, char* argv_in[]) {
   defaults();
   argc = argc_in;
   argv = argv_in;
@@ -30,11 +31,13 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
   state_vector = state_vector_in;
   targets = targets_in;
   sigmas = sigmas_in;
+  best_residual_function = best_residual_function_in;
 }
 
 /* Destructor */
 mango::problem::~problem() {
   std::cout << "Mango problem is being destroyed.\n";
+  delete[] best_state_vector;
 }
 
 void mango::problem::defaults() {
@@ -44,6 +47,8 @@ void mango::problem::defaults() {
   finite_difference_step_size = 1.0e-7;
   output_filename = "mango_out.";
   max_function_evaluations = 10000;
+  best_state_vector = new double[N_parameters];
+  best_function_evaluation = -1;
 }
 
 
@@ -109,5 +114,9 @@ int mango::problem::get_N_procs_group_leaders() {
 
 int mango::problem::get_worker_group() {
   return worker_group;
+}
+
+int mango::problem::get_best_function_evaluation() {
+  return best_function_evaluation;
 }
 

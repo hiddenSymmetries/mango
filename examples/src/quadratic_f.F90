@@ -13,10 +13,11 @@ program quadratic
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
-  double precision, dimension(N_dim) :: state_vector, targets, sigmas
+  double precision, dimension(N_dim) :: state_vector, targets, sigmas, best_residual_function
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: j
+  double precision :: best_objective_function
 
   !---------------------------------------------
 
@@ -28,7 +29,7 @@ program quadratic
      targets(j) = j
      sigmas(j) = j
   end do
-  call mango_problem_create_least_squares(problem,N_dim,state_vector,N_dim,targets,sigmas,residual_function)
+  call mango_problem_create_least_squares(problem,N_dim,state_vector,N_dim,targets,sigmas,best_residual_function,residual_function)
   print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
@@ -39,7 +40,12 @@ program quadratic
   call mango_set_max_function_evaluations(problem, 2000)
 
   if (mango_is_proc0_worker_groups(problem)) then
-     call mango_optimize(problem)
+     best_objective_function = mango_optimize(problem)
+
+     print *,"Best state vector:",state_vector
+     print *,"Best objective function: ",best_objective_function
+     print *,"Best residual function: ",best_residual_function
+     print *,"Best function evaluation was ",mango_get_best_function_evaluation(problem)
 
      ! Make workers stop
      data = -1

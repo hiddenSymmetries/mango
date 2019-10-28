@@ -103,11 +103,23 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
     MPI_Reduce(residual_functions, residual_functions, N_evaluations * N_terms, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
   }
 
-  /* Record the results in order in the output file. */
+  /* Record the results in order in the output file. At the same time, check for any best-yet values of the
+   objective function.*/
+  double total_objective_function;
+  bool failed;
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
       function_evaluations += 1;
-      write_least_squares_file_line(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms]);
+      total_objective_function = write_least_squares_file_line(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms]);
+
+      failed = false;
+      if (!failed && (!at_least_one_success || total_objective_function < best_objective_function)) {
+        at_least_one_success = true;
+        best_objective_function = total_objective_function;
+        best_function_evaluation = function_evaluations;
+        memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
+        memcpy(best_residual_function, &residual_functions[j_evaluation*N_terms], N_terms * sizeof(double));
+      }
     }
   }
   

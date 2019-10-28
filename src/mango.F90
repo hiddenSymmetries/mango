@@ -35,11 +35,11 @@ module mango
        real(C_double) :: state_vector
        type(C_funptr), value :: objective_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
      end function C_mango_problem_create
-     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas, residual_function) result(this) bind(C,name="mango_problem_create_least_squares")
+     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function) result(this) bind(C,name="mango_problem_create_least_squares")
        import
        integer(C_int) :: N_parameters, N_terms
        type(C_ptr) :: this
-       real(C_double) :: state_vector, targets, sigmas
+       real(C_double) :: state_vector, targets, sigmas, best_residual_function
        type(C_funptr), value :: residual_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
      end function C_mango_problem_create_least_squares
      subroutine C_mango_problem_destroy (this) bind(C,name="mango_problem_destroy")
@@ -71,10 +71,11 @@ module mango
        integer(C_int) :: mpi_comm
        type(C_ptr), value :: this
      end subroutine C_mango_mpi_init
-     subroutine C_mango_optimize(this) bind(C,name="mango_optimize")
+     function C_mango_optimize(this) result(optimum) bind(C,name="mango_optimize")
        import
        type(C_ptr), value :: this
-     end subroutine C_mango_optimize
+       real(C_double) :: optimum
+     end function C_mango_optimize
      function C_mango_get_mpi_rank_world(this) result(mpi_rank) bind(C,name="mango_get_mpi_rank_world")
        import
        integer(C_int) :: mpi_rank
@@ -140,16 +141,26 @@ module mango
        integer(C_int) :: N
        type(C_ptr), value :: this
      end function C_mango_get_N_terms
-     subroutine C_mango_set_centered_differences(this, centered_differences_int) bind(C,name="mango_set_centered_differences")
+     function C_mango_get_worker_group(this) result(N) bind(C,name="mango_get_worker_group")
        import
+       integer(C_int) :: N
        type(C_ptr), value :: this
-       integer(C_int) :: centered_differences_int
-     end subroutine C_mango_set_centered_differences
+     end function C_mango_get_worker_group
+     function C_mango_get_best_function_evaluation(this) result(N) bind(C,name="mango_get_best_function_evaluation")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_get_best_function_evaluation
      subroutine C_mango_set_max_function_evaluations(this, N) bind(C,name="mango_set_max_function_evaluations")
        import
        type(C_ptr), value :: this
        integer(C_int) :: N
      end subroutine C_mango_set_max_function_evaluations
+     subroutine C_mango_set_centered_differences(this, centered_differences_int) bind(C,name="mango_set_centered_differences")
+       import
+       type(C_ptr), value :: this
+       integer(C_int) :: centered_differences_int
+     end subroutine C_mango_set_centered_differences
   end interface
 
   public :: mango_problem
@@ -160,7 +171,8 @@ module mango
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
        mango_is_proc0_world, mango_is_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
-       mango_get_N_parameters, mango_get_N_terms, mango_set_max_function_evaluations, mango_set_centered_differences
+       mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
+       mango_set_max_function_evaluations, mango_set_centered_differences
   
 
   abstract interface
@@ -230,12 +242,12 @@ contains
     print *,"Done calling objective fn from mango.F90. f=",f
   end subroutine mango_problem_create
 
-  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, residual_function)
+  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
     type(mango_problem), intent(out) :: this
     integer, intent(in) :: N_parameters, N_terms
-    real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:)
+    real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:), best_residual_function(:)
     procedure(residual_function_interface) :: residual_function
-    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), C_funloc(residual_function))
+    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
   end subroutine mango_problem_create_least_squares
 
   subroutine mango_problem_destroy(this)
@@ -298,10 +310,10 @@ contains
     call C_mango_mpi_init(this%object, int(mpi_comm,C_int))
   end subroutine mango_mpi_init
 
-  subroutine mango_optimize(this)
+  double precision function mango_optimize(this)
     type(mango_problem), intent(in) :: this
-    call C_mango_optimize(this%object)
-  end subroutine mango_optimize
+    mango_optimize = C_mango_optimize(this%object)
+  end function mango_optimize
 
   integer function mango_get_mpi_rank_world(this)
     type(mango_problem), intent(in) :: this
@@ -384,6 +396,22 @@ contains
     mango_get_N_terms = C_mango_get_N_terms(this%object)
   end function mango_get_N_terms
 
+  integer function mango_get_worker_group(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_worker_group = C_mango_get_worker_group(this%object)
+  end function mango_get_worker_group
+
+  integer function mango_get_best_function_evaluation(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_best_function_evaluation = C_mango_get_best_function_evaluation(this%object)
+  end function mango_get_best_function_evaluation
+
+  subroutine mango_set_max_function_evaluations(this, N)
+    type(mango_problem), intent(in) :: this
+    integer(C_int), intent(in) :: N
+    call C_mango_set_max_function_evaluations(this%object, N)
+  end subroutine mango_set_max_function_evaluations
+
   subroutine mango_set_centered_differences(this, centered_differences)
     type(mango_problem), intent(in) :: this
     logical, intent(in) :: centered_differences
@@ -392,11 +420,5 @@ contains
     if (centered_differences) logical_to_int = 1
     call C_mango_set_centered_differences(this%object, logical_to_int)
   end subroutine mango_set_centered_differences
-
-  subroutine mango_set_max_function_evaluations(this, N)
-    type(mango_problem), intent(in) :: this
-    integer(C_int), intent(in) :: N
-    call C_mango_set_max_function_evaluations(this%object, N)
-  end subroutine mango_set_max_function_evaluations
 
 end module mango

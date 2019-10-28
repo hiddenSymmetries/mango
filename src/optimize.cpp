@@ -1,13 +1,19 @@
 #include<iostream>
 #include<math.h>
+#include<limits>
 #include "mango.hpp"
 
-void mango::problem::optimize() {
+double mango::problem::optimize() {
 
   if (! proc0_worker_groups) {
     std::cout << "Error! The mango_optimize() subroutine should only be called by group leaders, not by all workers.\n";
     exit(1);
   }
+
+  function_evaluations = 0;
+  at_least_one_success = false;
+  best_objective_function = std::numeric_limits<double>::quiet_NaN();
+  best_function_evaluation = -1;
 
   /* Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders: */
   MPI_Bcast(&N_parameters, 1, MPI_INT, 0, mpi_comm_group_leaders);
@@ -35,17 +41,16 @@ void mango::problem::optimize() {
 
   if (least_squares) {
     optimize_least_squares();
-    return;
+    return(best_objective_function);
   }
 
   if (!proc0_world) {
     group_leaders_loop();
-    return;
+    return(std::numeric_limits<double>::quiet_NaN());
   }
   /* Only proc0_world continues past this point. */
 
   std::cout << "Hello world from optimize()\n";
-  function_evaluations = 0;
 
   /* Open output file */
   output_file.open(output_filename);
@@ -83,21 +88,34 @@ void mango::problem::optimize() {
     exit(1);
   }
 
-  output_file.close();
-
   /* Tell the other group leaders to exit. */
   int data = -1;
   MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
 
-  std::cout << "Here comes state_vector from optimize.cpp: " << state_vector[0];
+  memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); /* Make sure we leave state_vector equal to the best state vector seen. */
+
+  /* Copy the line corresponding to the optimum to the bottom of the output file. */
+  int function_evaluations_temp = function_evaluations;
+  function_evaluations = best_function_evaluation;
+  write_file_line(state_vector, best_objective_function);
+  function_evaluations = function_evaluations_temp;
+
+  output_file.close();
+
+  std::cout << "Here comes the optimal state_vector from optimize.cpp: " << state_vector[0];
   for (int j=1; j<N_parameters; j++) {
     std::cout << ", " << state_vector[j];
   }
+  std::cout << "\n";
 
+  /*
   std::cout << "\nAbout to call objective function from C.\n";
   double f;
   int failed;
   std::cout << "optimize.cpp: objective_function=" << (long int)objective_function << "\n";
   objective_function(&N_parameters, state_vector, &f, &failed, this);
   std::cout << "Value of objective function: " << f << "\n";
+  */
+
+  return(best_objective_function);
 }

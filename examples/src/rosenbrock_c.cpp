@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
   double state_vector[2] = {0.0, 0.0};
   double targets[2] = {1.0, 0.0};
   double sigmas[2] = {1.0, 0.1};
-
-  mango::problem myprob(2, state_vector, 2, targets, sigmas, &residual_function, argc, argv);
+  double best_residual_function[2];
+  mango::problem myprob(2, state_vector, 2, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
 
   /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
@@ -34,9 +34,15 @@ int main(int argc, char *argv[]) {
   myprob.max_function_evaluations = 2000;
 
   if (myprob.is_proc0_worker_groups()) {
-    myprob.optimize();
-    /* Make workers stop */
+    double best_objective_function = myprob.optimize();
 
+    std::cout << "Best state vector: " << std::setprecision(16);
+    for (int j=0; j<2; j++) std::cout << state_vector[j] << "  ";
+    std::cout << "\nBest objective function: " << best_objective_function << "\nBest residual vector:";
+    for (int j=0; j<2; j++) std::cout << best_residual_function[j] << "  ";
+    std::cout << "\nBest function evaluation was " << myprob.get_best_function_evaluation() << "\n";
+
+    /* Make workers stop */
     int data[1];
     data[0] = -1;
     MPI_Bcast(data, 1, MPI_INT, 0, myprob.get_mpi_comm_worker_groups());

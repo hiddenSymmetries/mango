@@ -34,8 +34,12 @@ int main(int argc, char *argv[]) {
   myprob.max_function_evaluations = 2000;
 
   if (myprob.is_proc0_worker_groups()) {
-    myprob.optimize();
+    double best_objective_function = myprob.optimize();
 
+    std::cout << "Best state vector: " << std::setprecision(16);
+    for (int j=0; j<N_dims; j++) std::cout << state_vector[j] << "  ";
+    std::cout << "\nBest objective function: " << best_objective_function << "\nBest function evaluation was " << myprob.get_best_function_evaluation() << "\n";
+    
     /* Make workers stop */
     int data[1];
     data[0] = -1;

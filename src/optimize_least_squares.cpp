@@ -8,7 +8,6 @@ void mango::problem::optimize_least_squares() {
 
   if (!proc0_world) {
     group_leaders_least_squares_loop();
-    return;
   }
   /* Only proc0_world continues past this point. */
 
@@ -75,13 +74,21 @@ void mango::problem::optimize_least_squares() {
     exit(1);
   }
 
-  output_file.close();
-
   /* Tell the other group leaders to exit. */
   int data = -1;
   MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
 
-  std::cout << "Here comes state_vector from optimize_least_squares.cpp: " << state_vector[0];
+  memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); /* Make sure we leave state_vector equal to the best state vector seen. */
+
+  /* Copy the line corresponding to the optimum to the bottom of the output file. */
+  int function_evaluations_temp= function_evaluations;
+  function_evaluations = best_function_evaluation;
+  write_least_squares_file_line(state_vector, best_residual_function);
+  function_evaluations = function_evaluations_temp;
+
+  output_file.close();
+
+  std::cout << "Here comes the optimal state_vector from optimize_least_squares.cpp: " << state_vector[0];
   for (int j=1; j<N_parameters; j++) {
     std::cout << ", " << state_vector[j];
   }

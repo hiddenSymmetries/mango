@@ -88,7 +88,12 @@ namespace mango {
     int argc;
     char** argv;
     int max_function_and_gradient_evaluations;
-    
+    bool at_least_one_success;
+    double* best_state_vector;
+    double best_objective_function;
+    double* best_residual_function;
+    int best_function_evaluation;
+
     void group_leaders_loop();
     void group_leaders_least_squares_loop();
     void optimize_least_squares();
@@ -101,7 +106,7 @@ namespace mango {
     void optimize_least_squares_petsc();
     void optimize_least_squares_gsl();
     void write_file_line(const double*, double);
-    void write_least_squares_file_line(const double*, double*);
+    double write_least_squares_file_line(const double*, double*);
     static double nlopt_objective_function(unsigned, const double*, double*, void*); 
 #ifdef MANGO_PETSC_AVAILABLE
     static PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);
@@ -125,14 +130,14 @@ namespace mango {
     int max_function_evaluations;
 
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
-    problem(int, double*, int, double*, double*, residual_function_type, int, char**); /* For least-squares problems */
+    problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); /* For least-squares problems */
     ~problem();
     void set_algorithm(algorithm_type);
     void set_algorithm(std::string);
     void read_input_file(std::string);
     void set_output_filename(std::string);
     void mpi_init(MPI_Comm);
-    void optimize();
+    double optimize();
     bool is_least_squares();
     int get_N_parameters();
     int get_N_terms();
@@ -148,6 +153,7 @@ namespace mango {
     int get_N_procs_worker_groups();
     int get_N_procs_group_leaders();
     int get_worker_group();
+    int get_best_function_evaluation();
   };
 }
 
