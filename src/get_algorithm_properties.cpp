@@ -103,11 +103,65 @@ void mango::problem::get_algorithm_properties() {
     algorithm_name = "nlopt_ln_sbplx";
     break;
 
+  case NLOPT_LD_MMA:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_mma";
+    break;
+  case NLOPT_LD_CCSAQ:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_ccsaq";
+    break;
+  case NLOPT_LD_SLSQP:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_slsqp";
+    break;
   case NLOPT_LD_LBFGS:
     algorithm_uses_derivatives = true;
     least_squares_algorithm = false;
     package = PACKAGE_NLOPT;
     algorithm_name = "nlopt_ld_lbfgs";
+    break;
+  case NLOPT_LD_TNEWTON_PRECOND_RESTART:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_tnewton_precond_restart";
+    break;
+  case NLOPT_LD_TNEWTON_PRECOND:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_tnewton_precond";
+    break;
+  case NLOPT_LD_TNEWTON_RESTART:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_tnewton_restart";
+    break;
+  case NLOPT_LD_TNEWTON:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_tnewton";
+    break;
+  case NLOPT_LD_VAR1:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_var1";
+    break;
+  case NLOPT_LD_VAR2:
+    algorithm_uses_derivatives = true;
+    least_squares_algorithm = false;
+    package = PACKAGE_NLOPT;
+    algorithm_name = "nlopt_ld_var2";
     break;
 
   case HOPSPACK:

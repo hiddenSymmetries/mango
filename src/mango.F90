@@ -145,6 +145,11 @@ module mango
        type(C_ptr), value :: this
        integer(C_int) :: centered_differences_int
      end subroutine C_mango_set_centered_differences
+     subroutine C_mango_set_max_function_evaluations(this, N) bind(C,name="mango_set_max_function_evaluations")
+       import
+       type(C_ptr), value :: this
+       integer(C_int) :: N
+     end subroutine C_mango_set_max_function_evaluations
   end interface
 
   public :: mango_problem
@@ -155,7 +160,7 @@ module mango
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
        mango_is_proc0_world, mango_is_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
-       mango_get_N_parameters, mango_get_N_terms, mango_set_centered_differences
+       mango_get_N_parameters, mango_get_N_terms, mango_set_max_function_evaluations, mango_set_centered_differences
   
 
   abstract interface
@@ -387,5 +392,11 @@ contains
     if (centered_differences) logical_to_int = 1
     call C_mango_set_centered_differences(this%object, logical_to_int)
   end subroutine mango_set_centered_differences
+
+  subroutine mango_set_max_function_evaluations(this, N)
+    type(mango_problem), intent(in) :: this
+    integer(C_int), intent(in) :: N
+    call C_mango_set_max_function_evaluations(this%object, N)
+  end subroutine mango_set_max_function_evaluations
 
 end module mango

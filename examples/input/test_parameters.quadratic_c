@@ -13,6 +13,15 @@ nlopt_ln_bobyqa
 nlopt_ln_praxis
 nlopt_ln_neldermead
 nlopt_ln_sbplx
+nlopt_ld_mma
+nlopt_ld_ccsaq
+nlopt_ld_slsqp
 nlopt_ld_lbfgs
+nlopt_ld_tnewton_precond_restart
+nlopt_ld_tnewton_precond
+nlopt_ld_tnewton_restart
+nlopt_ld_tnewton
+nlopt_ld_var1
+nlopt_ld_var2
 ! True location(s) of optimum:
 1,2,3

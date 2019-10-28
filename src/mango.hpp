@@ -37,7 +37,16 @@ namespace mango {
     NLOPT_LN_PRAXIS,
     NLOPT_LN_NELDERMEAD,
     NLOPT_LN_SBPLX,
+    NLOPT_LD_MMA,
+    NLOPT_LD_CCSAQ,
+    NLOPT_LD_SLSQP,
     NLOPT_LD_LBFGS,
+    NLOPT_LD_TNEWTON_PRECOND_RESTART,
+    NLOPT_LD_TNEWTON_PRECOND,
+    NLOPT_LD_TNEWTON_RESTART,
+    NLOPT_LD_TNEWTON,
+    NLOPT_LD_VAR1,
+    NLOPT_LD_VAR2,
     HOPSPACK,
     NUM_ALGORITHMS  /* Not an actual algorithm, just counting. */
   } algorithm_type;
@@ -78,6 +87,7 @@ namespace mango {
     std::ofstream output_file;
     int argc;
     char** argv;
+    int max_function_and_gradient_evaluations;
     
     void group_leaders_loop();
     void group_leaders_least_squares_loop();
@@ -112,6 +122,7 @@ namespace mango {
     bool centered_differences;
     double finite_difference_step_size;
     std::string output_filename;
+    int max_function_evaluations;
 
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*, residual_function_type, int, char**); /* For least-squares problems */

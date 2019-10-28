@@ -1,4 +1,5 @@
 #include<iostream>
+#include<math.h>
 #include "mango.hpp"
 
 void mango::problem::optimize() {
@@ -18,12 +19,24 @@ void mango::problem::optimize() {
   MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_group_leaders);
   get_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
 
+  if (algorithm_uses_derivatives) {
+    if (centered_differences) {
+      max_function_and_gradient_evaluations = ceil(max_function_evaluations / 7.0);
+    } else {
+      max_function_and_gradient_evaluations = ceil(max_function_evaluations / 4.0);
+    }
+  } else {
+    max_function_and_gradient_evaluations = max_function_evaluations;
+  }
+
+  std::cout << "Proc " << mpi_rank_world << " is entering optimize(), and thinks proc0_world=" << proc0_world << "\n";
+  std::cout << "max_function_evaluations = " << max_function_evaluations << 
+    ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << "\n";
+
   if (least_squares) {
     optimize_least_squares();
     return;
   }
-
-  std::cout << "Proc " << mpi_rank_world << " is entering optimize(), and thinks proc0_world=" << proc0_world << "\n";
 
   if (!proc0_world) {
     group_leaders_loop();

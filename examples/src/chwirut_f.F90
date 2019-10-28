@@ -35,7 +35,7 @@ program chwirut
   call mango_read_input_file(problem, "../input/mango_in.chwirut_f")
   call mango_set_output_filename(problem, "../output/mango_out.chwirut_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
-  call mango_set_centered_differences(problem, .true.)
+  call mango_set_max_function_evaluations(problem, 2000)
 
   if (mango_is_proc0_worker_groups(problem)) then
      call mango_optimize(problem)

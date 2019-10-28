@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
   myprob.output_filename = "../output/mango_out.quadratic_c";
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.centered_differences = true; 
+  myprob.max_function_evaluations = 2000;
 
   if (myprob.is_proc0_worker_groups()) {
     myprob.optimize();

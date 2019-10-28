@@ -57,6 +57,7 @@ void mango::problem::optimize_petsc() {
     exit(1);
   }
 
+  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
   TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);

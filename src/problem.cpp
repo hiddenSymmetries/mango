@@ -43,6 +43,7 @@ void mango::problem::defaults() {
   centered_differences = false;
   finite_difference_step_size = 1.0e-7;
   output_filename = "mango_out.";
+  max_function_evaluations = 10000;
 }
 
 

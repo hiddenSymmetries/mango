@@ -134,7 +134,7 @@ for example in examples:
 
     for j_algorithm in range(len(algorithms)):
         algorithm = algorithms[j_algorithm]
-        algorithm_with_spaces = (algorithm+",").ljust(25)
+        algorithm_with_spaces = (algorithm+",").ljust(35)
         for j_procs in range(len(N_procss)):
             N_procs = N_procss[j_procs]
             N_worker_groups = N_worker_groupss[j_procs]

@@ -121,6 +121,10 @@ extern "C" {
     return (int) This->get_N_terms();
   }
 
+  void mango_set_max_function_evaluations(mango::problem *This, int *N) {
+    This->max_function_evaluations = *N;
+  }
+
   void mango_set_centered_differences(mango::problem *This, int* centered_differences_int) {
     if (*centered_differences_int==1) {
       This->centered_differences = true;

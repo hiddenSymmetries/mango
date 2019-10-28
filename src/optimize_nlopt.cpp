@@ -26,6 +26,7 @@ void mango::problem::optimize_nlopt() {
 
   nlopt::algorithm mango_nlopt_algorithm;
   switch (algorithm) {
+    /* Global, derivative-free algorithms */
   case mango::NLOPT_GN_DIRECT:
     mango_nlopt_algorithm = nlopt::GN_DIRECT;
     break;
@@ -53,6 +54,8 @@ void mango::problem::optimize_nlopt() {
   case mango::NLOPT_GN_CRS2_LM:
     mango_nlopt_algorithm = nlopt::GN_CRS2_LM;
     break;
+
+    /* Local, derivative-free algorithms */
   case mango::NLOPT_LN_COBYLA:
     mango_nlopt_algorithm = nlopt::LN_COBYLA;
     break;
@@ -68,9 +71,39 @@ void mango::problem::optimize_nlopt() {
   case mango::NLOPT_LN_SBPLX:
     mango_nlopt_algorithm = nlopt::LN_SBPLX;
     break;
+
+    /* Local, derivative-based algorithms */
+  case mango::NLOPT_LD_MMA:
+    mango_nlopt_algorithm = nlopt::LD_MMA;
+    break;
+  case mango::NLOPT_LD_CCSAQ:
+    mango_nlopt_algorithm = nlopt::LD_CCSAQ;
+    break;
+  case mango::NLOPT_LD_SLSQP:
+    mango_nlopt_algorithm = nlopt::LD_SLSQP;
+    break;
   case mango::NLOPT_LD_LBFGS:
     mango_nlopt_algorithm = nlopt::LD_LBFGS;
     break;
+  case mango::NLOPT_LD_TNEWTON_PRECOND_RESTART:
+    mango_nlopt_algorithm = nlopt::LD_TNEWTON_PRECOND_RESTART;
+    break;
+  case mango::NLOPT_LD_TNEWTON_PRECOND:
+    mango_nlopt_algorithm = nlopt::LD_TNEWTON_PRECOND;
+    break;
+  case mango::NLOPT_LD_TNEWTON_RESTART:
+    mango_nlopt_algorithm = nlopt::LD_TNEWTON_RESTART;
+    break;
+  case mango::NLOPT_LD_TNEWTON:
+    mango_nlopt_algorithm = nlopt::LD_TNEWTON;
+    break;
+  case mango::NLOPT_LD_VAR1:
+    mango_nlopt_algorithm = nlopt::LD_VAR1;
+    break;
+  case mango::NLOPT_LD_VAR2:
+    mango_nlopt_algorithm = nlopt::LD_VAR2;
+    break;
+
   default:
     std::cout << "Error in optimize_nlopt. Unexpected algorithm!\n";
     exit(1);
@@ -84,6 +117,9 @@ void mango::problem::optimize_nlopt() {
   nlopt_opt opt = nlopt_create((nlopt_algorithm)mango_nlopt_algorithm, N_parameters);
   /*  nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this); */
   nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this);
+
+  nlopt_set_maxeval(opt, max_function_and_gradient_evaluations);
+
   double final_objective_function;
   nlopt_result result = nlopt_optimize(opt, state_vector, &final_objective_function);
 

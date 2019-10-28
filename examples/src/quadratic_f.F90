@@ -36,6 +36,7 @@ program quadratic
   call mango_set_output_filename(problem, "../output/mango_out.quadratic_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_centered_differences(problem, .true.)
+  call mango_set_max_function_evaluations(problem, 2000)
 
   if (mango_is_proc0_worker_groups(problem)) then
      call mango_optimize(problem)
