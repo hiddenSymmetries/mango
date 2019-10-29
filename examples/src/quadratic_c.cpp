@@ -31,6 +31,9 @@ int main(int argc, char *argv[]) {
     targets[j] = (double) j+1;
   }
 
+  std::cout << "Is foobar a valid algorithm? " << mango::does_algorithm_exist("foobar") << "\n";
+  std::cout << "Is petsc_nm a valid algorithm? " << mango::does_algorithm_exist("petsc_nm") << "\n";
+
   double best_residual_function[N_dims];
   mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 

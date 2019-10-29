@@ -24,7 +24,7 @@ double mango::problem::optimize() {
   MPI_Bcast(&least_squares, 1, MPI_C_BOOL, 0, mpi_comm_group_leaders);
   MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_group_leaders);
-  get_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
+  load_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
 
   if (algorithm_uses_derivatives) {
     if (centered_differences) {

@@ -13,7 +13,7 @@ void mango::problem::set_algorithm(algorithm_type algorithm_in) {
   }
 
   algorithm = algorithm_in;
-  get_algorithm_properties();
+  load_algorithm_properties();
 
   std::cout << "Algorithm set (by integer) to " << algorithm << "\n";
 }
@@ -25,7 +25,7 @@ void mango::problem::set_algorithm(std::string str) {
 
   for (int j = 0; j < NUM_ALGORITHMS; j++) {
     algorithm = (algorithm_type) j;
-    get_algorithm_properties();
+    load_algorithm_properties();
     if (algorithm_name.compare(str) == 0) {
       found_match = true;
       break;
@@ -38,4 +38,25 @@ void mango::problem::set_algorithm(std::string str) {
   }
 
   std::cout << "Algorithm set (by string) to " << algorithm << "\n";
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+bool mango::does_algorithm_exist(std::string str) {
+  bool found_match = false;
+  bool algorithm_uses_derivatives, least_squares_algorithm;
+  package_type package;
+  std::string algorithm_name;
+  algorithm_type algorithm;
+
+  for (int j = 0; j < NUM_ALGORITHMS; j++) {
+    algorithm = (algorithm_type) j;
+    get_algorithm_properties(algorithm, &algorithm_uses_derivatives, &least_squares_algorithm, &package, &algorithm_name);
+    if (algorithm_name.compare(str) == 0) {
+      found_match = true;
+      break;
+    }
+  }
+
+  return(found_match);
 }

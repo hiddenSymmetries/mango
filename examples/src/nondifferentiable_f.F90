@@ -25,6 +25,13 @@ program nondifferentiable
   !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
 
+  print *,"Is foobar a valid algorithm? ", mango_does_algorithm_exist('foobar')
+  print *,"Is petsc_pounders a valid algorithm? ", mango_does_algorithm_exist('petsc_pounders')
+  print *,"Is 'petsc_pounders ' a valid algorithm? ", mango_does_algorithm_exist('petsc_pounders ')
+  print *,"Is petsc_nm_blurg a valid algorithm? ", mango_does_algorithm_exist('petsc_nm_blurg')
+  print *,"Is petsc_n a valid algorithm? ", mango_does_algorithm_exist('petsc_n')
+  print *,"Is nlopt_ld_var2 a valid algorithm? ", mango_does_algorithm_exist('nlopt_ld_var2')
+
   state_vector = 0
   call mango_problem_create(problem,N_dim,state_vector,dummy,objective_function)
   print *,"Here comes state vector:",state_vector

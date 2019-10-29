@@ -24,7 +24,7 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world_in) {
   /* Make sure all procs agree on certain variables that will be used here. */
   MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_world);
   MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_world);
-  get_algorithm_properties(); /* Now that all procs agree on algorithm, all procs will get the correct algorithm properties. */
+  load_algorithm_properties(); /* Now that all procs agree on algorithm, all procs will get the correct algorithm properties. */
 
   /* Ensure N_worker_groups is within the range [1, N_procs_world] */
   if (N_worker_groups > N_procs_world) N_worker_groups = N_procs_world;

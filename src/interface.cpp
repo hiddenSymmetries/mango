@@ -145,4 +145,10 @@ extern "C" {
     }
   }
 
+  int mango_does_algorithm_exist(char algorithm_name[mango_interface_string_length]) {
+    bool return_bool = mango::does_algorithm_exist(algorithm_name);
+    /* Convert bool to integer: */
+    return(return_bool ? 1 : 0);
+  }
+
 }

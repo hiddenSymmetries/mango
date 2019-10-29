@@ -58,6 +58,9 @@ namespace mango {
   typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::problem*);
   typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::problem*);
 
+  bool does_algorithm_exist(std::string);
+  void get_algorithm_properties(int, bool*, bool*, package_type*, std::string*);
+
   class problem {
   private:
     MPI_Comm mpi_comm_world;
@@ -67,7 +70,7 @@ namespace mango {
     bool algorithm_uses_derivatives;
     bool least_squares_algorithm;
     bool least_squares;
-    int package;
+    package_type package;
     std::string algorithm_name;
     int N_procs_world;
     int mpi_rank_world;
@@ -98,7 +101,7 @@ namespace mango {
     void group_leaders_least_squares_loop();
     void optimize_least_squares();
     void defaults();
-    void get_algorithm_properties();
+    void load_algorithm_properties();
     void optimize_petsc();
     void optimize_nlopt();
     void optimize_hopspack();
