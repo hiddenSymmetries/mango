@@ -66,6 +66,10 @@ extern "C" {
     This->mpi_init(*comm);
   }
 
+  void mango_set_custom_mpi_communicators(mango::problem *This, MPI_Comm *comm_world, MPI_Comm *comm_group_leaders, MPI_Comm *comm_worker_groups) {
+    This->set_custom_mpi_communicators(*comm_world, *comm_group_leaders, *comm_worker_groups);
+  }
+
   double mango_optimize(mango::problem *This) {
     return This->optimize();
   }
@@ -128,6 +132,10 @@ extern "C" {
 
   int mango_get_best_function_evaluation(mango::problem *This) {
     return (int) This->get_best_function_evaluation();
+  }
+
+  int mango_get_function_evaluations(mango::problem *This) {
+    return (int) This->get_function_evaluations();
   }
 
   void mango_set_max_function_evaluations(mango::problem *This, int *N) {

@@ -71,6 +71,11 @@ module mango
        integer(C_int) :: mpi_comm
        type(C_ptr), value :: this
      end subroutine C_mango_mpi_init
+     subroutine C_mango_set_custom_mpi_communicators(this, comm1, comm2, comm3) bind(C,name="mango_set_custom_mpi_communicators")
+       import
+       integer(C_int) :: comm1, comm2, comm3
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_custom_mpi_communicators
      function C_mango_optimize(this) result(optimum) bind(C,name="mango_optimize")
        import
        type(C_ptr), value :: this
@@ -151,6 +156,11 @@ module mango
        integer(C_int) :: N
        type(C_ptr), value :: this
      end function C_mango_get_best_function_evaluation
+     function C_mango_get_function_evaluations(this) result(N) bind(C,name="mango_get_function_evaluations")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_get_function_evaluations
      subroutine C_mango_set_max_function_evaluations(this, N) bind(C,name="mango_set_max_function_evaluations")
        import
        type(C_ptr), value :: this
@@ -171,13 +181,14 @@ module mango
   public :: mango_problem
   public :: mango_problem_create, mango_problem_create_least_squares, mango_problem_destroy, &
        mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
-       mango_mpi_init, mango_optimize, &
+       mango_mpi_init, mango_set_custom_mpi_communicators, mango_optimize, &
        mango_get_mpi_rank_world, mango_get_mpi_rank_worker_groups, mango_get_mpi_rank_group_leaders, &
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
        mango_is_proc0_world, mango_is_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
-       mango_set_max_function_evaluations, mango_set_centered_differences, mango_does_algorithm_exist
+       mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
+       mango_does_algorithm_exist
   
 
   abstract interface
@@ -315,6 +326,12 @@ contains
     call C_mango_mpi_init(this%object, int(mpi_comm,C_int))
   end subroutine mango_mpi_init
 
+  subroutine mango_set_custom_mpi_communicators(this, comm1, comm2, comm3)
+    type(mango_problem), intent(in) :: this
+    integer, intent(in) :: comm1, comm2, comm3
+    call C_mango_set_custom_mpi_communicators(this%object, int(comm1,C_int), int(comm2,C_int), int(comm3,C_int))
+  end subroutine mango_set_custom_mpi_communicators
+
   double precision function mango_optimize(this)
     type(mango_problem), intent(in) :: this
     mango_optimize = C_mango_optimize(this%object)
@@ -410,6 +427,11 @@ contains
     type(mango_problem), intent(in) :: this
     mango_get_best_function_evaluation = C_mango_get_best_function_evaluation(this%object)
   end function mango_get_best_function_evaluation
+
+  integer function mango_get_function_evaluations(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_function_evaluations = C_mango_get_function_evaluations(this%object)
+  end function mango_get_function_evaluations
 
   subroutine mango_set_max_function_evaluations(this, N)
     type(mango_problem), intent(in) :: this

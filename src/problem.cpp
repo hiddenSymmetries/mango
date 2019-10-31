@@ -121,3 +121,7 @@ int mango::problem::get_best_function_evaluation() {
   return best_function_evaluation;
 }
 
+int mango::problem::get_function_evaluations() {
+  return function_evaluations;
+}
+

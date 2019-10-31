@@ -140,6 +140,7 @@ namespace mango {
     void read_input_file(std::string);
     void set_output_filename(std::string);
     void mpi_init(MPI_Comm);
+    void set_custom_mpi_communicators(MPI_Comm, MPI_Comm, MPI_Comm);
     double optimize();
     bool is_least_squares();
     int get_N_parameters();
@@ -157,6 +158,7 @@ namespace mango {
     int get_N_procs_group_leaders();
     int get_worker_group();
     int get_best_function_evaluation();
+    int get_function_evaluations();
   };
 }
 
