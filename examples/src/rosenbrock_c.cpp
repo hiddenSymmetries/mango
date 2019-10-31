@@ -1,6 +1,7 @@
 #include<iostream>
 #include<iomanip>
 #include<mpi.h>
+#include<stdlib.h>
 #include "mango.hpp"
 
 void residual_function(int*, const double*, int*, double*, int*, mango::problem*);

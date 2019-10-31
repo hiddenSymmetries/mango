@@ -1,4 +1,5 @@
 #include<iostream>
+#include<stdlib.h>
 #include "mango.hpp"
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>

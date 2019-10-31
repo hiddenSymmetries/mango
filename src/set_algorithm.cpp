@@ -1,5 +1,6 @@
 #include<iostream>
 #include<string>
+#include<stdlib.h>
 #include "mango.hpp"
 
 void mango::problem::set_algorithm(algorithm_type algorithm_in) {

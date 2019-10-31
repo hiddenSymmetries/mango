@@ -1,5 +1,6 @@
 #include<iostream>
 #include<mpi.h>
+#include<stdlib.h>
 #include "mango.hpp"
 
 #define bold_line "****************************************************************************************\n"

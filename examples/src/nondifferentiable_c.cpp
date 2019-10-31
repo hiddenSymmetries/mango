@@ -5,6 +5,7 @@
 #include<cstring>
 #include<mpi.h>
 #include<math.h>
+#include<stdlib.h>
 #include "mango.hpp"
 
 void objective_function(int*, const double*, double*, int*, mango::problem*);

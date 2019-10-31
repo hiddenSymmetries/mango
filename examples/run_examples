@@ -10,6 +10,13 @@ print()
 print("usage: " + os.path.basename(__file__) + " <1 or more examples to run>")
 print("Wildcards (*) are accepted in the example names. For a wildcard as a first character, enclose the string in single or double quotes. Do not include bin/ in the example names. If no examples are specified, all examples will be run")
 
+try:
+    submitCommand = os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"]
+except:
+    submitCommand = ""
+
+print("MANGO_COMMAND_TO_SUBMIT_JOB=",submitCommand)
+
 print("Running mango examples.")
 print()
 
@@ -185,7 +192,8 @@ for example in examples:
             except:
                 print("Error changing to the bin directory!")
                 raise
-            command = "mpiexec -n "+str(N_procs) + " ./"+example
+            command = submitCommand + " ./"+example
+            command = command.replace('NUM_PROCS',str(N_procs))
             print("Submitting command "+command)
             sys.stdout.flush()
             try:

@@ -82,8 +82,7 @@ retest: $(TARGET)
 	@echo "Testing existing output files for examples without re-running then." && cd examples && export MANGO_RETEST=yes && ./run_examples
 
 test_make:
-	@echo F_OBJ_FILES is $(F_OBJ_FILES)
-	@echo C_OBJ_FILES is $(C_OBJ_FILES)
+	@echo MANGO_HOST is $(MANGO_HOST)
 	@echo HOSTNAME is $(HOSTNAME)
 	@echo FC is $(FC)
 	@echo FLINKER is $(FLINKER)
@@ -95,4 +94,7 @@ test_make:
 	@echo MANGO_NLOPT_AVAILABLE is $(MANGO_NLOPT_AVAILABLE)
 	@echo EXTRA_F_COMPILE_FLAGS is $(EXTRA_F_COMPILE_FLAGS)
 	@echo EXTRA_C_COMPILE_FLAGS is $(EXTRA_C_COMPILE_FLAGS)
-	@echo EXTRA_LINK_FLAGS is $(EXTRA_LINK_FLAGS)
+	@echo EXTRA_F_LINK_FLAGS is $(EXTRA_F_LINK_FLAGS)
+	@echo EXTRA_C_LINK_FLAGS is $(EXTRA_C_LINK_FLAGS)
+	@echo F_OBJ_FILES is $(F_OBJ_FILES)
+	@echo C_OBJ_FILES is $(C_OBJ_FILES)

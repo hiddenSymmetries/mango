@@ -2,6 +2,7 @@
 #include<math.h>
 #include<limits>
 #include<cstring>
+#include<stdlib.h>
 #include "mango.hpp"
 
 double mango::problem::optimize() {
@@ -54,7 +55,7 @@ double mango::problem::optimize() {
   std::cout << "Hello world from optimize()\n";
 
   /* Open output file */
-  output_file.open(output_filename);
+  output_file.open(output_filename.c_str());
   if (!output_file.is_open()) {
     std::cout << "Error! Unable to open output file " << output_filename << "\n";
     exit(1);

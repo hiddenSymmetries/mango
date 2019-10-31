@@ -1,5 +1,6 @@
 #include<iostream>
 #include<iomanip>
+#include<stdlib.h>
 #include "mango.hpp"
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
@@ -49,7 +50,11 @@ void mango::problem::optimize_least_squares_petsc() {
   switch (algorithm) {
   case PETSC_POUNDERS:
     TaoSetType(my_tao, TAOPOUNDERS);
+#if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 4))
     TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)this);
+#else
+    TaoSetResidualRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)this);
+#endif
     break;
   default:
     std::cout << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithm_name << "\n";

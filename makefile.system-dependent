@@ -6,18 +6,8 @@ else
         HOSTNAME?="laptop"
 endif
 
-ifeq ($(HOSTNAME),edison)
-	FC = ftn
-	FLINKER = $(FC)
-	## NERSC documentation recommends against specifying -O3
-	## -mkl MUST APPEAR AT THE END!!
-	EXTRA_COMPILE_FLAGS = -openmp -mkl
-	EXTRA_LINK_FLAGS =  -openmp -mkl -Wl,-ydgemm_
-	# Above, the link flag "-Wl,-ydgemm_" causes the linker to report which version of DGEMM (the BLAS3 matrix-matrix-multiplication subroutine) is used.
-	# For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
-	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 24
-
-else ifeq ($(HOSTNAME),cori)
+ifeq ($(HOSTNAME),cori)
+	MANGO_HOST = cori
 	FC = ftn
 	FLINKER = $(FC)
 	## NERSC documentation recommends against specifying -O3
@@ -29,6 +19,8 @@ else ifeq ($(HOSTNAME),cori)
 	REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
 
 else ifneq (,$(findstring pppl,$(HOSTNAME)))
+	MANGO_HOST = pppl
+
         MANGO_PETSC_AVAILABLE = F
         MANGO_HOPSPACK_AVAILABLE = F
         MANGO_DAKOTA_AVAILABLE = F
@@ -45,24 +37,38 @@ else ifneq (,$(findstring pppl,$(HOSTNAME)))
         EXTRA_F_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnlopt
 
 else ifeq ($(CLUSTER),DRACO)
-	# On Draco, you seem to need 'module load gcc'.
-	MANGO_PETSC_AVAILABLE = F
+	MANGO_HOST = draco
+
+	# On Draco, you sometimes seem to need 'module load gcc', sometimes not.
+	MANGO_PETSC_AVAILABLE = T
 	MANGO_HOPSPACK_AVAILABLE = F
 	MANGO_DAKOTA_AVAILABLE = F
-	MANGO_NLOPT_AVAILABLE = F
+	MANGO_NLOPT_AVAILABLE = T
 
-	CC = mpiicpc
-        FC = mpiifort
-	#CLINKER = $(CC)
-	#FLINKER = $(FC)
-	EXTRA_C_COMPILE_FLAGS = -O0 -g
-	EXTRA_F_COMPILE_FLAGS = -O0 -g -module obj
-	EXTRA_C_LINK_FLAGS = 
-	EXTRA_F_LINK_FLAGS = -cxxlib
+	#ifeq ($(PETSC_DIR),)
+	#$(error PETSC_DIR is not defined. This probably means you have not loaded the petsc-real module.)
+	#endif
+
+	ifeq ($(MANGO_PETSC_AVAILABLE),T)
+	  include ${PETSC_DIR}/lib/petsc/conf/variables
+	  include ${PETSC_DIR}/lib/petsc/conf/rules
+	  EXTRA_C_COMPILE_FLAGS = -O0 -g -I/u/mlan/nlopt/nlopt-2.6.1/install/include -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
+	  EXTRA_F_COMPILE_FLAGS = -O0 -g -module obj -I/u/mlan/nlopt/nlopt-2.6.1/install/include -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
+	  EXTRA_C_LINK_FLAGS = -L/u/mlan/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -L$(PETSC_DIR)/lib -lpetsc
+	  EXTRA_F_LINK_FLAGS = -L/u/mlan/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -cxxlib -L$(PETSC_DIR)/lib -lpetsc
+	else
+	  CC = mpiicpc
+          FC = mpiifort
+	  CLINKER = $(CC)
+	  FLINKER = $(FC)
+	  EXTRA_C_COMPILE_FLAGS = -O0 -g -I/u/mlan/nlopt/nlopt-2.6.1/install/include 
+	  EXTRA_F_COMPILE_FLAGS = -O0 -g -module obj -I/u/mlan/nlopt/nlopt-2.6.1/install/include
+	  EXTRA_C_LINK_FLAGS = -L/u/mlan/nlopt/nlopt-2.6.1/install/lib64 -lnlopt
+	  EXTRA_F_LINK_FLAGS = -L/u/mlan/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -cxxlib 
+	endif
+
 
 	#PETSC_DIR=/opt/local/lib/petsc
-	#include ${PETSC_DIR}/lib/petsc/conf/variables
-	#include ${PETSC_DIR}/lib/petsc/conf/rules
 	#
 	#EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
 	#EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
@@ -70,7 +76,11 @@ else ifeq ($(CLUSTER),DRACO)
 	#EXTRA_LINK_FLAGS = -lnlopt
 	#EXTRA_C_COMPILE_FLAGS += -I/usr/local/include
 	#EXTRA_F_COMPILE_FLAGS += -I/usr/local/include
+
+	MANGO_COMMAND_TO_SUBMIT_JOB = srun -n NUM_PROCS
 else
+	MANGO_HOST = osx
+
 	MANGO_PETSC_AVAILABLE = T
 	MANGO_HOPSPACK_AVAILABLE = F
 	MANGO_DAKOTA_AVAILABLE = F
@@ -94,5 +104,5 @@ else
 
 
 	# For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
-	REGCOIL_COMMAND_TO_SUBMIT_JOB =
+	MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS
 endif

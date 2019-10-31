@@ -1,5 +1,6 @@
 #include<iostream>
 #include<cstring>
+#include<stdlib.h>
 #include "mango.hpp"
 
 /* void least_squares_to_single_objective(int*, const double*, double*, int*); */
@@ -25,7 +26,7 @@ void mango::problem::optimize_least_squares() {
   }
 
   /* Open output file */
-  output_file.open(output_filename);
+  output_file.open(output_filename.c_str());
   if (!output_file.is_open()) {
     std::cout << "Error! Unable to open output file " << output_filename << "\n";
     exit(1);
