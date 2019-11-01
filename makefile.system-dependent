@@ -78,6 +78,15 @@ else ifeq ($(CLUSTER),DRACO)
 	#EXTRA_F_COMPILE_FLAGS += -I/usr/local/include
 
 	MANGO_COMMAND_TO_SUBMIT_JOB = srun -n NUM_PROCS
+
+else ifneq (,$(TRAVIS_ARCH))
+	MANGO_HOST = travis
+
+        MANGO_PETSC_AVAILABLE = F
+        MANGO_HOPSPACK_AVAILABLE = F
+        MANGO_DAKOTA_AVAILABLE = F
+        MANGO_NLOPT_AVAILABLE = F
+
 else
 	MANGO_HOST = osx
 

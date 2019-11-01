@@ -3,4 +3,4 @@ compiler: gcc
 
 script:
  - env
- - make
+ - make test_make
