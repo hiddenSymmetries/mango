@@ -160,4 +160,8 @@ extern "C" {
     return(return_bool ? 1 : 0);
   }
 
+  void mango_set_finite_difference_step_size(mango::problem *This, double* step) {
+    This->finite_difference_step_size = *step;
+  }
+
 }

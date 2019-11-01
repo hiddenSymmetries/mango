@@ -28,7 +28,7 @@ for k in range(1,len(sys.argv)):
         filename = candidate_files[j]
         if os.path.isfile(filename):
             filenames.append(filename)
-            if filename[:10] != "mango_out.":
+            if filename[:9] != "mango_out":
                 print("WARNING: Including file "+filename+" even though it does not begin with mango_out.")
 
 print()
@@ -92,7 +92,7 @@ plotNum += 1
 for j in range(N_files):
     plt.plot(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
 plt.xlabel('Function evaluation')
-plt.ylabel('Objective function')
+plt.ylabel('Objective function, linear scale')
 plt.grid(True)
 if N_files > 1:
     plt.legend(loc=0,fontsize=7)
@@ -102,7 +102,7 @@ plotNum += 1
 for j in range(N_files):
     plt.semilogy(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
 plt.xlabel('Function evaluation')
-plt.ylabel('Objective function')
+plt.ylabel('Objective function, log scale')
 plt.grid(True)
 if N_files > 1:
     plt.legend(loc=0,fontsize=7)

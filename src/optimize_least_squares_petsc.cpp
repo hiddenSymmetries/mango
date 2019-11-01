@@ -50,7 +50,7 @@ void mango::problem::optimize_least_squares_petsc() {
   switch (algorithm) {
   case PETSC_POUNDERS:
     TaoSetType(my_tao, TAOPOUNDERS);
-#if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 4))
+#if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 10))
     TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)this);
 #else
     TaoSetResidualRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)this);

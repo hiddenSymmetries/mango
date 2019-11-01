@@ -147,4 +147,14 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   delete[] state_vectors;
   delete[] state_vector_copy;
 
+  if (proc0_world) {
+    std::cout << "Here comes finite-difference Jacobian:\n";
+    for (int j_term=0; j_term<N_terms; j_term++) {
+      for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {
+	std::cout << std::setw(25) << std::setprecision(15) << Jacobian[j_parameter*N_terms+j_term];
+      }
+      std::cout << "\n";
+    }
+  }
+
 }

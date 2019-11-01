@@ -176,6 +176,11 @@ module mango
        character(C_char) :: algorithm_str(mango_interface_string_length)
        integer(C_int) :: temp_int
      end function C_mango_does_algorithm_exist
+     subroutine C_mango_set_finite_difference_step_size (this, step) bind(C,name="mango_set_finite_difference_step_size")
+       import
+       real(C_double) :: step
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_finite_difference_step_size
   end interface
 
   public :: mango_problem
@@ -188,7 +193,7 @@ module mango
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
-       mango_does_algorithm_exist
+       mango_does_algorithm_exist, mango_set_finite_difference_step_size
   
 
   abstract interface
@@ -460,5 +465,11 @@ contains
     end do
     mango_does_algorithm_exist = (C_mango_does_algorithm_exist(algorithm_str_padded) == 1)
   end function mango_does_algorithm_exist
+
+  subroutine mango_set_finite_difference_step_size(this,finite_difference_step_size)
+    type(mango_problem), intent(in) :: this
+    double precision, intent(in) :: finite_difference_step_size
+    call C_mango_set_finite_difference_step_size(this%object, real(finite_difference_step_size,C_double))
+  end subroutine mango_set_finite_difference_step_size
 
 end module mango
