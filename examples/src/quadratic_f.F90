@@ -14,6 +14,7 @@ program quadratic
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
   double precision, dimension(N_dim) :: state_vector, targets, sigmas, best_residual_function
+  double precision, dimension(N_dim) :: upper_bounds, lower_bounds
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: j
@@ -38,6 +39,10 @@ program quadratic
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_centered_differences(problem, .true.)
   call mango_set_max_function_evaluations(problem, 2000)
+
+  lower_bounds = -5.0d+0
+  upper_bounds =  5.0d+0
+  call mango_set_bound_constraints(problem, lower_bounds, upper_bounds)
 
   if (mango_is_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)

@@ -27,6 +27,11 @@ double mango::problem::optimize() {
   MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_group_leaders);
   load_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
 
+  if (algorithm_requires_bound_constraints && (!bound_constraints_set)) {
+    std::cout << "Error! A MANGO algorithm was chosen that requires bound constraints, but bound constraints were not set.\n";
+    exit(1);
+  }
+
   if (algorithm_uses_derivatives) {
     if (centered_differences) {
       max_function_and_gradient_evaluations = ceil(max_function_evaluations / 7.0);

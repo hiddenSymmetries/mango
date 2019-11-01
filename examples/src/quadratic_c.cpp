@@ -44,6 +44,15 @@ int main(int argc, char *argv[]) {
   myprob.centered_differences = true; 
   myprob.max_function_evaluations = 2000;
 
+  double lower_bounds[N_dims];
+  double upper_bounds[N_dims];
+  for (int j=0; j<N_dims; j++) {
+    lower_bounds[j] = -5.0;
+    upper_bounds[j] =  5.0;
+  }
+
+  myprob.set_bound_constraints(lower_bounds, upper_bounds);
+
   double best_objective_function;
   if (myprob.is_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();

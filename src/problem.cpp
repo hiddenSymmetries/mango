@@ -50,6 +50,7 @@ void mango::problem::defaults() {
   output_filename = "mango_out.";
   max_function_evaluations = 10000;
   best_function_evaluation = -1;
+  bound_constraints_set = false;
 }
 
 
@@ -125,3 +126,8 @@ int mango::problem::get_function_evaluations() {
   return function_evaluations;
 }
 
+void mango::problem::set_bound_constraints(double* lb, double* ub) {
+  lower_bounds = lb;
+  upper_bounds = ub;
+  bound_constraints_set = true;
+}

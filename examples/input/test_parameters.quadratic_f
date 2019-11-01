@@ -9,6 +9,15 @@
 ! algorithms:
 petsc_pounders
 petsc_nm
+nlopt_gn_direct
+nlopt_gn_direct_l
+nlopt_gn_direct_l_rand
+nlopt_gn_direct_noscal
+nlopt_gn_direct_l_noscal
+nlopt_gn_direct_l_rand_noscal
+nlopt_gn_orig_direct
+nlopt_gn_orig_direct_l
+nlopt_gn_crs2_lm
 nlopt_ln_bobyqa
 nlopt_ln_praxis
 nlopt_ln_neldermead

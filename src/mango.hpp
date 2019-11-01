@@ -59,7 +59,7 @@ namespace mango {
   typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::problem*);
 
   bool does_algorithm_exist(std::string);
-  void get_algorithm_properties(int, bool*, bool*, package_type*, std::string*);
+  void get_algorithm_properties(int, bool*, bool*, package_type*, std::string*, bool*);
 
   class problem {
   private:
@@ -68,6 +68,7 @@ namespace mango {
     MPI_Comm mpi_comm_group_leaders;
     algorithm_type algorithm;
     bool algorithm_uses_derivatives;
+    bool algorithm_requires_bound_constraints;
     bool least_squares_algorithm;
     bool least_squares;
     package_type package;
@@ -96,6 +97,9 @@ namespace mango {
     double best_objective_function;
     double* best_residual_function;
     int best_function_evaluation;
+    bool bound_constraints_set;
+    double* lower_bounds;
+    double* upper_bounds;
 
     void group_leaders_loop();
     void group_leaders_least_squares_loop();
@@ -141,6 +145,7 @@ namespace mango {
     void set_output_filename(std::string);
     void mpi_init(MPI_Comm);
     void set_custom_mpi_communicators(MPI_Comm, MPI_Comm, MPI_Comm);
+    void set_bound_constraints(double*, double*);
     double optimize();
     bool is_least_squares();
     int get_N_parameters();

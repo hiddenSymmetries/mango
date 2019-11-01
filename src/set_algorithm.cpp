@@ -45,14 +45,14 @@ void mango::problem::set_algorithm(std::string str) {
 
 bool mango::does_algorithm_exist(std::string str) {
   bool found_match = false;
-  bool algorithm_uses_derivatives, least_squares_algorithm;
+  bool algorithm_uses_derivatives, least_squares_algorithm, algorithm_requires_bound_constraints;
   package_type package;
   std::string algorithm_name;
   algorithm_type algorithm;
 
   for (int j = 0; j < NUM_ALGORITHMS; j++) {
     algorithm = (algorithm_type) j;
-    get_algorithm_properties(algorithm, &algorithm_uses_derivatives, &least_squares_algorithm, &package, &algorithm_name);
+    get_algorithm_properties(algorithm, &algorithm_uses_derivatives, &least_squares_algorithm, &package, &algorithm_name, &algorithm_requires_bound_constraints);
     if (algorithm_name.compare(str) == 0) {
       found_match = true;
       break;

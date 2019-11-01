@@ -164,4 +164,8 @@ extern "C" {
     This->finite_difference_step_size = *step;
   }
 
+  void mango_set_bound_constraints(mango::problem *This, double* lower_bounds, double* upper_bounds) {
+    This->set_bound_constraints(lower_bounds, upper_bounds);
+  }
+
 }

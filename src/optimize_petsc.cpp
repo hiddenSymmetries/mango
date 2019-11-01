@@ -59,6 +59,24 @@ void mango::problem::optimize_petsc() {
   }
 
   TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
+
+  Vec lower_bounds_vec, upper_bounds_vec;
+  if (bound_constraints_set) {
+    VecCreateSeq(PETSC_COMM_SELF, N_parameters, &lower_bounds_vec);
+    VecCreateSeq(PETSC_COMM_SELF, N_parameters, &upper_bounds_vec);
+
+    for (int j=0; j<N_parameters; j++) {
+      VecSetValue(lower_bounds_vec, j, lower_bounds[j], INSERT_VALUES);
+      VecSetValue(upper_bounds_vec, j, upper_bounds[j], INSERT_VALUES);
+    }
+    VecAssemblyBegin(lower_bounds_vec);
+    VecAssemblyBegin(upper_bounds_vec);
+    VecAssemblyEnd(lower_bounds_vec);
+    VecAssemblyEnd(upper_bounds_vec);
+
+    TaoSetVariableBounds(my_tao, lower_bounds_vec, upper_bounds_vec);
+  }
+
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
   TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
@@ -68,6 +86,10 @@ void mango::problem::optimize_petsc() {
   memcpy(state_vector, temp_array, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
 
+  if (bound_constraints_set) {
+    VecDestroy(&lower_bounds_vec);
+    VecDestroy(&upper_bounds_vec);
+  }
 
   TaoDestroy(&my_tao);
   VecDestroy(&tao_state_vec);

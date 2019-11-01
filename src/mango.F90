@@ -181,6 +181,11 @@ module mango
        real(C_double) :: step
        type(C_ptr), value :: this
      end subroutine C_mango_set_finite_difference_step_size
+     subroutine C_mango_set_bound_constraints(this, lower_bounds, upper_bounds) bind(C,name="mango_set_bound_constraints")
+       import
+       real(C_double) :: lower_bounds, upper_bounds
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_bound_constraints
   end interface
 
   public :: mango_problem
@@ -193,7 +198,7 @@ module mango
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
-       mango_does_algorithm_exist, mango_set_finite_difference_step_size
+       mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints
   
 
   abstract interface
@@ -471,5 +476,11 @@ contains
     double precision, intent(in) :: finite_difference_step_size
     call C_mango_set_finite_difference_step_size(this%object, real(finite_difference_step_size,C_double))
   end subroutine mango_set_finite_difference_step_size
+
+  subroutine mango_set_bound_constraints(this, lower_bounds, upper_bounds)
+    type(mango_problem), intent(in) :: this
+    double precision, intent(in) :: lower_bounds(:), upper_bounds(:)
+    call C_mango_set_bound_constraints(this%object, lower_bounds(1), upper_bounds(1))
+  end subroutine mango_set_bound_constraints
 
 end module mango

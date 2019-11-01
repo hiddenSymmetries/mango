@@ -119,6 +119,11 @@ void mango::problem::optimize_nlopt() {
 
   nlopt_set_maxeval(opt, max_function_and_gradient_evaluations);
 
+  if (bound_constraints_set) {
+    nlopt_set_lower_bounds(opt, lower_bounds);
+    nlopt_set_upper_bounds(opt, upper_bounds);
+  }
+
   double final_objective_function;
   nlopt_result result = nlopt_optimize(opt, state_vector, &final_objective_function);
 
