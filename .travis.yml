@@ -2,5 +2,5 @@ language: cpp
 compiler: gcc
 
 script:
- - env
- - make test_make
+ - pwd
+ - ./tests/travis.sh

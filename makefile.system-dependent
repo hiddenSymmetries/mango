@@ -87,6 +87,11 @@ else ifneq (,$(TRAVIS_ARCH))
         MANGO_DAKOTA_AVAILABLE = F
         MANGO_NLOPT_AVAILABLE = F
 
+	CC = g++
+	FC = gcc
+	CLINKER = g++
+	FLINKER = gcc
+
 else
 	MANGO_HOST = osx
 
