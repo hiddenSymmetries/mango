@@ -7,7 +7,7 @@ dist: bionic
 addons:
   apt:
     packages:
-      - libpetsc3.7
+      - libpetsc-real3.11
 
 script:
  - pwd
