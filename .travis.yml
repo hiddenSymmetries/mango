@@ -7,8 +7,14 @@ dist: bionic
 addons:
   apt:
     packages:
-      - libpetsc-real3.11
+      - libpetsc3.7
+      - libgsl23
 
 script:
  - pwd
+ - env
+ - which mpicc
+ - which mpif90
+ - which gfortran
+
 # - ./tests/travis.sh
