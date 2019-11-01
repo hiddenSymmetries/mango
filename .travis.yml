@@ -1,6 +1,15 @@
 language: cpp
 compiler: gcc
 
+#addons:
+#  apt:
+#    packages:
+#      - 
+
 script:
  - pwd
- - ./tests/travis.sh
+ - apt-cache search mpi
+ - apt-cache search petsc
+ - apt-cache search fortran
+ - apt-cache pkgnames
+# - ./tests/travis.sh
