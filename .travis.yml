@@ -1,15 +1,14 @@
 language: cpp
 compiler: gcc
+dist: bionic
 
-#addons:
-#  apt:
-#    packages:
-#      - 
+# The available apt packages can be found here:
+# https://packages.ubuntu.com/bionic/allpackages
+addons:
+  apt:
+    packages:
+      - libpetsc3.7
 
 script:
  - pwd
- - apt-cache search mpi
- - apt-cache search petsc
- - apt-cache search fortran
- - apt-cache pkgnames
 # - ./tests/travis.sh
