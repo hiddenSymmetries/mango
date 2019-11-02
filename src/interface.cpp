@@ -63,12 +63,14 @@ extern "C" {
     This->set_output_filename(filename);
   }
 
-  void mango_mpi_init(mango::problem *This, MPI_Comm *comm) {
-    This->mpi_init(*comm);
+  /* For converting communicators between Fortran and C, see
+     https://www.mcs.anl.gov/research/projects/mpi/mpi-standard/mpi-report-2.0/node59.htm */
+  void mango_mpi_init(mango::problem *This, MPI_Fint *comm) {
+    This->mpi_init(MPI_Comm_f2c(*comm));
   }
 
-  void mango_set_custom_mpi_communicators(mango::problem *This, MPI_Comm *comm_world, MPI_Comm *comm_group_leaders, MPI_Comm *comm_worker_groups) {
-    This->set_custom_mpi_communicators(*comm_world, *comm_group_leaders, *comm_worker_groups);
+  void mango_set_custom_mpi_communicators(mango::problem *This, MPI_Fint *comm_world, MPI_Fint *comm_group_leaders, MPI_Fint *comm_worker_groups) {
+    This->set_custom_mpi_communicators(MPI_Comm_f2c(*comm_world), MPI_Comm_f2c(*comm_group_leaders), MPI_Comm_f2c(*comm_worker_groups));
   }
 
   double mango_optimize(mango::problem *This) {
@@ -108,15 +110,15 @@ extern "C" {
   }
 
   int mango_get_mpi_comm_world(mango::problem *This) {
-    return (int) This->get_mpi_comm_world();
+    return (int) MPI_Comm_c2f(This->get_mpi_comm_world());
   }
 
   int mango_get_mpi_comm_worker_groups(mango::problem *This) {
-    return (int) This->get_mpi_comm_worker_groups();
+    return (int) MPI_Comm_c2f(This->get_mpi_comm_worker_groups());
   }
 
   int mango_get_mpi_comm_group_leaders(mango::problem *This) {
-    return (int) This->get_mpi_comm_group_leaders();
+    return (int) MPI_Comm_c2f(This->get_mpi_comm_group_leaders());
   }
 
   int mango_get_N_parameters(mango::problem *This) {
