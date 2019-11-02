@@ -15,6 +15,6 @@ which gfortran
 
 make test_make
 
-#./tests/install_nlopt.sh
+./tests/install_nlopt.sh
 
 make

@@ -99,7 +99,7 @@ MANGO_HOST = travis
 MANGO_PETSC_AVAILABLE = T
 MANGO_HOPSPACK_AVAILABLE = F
 MANGO_DAKOTA_AVAILABLE = F
-MANGO_NLOPT_AVAILABLE = F
+MANGO_NLOPT_AVAILABLE = T
 
 # Locations of PETSc files as they will be located in travis's Ubuntu filesystem can be found at
 # https://packages.ubuntu.com/bionic/amd64/libpetsc3.7.7-dev/filelist
@@ -118,8 +118,8 @@ EXTRA_F_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 
 ifeq ($(MANGO_NLOPT_AVAILABLE),T)
 EXTRA_C_COMPILE_FLAGS += -I./nlopt/nlopt-2.6.1/install/include
-EXTRA_C_LINK_FLAGS += -lnlopt
-EXTRA_F_LINK_FLAGS += -lnlopt
+EXTRA_C_LINK_FLAGS += -L./nlopt/nlopt-2.6.1/install/lib -lnlopt
+EXTRA_F_LINK_FLAGS += -L./nlopt/nlopt-2.6.1/install/lib -lnlopt
 endif
 
 #####################################################################
