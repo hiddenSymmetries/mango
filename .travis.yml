@@ -1,20 +1,20 @@
 language: cpp
 compiler: gcc
+
+# 'dist' sets the release of Ubuntu that will be used. As of today (2019-11-02) bionic is the latest version available in Travis.
 dist: bionic
 
 # The available apt packages can be found here:
 # https://packages.ubuntu.com/bionic/allpackages
+# (although that does not seem to list petsc*-dev)
+# and
+# https://www.apt-browse.org/search/?query=libpetsc&components=5&architectures=amd64&persist=True
+# We need to load the "-dev" version of petsc in order to get access to mpicc/mpif90 and the include files.
 addons:
   apt:
     packages:
-      - libpetsc3.7
-      - libgsl23
+      - libpetsc3.7-dev
+      - libgsl-dev
 
 script:
- - pwd
- - env
- - which mpicc
- - which mpif90
- - which gfortran
-
-# - ./tests/travis.sh
+ - ./tests/travis.sh

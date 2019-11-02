@@ -82,15 +82,30 @@ else ifeq ($(CLUSTER),DRACO)
 else ifneq (,$(TRAVIS_ARCH))
 	MANGO_HOST = travis
 
-        MANGO_PETSC_AVAILABLE = F
+        MANGO_PETSC_AVAILABLE = T
         MANGO_HOPSPACK_AVAILABLE = F
         MANGO_DAKOTA_AVAILABLE = F
         MANGO_NLOPT_AVAILABLE = F
 
-	CC = g++
-	FC = gcc
-	CLINKER = g++
-	FLINKER = gcc
+	# Locations of PETSc files as they will be located in travis's Ubuntu filesystem can be found at
+	# https://packages.ubuntu.com/bionic/amd64/libpetsc3.7.7-dev/filelist
+	# or
+	# https://www.apt-browse.org/browse/ubuntu/bionic/universe/amd64/libpetsc3.7.7-dev/3.7.7+dfsg1-2build5/
+	PETSC_DIR=/usr/lib/petscdir/3.7.7/x86_64-linux-gnu-real
+
+	include ${PETSC_DIR}/lib/petsc/conf/variables
+	include ${PETSC_DIR}/lib/petsc/conf/rules
+	# The above lines should set CC, FC, CLINKER, and FLINKER
+
+	EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
+	EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
+	EXTRA_C_LINK_FLAGS = -lstdc++
+	EXTRA_F_LINK_FLAGS = -lstdc++
+	if eq ($(MANGO_NLOPT_AVAILABLE),T)
+	  EXTRA_C_COMPILE_FLAGS += -I./nlopt/nlopt-2.6.1/install/include
+	  EXTRA_C_LINK_FLAGS += -lnlopt
+	  EXTRA_F_LINK_FLAGS += -lnlopt
+	endif
 
 else
 	MANGO_HOST = osx
