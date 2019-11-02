@@ -117,9 +117,9 @@ EXTRA_C_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 EXTRA_F_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 
 ifeq ($(MANGO_NLOPT_AVAILABLE),T)
-EXTRA_C_COMPILE_FLAGS += -I./nlopt/nlopt-2.6.1/install/include
-EXTRA_C_LINK_FLAGS += -L./nlopt/nlopt-2.6.1/install/lib -lnlopt
-EXTRA_F_LINK_FLAGS += -L./nlopt/nlopt-2.6.1/install/lib -lnlopt
+EXTRA_C_COMPILE_FLAGS += -I ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/include
+EXTRA_C_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/lib -lnlopt
+EXTRA_F_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/lib -lnlopt
 endif
 
 #####################################################################
