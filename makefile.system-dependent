@@ -3,6 +3,8 @@
 # This file, which is included by the main makefile, attempts to detect which computer we are on.
 
 #####################################################################
+# NERSC Cori
+#####################################################################
 
 #ifdef $(NERSC_HOST)
 ifeq ($(NERSC_HOST),cori)
@@ -18,6 +20,8 @@ EXTRA_LINK_FLAGS =  -qopenmp -mkl -Wl,-ydgemm_
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
 REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
 
+#####################################################################
+# PPPL cluster
 #####################################################################
 
 else ifneq (,$(findstring pppl,$(HOSTNAME)))
@@ -39,6 +43,8 @@ EXTRA_C_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnl
 EXTRA_F_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnlopt
 
 #####################################################################
+# IPP Draco
+#####################################################################
 
 else ifeq ($(CLUSTER),DRACO)
 MANGO_HOST = draco
@@ -55,7 +61,7 @@ MANGO_NLOPT_AVAILABLE = T
 
 ifeq ($(MANGO_PETSC_AVAILABLE),T)
   include ${PETSC_DIR}/lib/petsc/conf/variables
-  include ${PETSC_DIR}/lib/petsc/conf/rules
+  #include ${PETSC_DIR}/lib/petsc/conf/rules
   EXTRA_C_COMPILE_FLAGS = -O0 -g -I/u/mlan/nlopt/nlopt-2.6.1/install/include -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
   EXTRA_F_COMPILE_FLAGS = -O0 -g -module obj -I/u/mlan/nlopt/nlopt-2.6.1/install/include -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
   EXTRA_C_LINK_FLAGS = -L/u/mlan/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -L$(PETSC_DIR)/lib -lpetsc
@@ -84,6 +90,8 @@ endif
 MANGO_COMMAND_TO_SUBMIT_JOB = srun -n NUM_PROCS
 
 #####################################################################
+# Travis-CI
+#####################################################################
 
 else ifneq (,$(TRAVIS_ARCH))
 MANGO_HOST = travis
@@ -99,14 +107,14 @@ MANGO_NLOPT_AVAILABLE = F
 # https://www.apt-browse.org/browse/ubuntu/bionic/universe/amd64/libpetsc3.7.7-dev/3.7.7+dfsg1-2build5/
 PETSC_DIR=/usr/lib/petscdir/3.7.7/x86_64-linux-gnu-real
 
+# The next line should set CC, FC, CLINKER, and FLINKER
 include ${PETSC_DIR}/lib/petsc/conf/variables
-include ${PETSC_DIR}/lib/petsc/conf/rules
-# The above lines should set CC, FC, CLINKER, and FLINKER
+#include ${PETSC_DIR}/lib/petsc/conf/rules
 
 EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
 EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
-EXTRA_C_LINK_FLAGS = -lstdc++
-EXTRA_F_LINK_FLAGS = -lstdc++
+EXTRA_C_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
+EXTRA_F_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 
 ifeq ($(MANGO_NLOPT_AVAILABLE),T)
 EXTRA_C_COMPILE_FLAGS += -I./nlopt/nlopt-2.6.1/install/include
@@ -114,6 +122,8 @@ EXTRA_C_LINK_FLAGS += -lnlopt
 EXTRA_F_LINK_FLAGS += -lnlopt
 endif
 
+#####################################################################
+# Matt's laptop, with mpi and petsc via macports
 #####################################################################
 
 else
@@ -126,7 +136,7 @@ MANGO_NLOPT_AVAILABLE = T
 
 PETSC_DIR=/opt/local/lib/petsc
 include ${PETSC_DIR}/lib/petsc/conf/variables
-include ${PETSC_DIR}/lib/petsc/conf/rules
+#include ${PETSC_DIR}/lib/petsc/conf/rules
 
 #CC = mpicxx
 #FC = mpif90

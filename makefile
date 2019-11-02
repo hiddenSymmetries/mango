@@ -71,9 +71,9 @@ lib/libmango.a: $(F_OBJ_FILES) $(C_OBJ_FILES)
 examples: lib/libmango.a
 	$(MAKE) -C examples	
 
-#clean:
-#	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~
-#	$(MAKE) -C examples clean
+clean:
+	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~
+	$(MAKE) -C examples clean
 
 test: $(TARGET)
 	@echo "Beginning functional tests." && cd examples && export MANGO_RETEST=no && ./run_examples
