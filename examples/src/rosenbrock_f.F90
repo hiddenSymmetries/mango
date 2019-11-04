@@ -33,7 +33,7 @@ program rosenbrock
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_max_function_evaluations(problem, 2000)
 
-  if (mango_is_proc0_worker_groups(problem)) then
+  if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
 
      ! Make workers stop
@@ -44,7 +44,7 @@ program rosenbrock
      call worker(problem)
   end if
 
-  if (mango_is_proc0_world(problem)) then
+  if (mango_get_proc0_world(problem)) then
      print *,"Best state vector:",state_vector
      print *,"Best objective function: ",best_objective_function
      print *,"Best residual function: ",best_residual_function

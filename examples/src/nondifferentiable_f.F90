@@ -43,7 +43,7 @@ program nondifferentiable
   call mango_set_centered_differences(problem, .true.)
   call mango_set_max_function_evaluations(problem, 2000)
 
-  if (mango_is_proc0_worker_groups(problem)) then
+  if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
 
      ! Make workers stop
@@ -54,7 +54,7 @@ program nondifferentiable
      call worker(problem)
   end if
 
-  if (mango_is_proc0_world(problem)) then
+  if (mango_get_proc0_world(problem)) then
      print *,"Best state vector:",state_vector
      print *,"Best objective function: ",best_objective_function
      print *,"Best function evaluation was ",mango_get_best_function_evaluation(problem)

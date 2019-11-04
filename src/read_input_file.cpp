@@ -14,8 +14,11 @@ void mango::problem::read_input_file(std::string filename) {
     exit(1);
   }
 
+  int N_worker_groups;
   file >> N_worker_groups;
   file >> algorithm_str;
   set_algorithm(algorithm_str);
   file.close();
+
+  mpi_partition.set_N_worker_groups(N_worker_groups);
 }

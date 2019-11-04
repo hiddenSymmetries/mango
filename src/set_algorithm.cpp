@@ -16,7 +16,7 @@ void mango::problem::set_algorithm(algorithm_type algorithm_in) {
   algorithm = algorithm_in;
   load_algorithm_properties();
 
-  std::cout << "Algorithm set (by integer) to " << algorithm << "\n";
+  std::cout << "Algorithm set (by integer) to " << algorithm << ", a.k.a. " << algorithm_name << "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ void mango::problem::set_algorithm(std::string str) {
     exit(1);
   }
 
-  std::cout << "Algorithm set (by string) to " << algorithm << "\n";
+  std::cout << "Algorithm set (by string) to " << algorithm << ", a.k.a. " << algorithm_name << "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////

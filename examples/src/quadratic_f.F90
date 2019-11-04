@@ -44,7 +44,7 @@ program quadratic
   upper_bounds =  5.0d+0
   call mango_set_bound_constraints(problem, lower_bounds, upper_bounds)
 
-  if (mango_is_proc0_worker_groups(problem)) then
+  if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
 
      ! Make workers stop
@@ -55,7 +55,7 @@ program quadratic
      call worker(problem)
   end if
 
-  if (mango_is_proc0_world(problem)) then
+  if (mango_get_proc0_world(problem)) then
      print *,"Best state vector:",state_vector
      print *,"Best objective function: ",best_objective_function
      print *,"Best residual function: ",best_residual_function

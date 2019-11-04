@@ -7,7 +7,7 @@
 
 double mango::problem::optimize() {
 
-  if (! proc0_worker_groups) {
+  if (! mpi_partition.get_proc0_worker_groups()) {
     std::cout << "Error! The mango_optimize() subroutine should only be called by group leaders, not by all workers.\n";
     exit(1);
   }
@@ -17,13 +17,15 @@ double mango::problem::optimize() {
   best_objective_function = std::numeric_limits<double>::quiet_NaN();
   best_function_evaluation = -1;
 
+  /* To simplify code a bit... */
+  MPI_Comm mpi_comm_group_leaders = mpi_partition.get_comm_group_leaders();
+
   /* Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders: */
   MPI_Bcast(&N_parameters, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&N_terms, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&centered_differences, 1, MPI_C_BOOL, 0, mpi_comm_group_leaders);
   MPI_Bcast(&finite_difference_step_size, 1, MPI_DOUBLE, 0, mpi_comm_group_leaders);
   MPI_Bcast(&least_squares, 1, MPI_C_BOOL, 0, mpi_comm_group_leaders);
-  MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_group_leaders);
   load_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
 
@@ -42,7 +44,7 @@ double mango::problem::optimize() {
     max_function_and_gradient_evaluations = max_function_evaluations;
   }
 
-  std::cout << "Proc " << mpi_rank_world << " is entering optimize(), and thinks proc0_world=" << proc0_world << "\n";
+  std::cout << "Proc " << mpi_partition.get_rank_world() << " is entering optimize(), and thinks proc0_world=" << mpi_partition.get_proc0_world() << "\n";
   std::cout << "max_function_evaluations = " << max_function_evaluations << 
     ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << "\n";
 
@@ -51,7 +53,7 @@ double mango::problem::optimize() {
     return(best_objective_function);
   }
 
-  if (!proc0_world) {
+  if (!mpi_partition.get_proc0_world()) {
     group_leaders_loop();
     return(std::numeric_limits<double>::quiet_NaN());
   }

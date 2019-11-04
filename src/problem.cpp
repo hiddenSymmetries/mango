@@ -43,7 +43,7 @@ mango::problem::~problem() {
 }
 
 void mango::problem::defaults() {
-  N_worker_groups = -1;
+  mpi_partition.set_N_worker_groups(-1);
   set_algorithm(PETSC_NM);
   centered_differences = false;
   finite_difference_step_size = 1.0e-7;
@@ -70,54 +70,6 @@ int mango::problem::get_N_terms() {
   return N_terms;
 }
 
-MPI_Comm mango::problem::get_mpi_comm_world() {
-  return mpi_comm_world;
-}
-
-MPI_Comm mango::problem::get_mpi_comm_worker_groups() {
-  return mpi_comm_worker_groups;
-}
-
-MPI_Comm mango::problem::get_mpi_comm_group_leaders() {
-  return mpi_comm_group_leaders;
-}
-
-bool mango::problem::is_proc0_world() {
-  return proc0_world;
-}
-
-bool mango::problem::is_proc0_worker_groups() {
-  return proc0_worker_groups;
-}
-
-int mango::problem::get_mpi_rank_world() {
-  return mpi_rank_world;
-}
-
-int mango::problem::get_mpi_rank_worker_groups() {
-  return mpi_rank_worker_groups;
-}
-
-int mango::problem::get_mpi_rank_group_leaders() {
-  return mpi_rank_group_leaders;
-}
-
-int mango::problem::get_N_procs_world() {
-  return N_procs_world;
-}
-
-int mango::problem::get_N_procs_worker_groups() {
-  return N_procs_worker_groups;
-}
-
-int mango::problem::get_N_procs_group_leaders() {
-  return N_procs_group_leaders;
-}
-
-int mango::problem::get_worker_group() {
-  return worker_group;
-}
-
 int mango::problem::get_best_function_evaluation() {
   return best_function_evaluation;
 }
@@ -130,4 +82,39 @@ void mango::problem::set_bound_constraints(double* lb, double* ub) {
   lower_bounds = lb;
   upper_bounds = ub;
   bound_constraints_set = true;
+}
+
+#define bold_line "****************************************************************************************\n"
+void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
+  /* This method basically just calls MPI_Partition::init, but first checks to see if the algorithm
+     chosen can support parallel function evaluations. If not, N_worker_groups is set to 1. */
+
+  if (algorithm < 0) {
+    std::cout << "\nAlgorithm cannot be negative.\n";
+    exit(1);
+  }
+  if (algorithm >= NUM_ALGORITHMS) {
+    std::cout << "\nAlgorithm is too large.\n";
+    exit(1);
+  }
+
+  if (algorithm_uses_derivatives) { /* May want to change this, since HOPSPACK does not use derivatives but it does exploit concurrent function evaluations. */
+    int mpi_rank_world, N_procs_world;
+    MPI_Comm_size(mpi_comm_world, &N_procs_world);
+    MPI_Comm_rank(mpi_comm_world, &mpi_rank_world);
+
+    if ((N_procs_world > 1) && (mpi_partition.get_N_worker_groups() == 1) && (mpi_rank_world==0)) {
+      std::cout << bold_line;
+      std::cout << bold_line;
+      std::cout << "WARNING!!! You have chosen an algorithm that can exploit concurrent function evaluations\n";
+      std::cout << "but you have set N_worker_groups=1. You probably want a larger value.\n";
+      std::cout << bold_line;
+      std::cout << bold_line;
+    }
+  } else {
+    /* There is no point having >1 worker groups with these algorithms. */
+    mpi_partition.set_N_worker_groups(1);
+  }  
+
+  mpi_partition.init(mpi_comm_world);
 }

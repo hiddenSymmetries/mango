@@ -8,9 +8,9 @@ void mango::problem::finite_difference_Jacobian_to_gradient(const double* state_
 
   /* gradient should have been allocated already, with size N_parameters. */
 
-  std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_rank_world << "\n";
+  std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_partition.get_rank_world() << "\n";
 
-  if (!proc0_world) {
+  if (!mpi_partition.get_proc0_world()) {
     std::cout << "Only proc0_world should get here!\n";
     exit(1);
   }

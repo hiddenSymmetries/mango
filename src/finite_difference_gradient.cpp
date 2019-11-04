@@ -14,6 +14,14 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     return;
   }
 
+  /* To simplify code in this file, make some copies of variables in mpi_partition. */
+  MPI_Comm mpi_comm_group_leaders = mpi_partition.get_comm_group_leaders();
+  bool proc0_world = mpi_partition.get_proc0_world();
+  int mpi_rank_world = mpi_partition.get_rank_world();
+  int mpi_rank_group_leaders = mpi_partition.get_rank_group_leaders();
+  int N_worker_groups = mpi_partition.get_N_worker_groups();
+
+
   int data;
   int j_evaluation, j_parameter;
 

@@ -8,7 +8,7 @@
 void mango::problem::optimize_least_squares() {
   int j;
 
-  if (!proc0_world) {
+  if (!mpi_partition.get_proc0_world()) {
     group_leaders_least_squares_loop();
     return;
   }
@@ -79,7 +79,7 @@ void mango::problem::optimize_least_squares() {
 
   /* Tell the other group leaders to exit. */
   int data = -1;
-  MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
+  MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
 
   memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); /* Make sure we leave state_vector equal to the best state vector seen. */
 

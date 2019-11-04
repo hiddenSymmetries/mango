@@ -69,8 +69,8 @@ extern "C" {
     This->mpi_init(MPI_Comm_f2c(*comm));
   }
 
-  void mango_set_custom_mpi_communicators(mango::problem *This, MPI_Fint *comm_world, MPI_Fint *comm_group_leaders, MPI_Fint *comm_worker_groups) {
-    This->set_custom_mpi_communicators(MPI_Comm_f2c(*comm_world), MPI_Comm_f2c(*comm_group_leaders), MPI_Comm_f2c(*comm_worker_groups));
+  void mango_mpi_partition_set_custom(mango::problem *This, MPI_Fint *comm_world, MPI_Fint *comm_group_leaders, MPI_Fint *comm_worker_groups) {
+    This->mpi_partition.set_custom(MPI_Comm_f2c(*comm_world), MPI_Comm_f2c(*comm_group_leaders), MPI_Comm_f2c(*comm_worker_groups));
   }
 
   double mango_optimize(mango::problem *This) {
@@ -78,47 +78,47 @@ extern "C" {
   }
 
   int mango_get_mpi_rank_world(mango::problem *This) {
-    return This->get_mpi_rank_world();
+    return This->mpi_partition.get_rank_world();
   }
 
   int mango_get_mpi_rank_worker_groups(mango::problem *This) {
-    return This->get_mpi_rank_worker_groups();
+    return This->mpi_partition.get_rank_worker_groups();
   }
 
   int mango_get_mpi_rank_group_leaders(mango::problem *This) {
-    return This->get_mpi_rank_group_leaders();
+    return This->mpi_partition.get_rank_group_leaders();
   }
 
   int mango_get_N_procs_world(mango::problem *This) {
-    return This->get_N_procs_world();
+    return This->mpi_partition.get_N_procs_world();
   }
 
   int mango_get_N_procs_worker_groups(mango::problem *This) {
-    return This->get_N_procs_worker_groups();
+    return This->mpi_partition.get_N_procs_worker_groups();
   }
 
   int mango_get_N_procs_group_leaders(mango::problem *This) {
-    return This->get_N_procs_group_leaders();
+    return This->mpi_partition.get_N_procs_group_leaders();
   }
 
-  int mango_is_proc0_world(mango::problem *This) {
-    return This->is_proc0_world() ? 1 : 0;
+  int mango_get_proc0_world(mango::problem *This) {
+    return This->mpi_partition.get_proc0_world() ? 1 : 0;
   }
 
-  int mango_is_proc0_worker_groups(mango::problem *This) {
-    return This->is_proc0_worker_groups() ? 1 : 0;
+  int mango_get_proc0_worker_groups(mango::problem *This) {
+    return This->mpi_partition.get_proc0_worker_groups() ? 1 : 0;
   }
 
   int mango_get_mpi_comm_world(mango::problem *This) {
-    return (int) MPI_Comm_c2f(This->get_mpi_comm_world());
+    return (int) MPI_Comm_c2f(This->mpi_partition.get_comm_world());
   }
 
   int mango_get_mpi_comm_worker_groups(mango::problem *This) {
-    return (int) MPI_Comm_c2f(This->get_mpi_comm_worker_groups());
+    return (int) MPI_Comm_c2f(This->mpi_partition.get_comm_worker_groups());
   }
 
   int mango_get_mpi_comm_group_leaders(mango::problem *This) {
-    return (int) MPI_Comm_c2f(This->get_mpi_comm_group_leaders());
+    return (int) MPI_Comm_c2f(This->mpi_partition.get_comm_group_leaders());
   }
 
   int mango_get_N_parameters(mango::problem *This) {
@@ -130,7 +130,7 @@ extern "C" {
   }
 
   int mango_get_worker_group(mango::problem *This) {
-    return (int) This->get_worker_group();
+    return (int) This->mpi_partition.get_worker_group();
   }
 
   int mango_get_best_function_evaluation(mango::problem *This) {

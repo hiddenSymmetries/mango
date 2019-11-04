@@ -71,11 +71,11 @@ module mango
        integer(C_int) :: mpi_comm
        type(C_ptr), value :: this
      end subroutine C_mango_mpi_init
-     subroutine C_mango_set_custom_mpi_communicators(this, comm1, comm2, comm3) bind(C,name="mango_set_custom_mpi_communicators")
+     subroutine C_mango_mpi_partition_set_custom(this, comm1, comm2, comm3) bind(C,name="mango_mpi_partition_set_custom")
        import
        integer(C_int) :: comm1, comm2, comm3
        type(C_ptr), value :: this
-     end subroutine C_mango_set_custom_mpi_communicators
+     end subroutine C_mango_mpi_partition_set_custom
      function C_mango_optimize(this) result(optimum) bind(C,name="mango_optimize")
        import
        type(C_ptr), value :: this
@@ -111,16 +111,16 @@ module mango
        integer(C_int) :: N_procs
        type(C_ptr), value :: this
      end function C_mango_get_N_procs_group_leaders
-     function C_mango_is_proc0_world(this) result(proc0) bind(C,name="mango_is_proc0_world")
+     function C_mango_get_proc0_world(this) result(proc0) bind(C,name="mango_get_proc0_world")
        import
        integer(C_int) :: proc0
        type(C_ptr), value :: this
-     end function C_mango_is_proc0_world
-     function C_mango_is_proc0_worker_groups(this) result(proc0) bind(C,name="mango_is_proc0_worker_groups")
+     end function C_mango_get_proc0_world
+     function C_mango_get_proc0_worker_groups(this) result(proc0) bind(C,name="mango_get_proc0_worker_groups")
        import
        integer(C_int) :: proc0
        type(C_ptr), value :: this
-     end function C_mango_is_proc0_worker_groups
+     end function C_mango_get_proc0_worker_groups
      function C_mango_get_mpi_comm_world(this) result(comm) bind(C,name="mango_get_mpi_comm_world")
        import
        integer(C_int) :: comm
@@ -191,10 +191,10 @@ module mango
   public :: mango_problem
   public :: mango_problem_create, mango_problem_create_least_squares, mango_problem_destroy, &
        mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
-       mango_mpi_init, mango_set_custom_mpi_communicators, mango_optimize, &
+       mango_mpi_init, mango_mpi_partition_set_custom, mango_optimize, &
        mango_get_mpi_rank_world, mango_get_mpi_rank_worker_groups, mango_get_mpi_rank_group_leaders, &
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
-       mango_is_proc0_world, mango_is_proc0_worker_groups, &
+       mango_get_proc0_world, mango_get_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
@@ -336,11 +336,11 @@ contains
     call C_mango_mpi_init(this%object, int(mpi_comm,C_int))
   end subroutine mango_mpi_init
 
-  subroutine mango_set_custom_mpi_communicators(this, comm1, comm2, comm3)
+  subroutine mango_mpi_partition_set_custom(this, comm1, comm2, comm3)
     type(mango_problem), intent(in) :: this
     integer, intent(in) :: comm1, comm2, comm3
-    call C_mango_set_custom_mpi_communicators(this%object, int(comm1,C_int), int(comm2,C_int), int(comm3,C_int))
-  end subroutine mango_set_custom_mpi_communicators
+    call C_mango_mpi_partition_set_custom(this%object, int(comm1,C_int), int(comm2,C_int), int(comm3,C_int))
+  end subroutine mango_mpi_partition_set_custom
 
   double precision function mango_optimize(this)
     type(mango_problem), intent(in) :: this
@@ -377,31 +377,31 @@ contains
     mango_get_N_procs_group_leaders = C_mango_get_N_procs_group_leaders(this%object)
   end function mango_get_N_procs_group_leaders
 
-  logical function mango_is_proc0_world(this)
+  logical function mango_get_proc0_world(this)
     type(mango_problem), intent(in) :: this
     integer :: result
-    result = C_mango_is_proc0_world(this%object)
+    result = C_mango_get_proc0_world(this%object)
     if (result == 0) then
-       mango_is_proc0_world = .false.
+       mango_get_proc0_world = .false.
     elseif (result == 1) then
-       mango_is_proc0_world = .true.
+       mango_get_proc0_world = .true.
     else
-       stop "Error in mango_is_proc0_world"
+       stop "Error in mango_get_proc0_world"
     end if
-  end function mango_is_proc0_world
+  end function mango_get_proc0_world
 
-  logical function mango_is_proc0_worker_groups(this)
+  logical function mango_get_proc0_worker_groups(this)
     type(mango_problem), intent(in) :: this
     integer :: result
-    result = C_mango_is_proc0_worker_groups(this%object)
+    result = C_mango_get_proc0_worker_groups(this%object)
     if (result == 0) then
-       mango_is_proc0_worker_groups = .false.
+       mango_get_proc0_worker_groups = .false.
     elseif (result == 1) then
-       mango_is_proc0_worker_groups = .true.
+       mango_get_proc0_worker_groups = .true.
     else
-       stop "Error in mango_is_proc0_worker_groups"
+       stop "Error in mango_get_proc0_worker_groups"
     end if
-  end function mango_is_proc0_worker_groups
+  end function mango_get_proc0_worker_groups
 
   integer function mango_get_mpi_comm_world(this)
     type(mango_problem), intent(in) :: this

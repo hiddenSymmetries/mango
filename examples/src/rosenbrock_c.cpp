@@ -35,18 +35,18 @@ int main(int argc, char *argv[]) {
   myprob.max_function_evaluations = 2000;
 
   double best_objective_function;
-  if (myprob.is_proc0_worker_groups()) {
+  if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
 
     /* Make workers stop */
     int data[1];
     data[0] = -1;
-    MPI_Bcast(data, 1, MPI_INT, 0, myprob.get_mpi_comm_worker_groups());
+    MPI_Bcast(data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
   } else {
     worker(&myprob);
   }
 
-  if (myprob.is_proc0_world()) {
+  if (myprob.mpi_partition.get_proc0_world()) {
     std::cout << "Best state vector: " << std::setprecision(16);
     for (int j=0; j<2; j++) std::cout << state_vector[j] << "  ";
     std::cout << "\nBest objective function: " << best_objective_function << "\nBest residual vector:";
@@ -75,12 +75,12 @@ void worker(mango::problem* myprob) {
   int data[1];
 
   while (keep_going) {
-    MPI_Bcast(data, 1, MPI_INT, 0, myprob->get_mpi_comm_worker_groups());
+    MPI_Bcast(data, 1, MPI_INT, 0, myprob->mpi_partition.get_comm_worker_groups());
     if (data[0] < 0) {
-      std::cout << "Proc " << std::setw(5) << myprob->get_mpi_rank_world() << " is exiting.\n";
+      std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
       keep_going = false;
     } else {
-      std::cout<< "Proc " << std::setw(5) << myprob->get_mpi_rank_world() << " is doing calculation " << data[0] << "\n";
+      std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
       /* For this problem, the workers don't actually do any work. */
     }
   }

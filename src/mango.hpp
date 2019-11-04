@@ -61,11 +61,53 @@ namespace mango {
   bool does_algorithm_exist(std::string);
   void get_algorithm_properties(int, bool*, bool*, package_type*, std::string*, bool*);
 
+  //////////////////////////////////////////////////////////////////////////////////////
+
+  class MPI_Partition {
+  private:
+    MPI_Comm comm_world;
+    MPI_Comm comm_worker_groups;
+    MPI_Comm comm_group_leaders;
+    int N_procs_world;
+    int rank_world;
+    int N_procs_worker_groups;
+    int rank_worker_groups;
+    int N_procs_group_leaders;
+    int rank_group_leaders;
+    int worker_group;
+    bool proc0_world;
+    bool proc0_worker_groups;
+    int N_worker_groups;
+    bool initialized;
+
+    void verify_initialized();
+    void print();
+
+  public:
+    MPI_Partition();
+    ~MPI_Partition();
+    void init(MPI_Comm);
+    void set_custom(MPI_Comm, MPI_Comm, MPI_Comm);
+    MPI_Comm get_comm_world();
+    MPI_Comm get_comm_worker_groups();
+    MPI_Comm get_comm_group_leaders();
+    bool get_proc0_world();
+    bool get_proc0_worker_groups();
+    int get_rank_world();
+    int get_rank_worker_groups();
+    int get_rank_group_leaders();
+    int get_N_procs_world();
+    int get_N_procs_worker_groups();
+    int get_N_procs_group_leaders();
+    int get_worker_group();
+    int get_N_worker_groups();
+    void set_N_worker_groups(int);
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////////
+
   class problem {
   private:
-    MPI_Comm mpi_comm_world;
-    MPI_Comm mpi_comm_worker_groups;
-    MPI_Comm mpi_comm_group_leaders;
     algorithm_type algorithm;
     bool algorithm_uses_derivatives;
     bool algorithm_requires_bound_constraints;
@@ -73,16 +115,6 @@ namespace mango {
     bool least_squares;
     package_type package;
     std::string algorithm_name;
-    int N_procs_world;
-    int mpi_rank_world;
-    int N_procs_worker_groups;
-    int mpi_rank_worker_groups;
-    int N_procs_group_leaders;
-    int mpi_rank_group_leaders;
-    int worker_group;
-    bool proc0_world;
-    bool proc0_worker_groups;
-    int N_worker_groups;
     int N_parameters;
     int N_terms;
     objective_function_type objective_function;
@@ -135,33 +167,21 @@ namespace mango {
     double finite_difference_step_size;
     std::string output_filename;
     int max_function_evaluations;
+    MPI_Partition mpi_partition;
 
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); /* For least-squares problems */
     ~problem();
+    void mpi_init(MPI_Comm);
     void set_algorithm(algorithm_type);
     void set_algorithm(std::string);
     void read_input_file(std::string);
     void set_output_filename(std::string);
-    void mpi_init(MPI_Comm);
-    void set_custom_mpi_communicators(MPI_Comm, MPI_Comm, MPI_Comm);
     void set_bound_constraints(double*, double*);
     double optimize();
     bool is_least_squares();
     int get_N_parameters();
     int get_N_terms();
-    MPI_Comm get_mpi_comm_world();
-    MPI_Comm get_mpi_comm_worker_groups();
-    MPI_Comm get_mpi_comm_group_leaders();
-    bool is_proc0_world();
-    bool is_proc0_worker_groups();
-    int get_mpi_rank_world();
-    int get_mpi_rank_worker_groups();
-    int get_mpi_rank_group_leaders();
-    int get_N_procs_world();
-    int get_N_procs_worker_groups();
-    int get_N_procs_group_leaders();
-    int get_worker_group();
     int get_best_function_evaluation();
     int get_function_evaluations();
   };
