@@ -1,18 +1,13 @@
 #include<iostream>
 #include<mpi.h>
-#include<stdlib.h>
 #include "mango.hpp"
+#include<exception>
 
 void mango::MPI_Partition::init(MPI_Comm mpi_comm_world_in) {
   int ierr;
 
-  /* mpi_comm_world = mpi_comm_world_in; */
   ierr = MPI_Comm_dup(mpi_comm_world_in, &comm_world);
-
-  if (ierr != 0) {
-    std::cout << "\nError in mango::mpi_init.\n";
-    exit(1);
-  }
+  if (ierr != 0) throw std::runtime_error("Error 1 in mango::MPI_Partition::init.");
 
   ierr = MPI_Comm_size(comm_world, &N_procs_world);
   ierr = MPI_Comm_rank(comm_world, &rank_world);
@@ -35,10 +30,7 @@ void mango::MPI_Partition::init(MPI_Comm mpi_comm_world_in) {
   /* color = worker_group, key = rank_world */
 
   ierr = MPI_Comm_split(comm_world, worker_group, rank_world, &comm_worker_groups);
-  if (ierr != 0) {
-    std::cout << "\nError 2 in mango::mpi_init.\n";
-    exit(1);
-  }
+  if (ierr != 0) throw std::runtime_error("Error 2 in mango::MPI_Partition::init.");
   MPI_Comm_rank(comm_worker_groups, &rank_worker_groups);
   MPI_Comm_size(comm_worker_groups, &N_procs_worker_groups);
   proc0_worker_groups = (rank_worker_groups == 0);
@@ -51,10 +43,8 @@ void mango::MPI_Partition::init(MPI_Comm mpi_comm_world_in) {
     color = MPI_UNDEFINED;
   }
   ierr = MPI_Comm_split(comm_world, color, rank_world, &comm_group_leaders);
-  if (ierr != 0) {
-    std::cout << "\nError 3 in mango::mpi_init.\n";
-    exit(1);
-  }
+  if (ierr != 0) throw std::runtime_error("Error 3 in mango::MPI_Partition::init.");
+
   if (proc0_worker_groups) {
     MPI_Comm_rank(comm_group_leaders, &rank_group_leaders);
     MPI_Comm_size(comm_group_leaders, &N_procs_group_leaders);

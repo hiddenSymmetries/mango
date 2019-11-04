@@ -1,6 +1,5 @@
 #include<iostream>
 #include<mpi.h>
-#include<stdlib.h>
 #include "mango.hpp"
 
 void mango::MPI_Partition::print() {

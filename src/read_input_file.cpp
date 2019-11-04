@@ -1,7 +1,6 @@
 #include<string>
 #include<fstream>
 #include<iostream>
-#include<stdlib.h>
 #include "mango.hpp"
 
 void mango::problem::read_input_file(std::string filename) {
@@ -11,7 +10,7 @@ void mango::problem::read_input_file(std::string filename) {
   file.open(filename.c_str());
   if (!file.is_open()) {
     std::cout << "Error! Unable to open file " << filename << "\n";
-    exit(1);
+    throw std::runtime_error("Error in mango::problem::read_input_file. Unable to open file.");
   }
 
   int N_worker_groups;

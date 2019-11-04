@@ -1,6 +1,5 @@
 #include<iostream>
 #include<string>
-#include<stdlib.h>
 #include "mango.hpp"
 
 /* Constructor */
@@ -14,10 +13,7 @@ mango::MPI_Partition::~MPI_Partition() {
 }
 
 void mango::MPI_Partition::verify_initialized() {
-  if (!initialized) {
-    std::cout << "Error! MPI_Partition get method was called before initialization.\n";
-    exit(1);
-  }
+  if (!initialized) throw std::runtime_error("Error! MPI_Partition get method was called before initialization.");
 }
 
 MPI_Comm mango::MPI_Partition::get_comm_world() {
@@ -86,10 +82,7 @@ int mango::MPI_Partition::get_N_worker_groups() {
 }
 
 void mango::MPI_Partition::set_N_worker_groups(int N_worker_groups_in) {
-  if (initialized) {
-    std::cout << "Error! MPI_Partition::set_N_worker_groups called after initialization.\n";
-    exit(1);
-  }
+  if (initialized) throw std::runtime_error("Error! MPI_Partition::set_N_worker_groups called after initialization.");
   N_worker_groups = N_worker_groups_in;
 }
 

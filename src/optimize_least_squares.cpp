@@ -1,6 +1,5 @@
 #include<iostream>
 #include<cstring>
-#include<stdlib.h>
 #include "mango.hpp"
 
 /* void least_squares_to_single_objective(int*, const double*, double*, int*); */
@@ -21,15 +20,15 @@ void mango::problem::optimize_least_squares() {
   for (j=0; j<N_terms; j++) {
     if (sigmas[j] == 0.0) {
       std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
-      exit(1);
+      throw std::runtime_error("Error in mango::problem::optimize_least_squares. sigmas is not all nonzero.");
     }
   }
 
   /* Open output file */
   output_file.open(output_filename.c_str());
   if (!output_file.is_open()) {
-    std::cout << "Error! Unable to open output file " << output_filename << "\n";
-    exit(1);
+    std::cout << "output file: " << output_filename << "\n";
+    throw std::runtime_error("Error in mango::problem::optimize_least_squares(). Unable to open output file.");
   }
   /* Write header line of output file */
   output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation";
@@ -73,8 +72,7 @@ void mango::problem::optimize_least_squares() {
     }
     break;
   default:
-    std::cout << "Error! Unrecognized package.\n";
-    exit(1);
+    throw std::runtime_error("Error! Unrecognized package.");
   }
 
   /* Tell the other group leaders to exit. */

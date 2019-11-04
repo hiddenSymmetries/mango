@@ -104,8 +104,7 @@ void mango::problem::optimize_nlopt() {
     break;
 
   default:
-    std::cout << "Error in optimize_nlopt. Unexpected algorithm!\n";
-    exit(1);
+    throw std::runtime_error("Error in optimize_nlopt. Unexpected algorithm!");
   }
 
   /* I'll use the C interface of nlopt rather than the C++ interface, because the C++ interface requires 
@@ -150,30 +149,25 @@ void mango::problem::optimize_nlopt() {
     std::cout << "WARNING!!! NLOPT reported a generic failure. Results may or may not make sense.\n";
     break;
   case nlopt::INVALID_ARGS:
-    std::cout << "nlopt failure: invalid arguments!\n";
-    exit(1);
+    throw std::runtime_error("nlopt failure: invalid arguments!");
     break;
   case nlopt::OUT_OF_MEMORY:
-    std::cout << "nlopt out of memory!\n";
-    exit(1);
+    throw std::runtime_error("nlopt out of memory!");
     break;
   case nlopt::ROUNDOFF_LIMITED:
     std::cout << "nlopt: WARNING! Limited by roundoff. Results may or may not make sense.\n";
     break;
   case nlopt::FORCED_STOP:
-    std::cout << "nlopt forced stop!\n";
-    exit(1);
+    throw std::runtime_error("nlopt forced stop!");
     break;
   default:
-    std::cout << "nlopt unexpected return value!\n";
-    exit(1);
+    throw std::runtime_error("nlopt unexpected return value!");
   }
 
   nlopt_destroy(opt);
 
 #else
-  std::cout << "Error! A NLOPT algorithm was requested, but Mango was compiled without NLOPT support.\n";
-  exit(1);
+  throw std::runtime_error("Error! A NLOPT algorithm was requested, but Mango was compiled without NLOPT support.");
 #endif
 }
 

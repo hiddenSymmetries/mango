@@ -1,5 +1,4 @@
 #include<iostream>
-#include<stdlib.h>
 #include "mango.hpp"
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
@@ -21,10 +20,7 @@ void mango::problem::optimize_petsc() {
 
   int ierr;
   ierr = PetscInitialize(&argc,&argv,(char *)0,help);
-  if (ierr) {
-    std::cout << "Error in PetscInitialize.\n";
-    exit(1);
-  }
+  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::problem::optimize_petsc().");
   ierr = PetscInitializeFortran();
 
   Tao my_tao;
@@ -50,12 +46,10 @@ void mango::problem::optimize_petsc() {
     TaoSetObjectiveRoutine(my_tao, &mango_petsc_objective_function, (void*)this);
     break;
   case PETSC_POUNDERS:
-    std::cout << "Should not get here! For the petsc_pounders algorithm, mango_optimize_least_squares_petsc should be called instead of mango_optimize_petsc.\n";
-    exit(1);
+    throw std::runtime_error("Should not get here! For the petsc_pounders algorithm, mango_optimize_least_squares_petsc should be called instead of mango_optimize_petsc.");
     break;
   default:
-    std::cout << "Should not get here!\n";
-    exit(1);
+    throw std::runtime_error("Should not get here!");
   }
 
   TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
@@ -97,8 +91,7 @@ void mango::problem::optimize_petsc() {
   PetscFinalize();
 
 #else
-  std::cout << "Error! A PETSc algorithm was requested, but Mango was compiled without PETSc support.\n";
-  exit(1);
+  throw std::runtime_error("Error! A PETSc algorithm was requested, but Mango was compiled without PETSc support.");
 #endif
 
 }

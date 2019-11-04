@@ -1,5 +1,4 @@
 #include<iostream>
-#include<stdlib.h>
 #include "mango.hpp"
 
 void mango::get_algorithm_properties(int algorithm, bool* algorithm_uses_derivatives, bool* least_squares_algorithm, package_type* package, std::string* algorithm_name, bool* bound_constraints_required) {
@@ -199,8 +198,7 @@ void mango::get_algorithm_properties(int algorithm, bool* algorithm_uses_derivat
     *bound_constraints_required = true;
     break;
   default:
-    std::cout << "Error! Unrecognized algorithm\n";
-    exit(1);
+    throw std::runtime_error("Error! Unrecognized algorithm");
   }
 
 }

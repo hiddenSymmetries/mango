@@ -1,5 +1,4 @@
 #include<iostream>
-#include<stdlib.h>
 #include "mango.hpp"
 
 #define mango_interface_string_length 256
@@ -151,8 +150,7 @@ extern "C" {
     } else if (*centered_differences_int==0) {
       This->centered_differences = false;
     } else {
-      std::cout << "Error in interface.cpp mango_set_centered_differences: centered_difference_int = " << centered_differences_int << "\n";
-      exit(1);
+      throw std::runtime_error("Error in interface.cpp mango_set_centered_differences");
     }
   }
 

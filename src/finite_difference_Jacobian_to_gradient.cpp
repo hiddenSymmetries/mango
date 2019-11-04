@@ -1,7 +1,6 @@
 #include<iostream>
 #include<iomanip>
 #include<cstring>
-#include<stdlib.h>
 #include "mango.hpp"
 
 void mango::problem::finite_difference_Jacobian_to_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
@@ -10,10 +9,7 @@ void mango::problem::finite_difference_Jacobian_to_gradient(const double* state_
 
   std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_partition.get_rank_world() << "\n";
 
-  if (!mpi_partition.get_proc0_world()) {
-    std::cout << "Only proc0_world should get here!\n";
-    exit(1);
-  }
+  if (!mpi_partition.get_proc0_world()) throw std::runtime_error("Only proc0_world should get here!");
 
   double* base_case_residual_vector = new double[N_terms];
   double* Jacobian = new double[N_terms * N_parameters];

@@ -2,15 +2,12 @@
 #include<math.h>
 #include<limits>
 #include<cstring>
-#include<stdlib.h>
 #include "mango.hpp"
 
 double mango::problem::optimize() {
 
-  if (! mpi_partition.get_proc0_worker_groups()) {
-    std::cout << "Error! The mango_optimize() subroutine should only be called by group leaders, not by all workers.\n";
-    exit(1);
-  }
+  if (! mpi_partition.get_proc0_worker_groups()) 
+    throw std::runtime_error("Error! The mango_optimize() subroutine should only be called by group leaders, not by all workers.");
 
   function_evaluations = 0;
   at_least_one_success = false;
@@ -29,10 +26,8 @@ double mango::problem::optimize() {
   MPI_Bcast(&algorithm, 1, MPI_INT, 0, mpi_comm_group_leaders);
   load_algorithm_properties(); /* Now that all group leader procs agree on algorithm, these procs will get the correct algorithm properties. */
 
-  if (algorithm_requires_bound_constraints && (!bound_constraints_set)) {
-    std::cout << "Error! A MANGO algorithm was chosen that requires bound constraints, but bound constraints were not set.\n";
-    exit(1);
-  }
+  if (algorithm_requires_bound_constraints && (!bound_constraints_set)) 
+    throw std::runtime_error("Error! A MANGO algorithm was chosen that requires bound constraints, but bound constraints were not set.");
 
   if (algorithm_uses_derivatives) {
     if (centered_differences) {
@@ -64,8 +59,8 @@ double mango::problem::optimize() {
   /* Open output file */
   output_file.open(output_filename.c_str());
   if (!output_file.is_open()) {
-    std::cout << "Error! Unable to open output file " << output_filename << "\n";
-    exit(1);
+    std::cout << "output file: " << output_filename << "\n";
+    throw std::runtime_error("Error! Unable to open output file.");
   }
   /* Write header line of output file */
   output_file << "Least squares?\nno\nN_parameters:\n" << N_parameters << "\nfunction_evaluation";
@@ -74,10 +69,8 @@ double mango::problem::optimize() {
   }
   output_file << ",objective_function\n";
 
-  if (least_squares_algorithm) {
-    std::cout << "Error! An algorithm for least-squares problems was chosen, but the problem specified is not least-squares.\n";
-    exit(1);
-  }
+  if (least_squares_algorithm) 
+    throw std::runtime_error("Error! An algorithm for least-squares problems was chosen, but the problem specified is not least-squares.");
 
   switch (package) {
   case PACKAGE_PETSC:
@@ -93,8 +86,7 @@ double mango::problem::optimize() {
     optimize_gsl();
     break;
   default:
-    std::cout << "Error! Unrecognized package.\n";
-    exit(1);
+    throw std::runtime_error("Error! Unrecognized package.");
   }
 
   /* Tell the other group leaders to exit. */

@@ -1,6 +1,5 @@
 #include<iostream>
 #include<iomanip>
-#include<stdlib.h>
 #include "mango.hpp"
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
@@ -22,10 +21,7 @@ void mango::problem::optimize_least_squares_petsc() {
 
   int ierr;
   ierr = PetscInitialize(&argc,&argv,(char *)0,help);
-  if (ierr) {
-    std::cout << "Error in PetscInitialize.\n";
-    exit(1);
-  }
+  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::problem::optimize_least_squares_petsc().");
   ierr = PetscInitializeFortran();
 
   Tao my_tao;
@@ -58,7 +54,7 @@ void mango::problem::optimize_least_squares_petsc() {
     break;
   default:
     std::cout << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithm_name << "\n";
-    exit(1);
+    throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 
   TaoSetFromOptions(my_tao);
@@ -77,8 +73,7 @@ void mango::problem::optimize_least_squares_petsc() {
   PetscFinalize();
 
 #else
-  std::cout << "Error! A PETSc algorithm was requested, but Mango was compiled without PETSc support.\n";
-  exit(1);
+  throw std::runtime_error("Error! A PETSc algorithm was requested, but Mango was compiled without PETSc support.");
 #endif
 
 }

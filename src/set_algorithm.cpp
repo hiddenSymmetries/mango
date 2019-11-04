@@ -1,17 +1,10 @@
 #include<iostream>
 #include<string>
-#include<stdlib.h>
 #include "mango.hpp"
 
 void mango::problem::set_algorithm(algorithm_type algorithm_in) {
-  if (algorithm_in < 0) {
-    std::cout << "\nAlgorithm cannot be negative.\n";
-    exit(1);
-  }
-  if (algorithm_in >= NUM_ALGORITHMS) {
-    std::cout << "\nAlgorithm is too large.\n";
-    exit(1);
-  }
+  if (algorithm_in < 0) throw std::runtime_error("Error in mango::problem::set_algorithm. Algorithm cannot be negative.");
+  if (algorithm_in >= NUM_ALGORITHMS) throw std::runtime_error("Error in mango::problem::set_algorithm. Algorithm is too large.");
 
   algorithm = algorithm_in;
   load_algorithm_properties();
@@ -35,7 +28,7 @@ void mango::problem::set_algorithm(std::string str) {
 
   if (!found_match) {
     std::cout << "\nError! No match found for algorithm string: " << str << "\n";
-    exit(1);
+    throw std::runtime_error("Error in mango::problem::set_algorithm. No match found for algorithm string.");
   }
 
   std::cout << "Algorithm set (by string) to " << algorithm << ", a.k.a. " << algorithm_name << "\n";
