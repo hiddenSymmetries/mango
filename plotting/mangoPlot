@@ -76,11 +76,18 @@ for k in range(len(filenames)):
 
         objective_function.append(this_objective_function)
 
+    if k==0:
+        min_objective_function = np.nanmin(objective_function)
+        # np.nanmin is a minimum excluding any nans.
+    else:
+        min_objective_function = np.nanmin((min_objective_function, np.nanmin(objective_function)))
+
     # In the next 2 lines, we drop the last elements because these represent a repeat of the optimal point.
     files_function_evaluations.append(function_evaluations[:-1])
     files_objective_function.append(objective_function[:-1])
 
 N_files = len(files_function_evaluations)
+print("Minimum objective function found:",min_objective_function)
 
 #########################################################
 # Done reading files. Now make the plot.
@@ -95,28 +102,41 @@ plotNum = 1
 
 import os
 
-plt.subplot(numRows,numCols,plotNum)
-plotNum += 1
-for j in range(N_files):
-    plt.plot(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
-plt.xlabel('Function evaluation')
-plt.ylabel('Objective function, linear scale')
-plt.grid(True)
-if N_files > 1:
-    plt.legend(loc=0,fontsize=7)
+#plt.subplot(numRows,numCols,plotNum)
+#plotNum += 1
+#for j in range(N_files):
+#    plt.plot(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
+#plt.xlabel('Function evaluation')
+#plt.ylabel('Objective function, linear scale')
+#plt.grid(True)
+#if N_files > 1:
+#    plt.legend(loc=0,fontsize=7)
 
 plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 for j in range(N_files):
     plt.semilogy(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
 plt.xlabel('Function evaluation')
-plt.ylabel('Objective function, log scale')
+plt.ylabel('Objective function')
 plt.grid(True)
 if N_files > 1:
     plt.legend(loc=0,fontsize=7)
 
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+for j in range(N_files):
+    plt.semilogy(files_function_evaluations[j], files_objective_function[j] - min_objective_function, '.-', label = filenames[j])
+plt.xlabel('Function evaluation')
+plt.ylabel('(Objective function) - (min objective function)')
+plt.grid(True)
+if N_files > 1:
+    plt.legend(loc=0,fontsize=7)
+
+
 if N_files == 1:
     plt.figtext(0.5,0.995, os.path.abspath(filename), ha='center',va='top',fontsize=7)
+
+plt.figtext(0.5,0.005, "Run in "+os.getcwd(), ha='center',va='bottom',fontsize=7)
 
 plt.tight_layout()
 
