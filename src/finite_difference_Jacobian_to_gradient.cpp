@@ -1,6 +1,7 @@
 #include<iostream>
 #include<iomanip>
 #include<cstring>
+#include<stdexcept>
 #include "mango.hpp"
 
 void mango::problem::finite_difference_Jacobian_to_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {

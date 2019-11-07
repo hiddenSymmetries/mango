@@ -82,6 +82,10 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   integer :: j
 
   print *,"Hi from fortran. N=",N_parameters," size(x)=",size(x), ", size(f)=",size(f)
+  print *,"mango_get_N_parameters(problem):",mango_get_N_parameters(problem)
+  print *,"mango_get_N_terms(problem):",mango_get_N_terms(problem)
+  print *,"This line might segfault:",mango_get_N_procs_worker_groups(problem)
+  print *,"This line too:",mango_get_mpi_rank_world(problem)
 
   f = x(1:N_terms)
 

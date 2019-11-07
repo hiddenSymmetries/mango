@@ -1,5 +1,6 @@
 #include<iostream>
 #include<mpi.h>
+#include<stdexcept>
 #include "mango.hpp"
 
 void mango::MPI_Partition::set_custom(MPI_Comm comm_world_in, MPI_Comm comm_group_leaders_in, MPI_Comm comm_worker_groups_in) {

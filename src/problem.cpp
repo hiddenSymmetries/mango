@@ -1,5 +1,6 @@
 #include<iostream>
 #include<string>
+#include<stdexcept>
 #include "mango.hpp"
 
 /* Constructor for non-least-squares problems */

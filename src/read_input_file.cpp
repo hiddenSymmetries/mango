@@ -1,6 +1,7 @@
 #include<string>
 #include<fstream>
 #include<iostream>
+#include<stdexcept>
 #include "mango.hpp"
 
 void mango::problem::read_input_file(std::string filename) {

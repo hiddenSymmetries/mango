@@ -1,7 +1,7 @@
 #include<iostream>
 #include<mpi.h>
+#include<stdexcept>
 #include "mango.hpp"
-#include<exception>
 
 void mango::MPI_Partition::init(MPI_Comm mpi_comm_world_in) {
   int ierr;

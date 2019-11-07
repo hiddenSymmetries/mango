@@ -1,4 +1,5 @@
 #include<iostream>
+#include<stdexcept>
 #include "mango.hpp"
 
 #define mango_interface_string_length 256

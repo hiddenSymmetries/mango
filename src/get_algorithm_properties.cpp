@@ -1,4 +1,5 @@
 #include<iostream>
+#include<stdexcept>
 #include "mango.hpp"
 
 void mango::get_algorithm_properties(int algorithm, bool* algorithm_uses_derivatives, bool* least_squares_algorithm, package_type* package, std::string* algorithm_name, bool* bound_constraints_required) {

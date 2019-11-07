@@ -2,6 +2,7 @@
 #include<math.h>
 #include<limits>
 #include<cstring>
+#include<stdexcept>
 #include "mango.hpp"
 
 double mango::problem::optimize() {
