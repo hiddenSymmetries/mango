@@ -54,7 +54,7 @@ void mango::problem::optimize_least_squares_petsc() {
 #endif
     break;
   default:
-    std::cout << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithm_name << "\n";
+    std::cout << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithms[algorithm].name << "\n";
     throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 

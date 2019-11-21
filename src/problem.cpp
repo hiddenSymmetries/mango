@@ -93,7 +93,7 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
   if (algorithm < 0) throw std::runtime_error("Error in mango::problem::mpi_init. Algorithm cannot be negative.");
   if (algorithm >= NUM_ALGORITHMS) throw std::runtime_error("Error in mango::problem::mpi_init. Algorithm is too large.");
 
-  if (algorithm_uses_derivatives) { /* May want to change this, since HOPSPACK does not use derivatives but it does exploit concurrent function evaluations. */
+  if (algorithms[algorithm].parallel) {
     int mpi_rank_world, N_procs_world;
     MPI_Comm_size(mpi_comm_world, &N_procs_world);
     MPI_Comm_rank(mpi_comm_world, &mpi_rank_world);
