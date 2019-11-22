@@ -266,3 +266,6 @@ print()
 print(line1)
 print(line1)
 print("Done running examples.")
+print()
+from tests.verify_language_independence import *
+verify_language_independence()

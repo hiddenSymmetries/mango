@@ -1,10 +1,15 @@
 *~
+*#
 *.o
 *.mod
+*.Mod
 *.MOD
-*#
 examples/bin/*
 lib/*
 mango_out.*
 examples/output/summary*
 examples/output/short_summary*
+.DS_Store
+examples/.DS_Store
+examples/temp
+examples/tests/__pycache__/

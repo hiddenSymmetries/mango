@@ -18,3 +18,5 @@ make test_make
 ./tests/install_nlopt.sh
 
 make
+
+make test

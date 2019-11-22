@@ -12,6 +12,7 @@ petsc_nm
 nlopt_ln_bobyqa
 nlopt_ln_praxis
 nlopt_ln_neldermead
+nlopt_ln_sbplx
 nlopt_ld_mma
 nlopt_ld_ccsaq
 nlopt_ld_slsqp
