@@ -140,7 +140,7 @@ plt.xlabel('Function evaluation')
 plt.ylabel('(Objective function) - (min objective function)')
 plt.grid(True)
 if N_files > 1:
-    plt.legend(loc=0,fontsize=7)
+    plt.legend(loc='upper right',fontsize=7)
 
 plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
@@ -150,7 +150,7 @@ plt.xlabel('Time (seconds)')
 plt.ylabel('(Objective function) - (min objective function)')
 plt.grid(True)
 if N_files > 1:
-    plt.legend(loc=0,fontsize=7)
+    plt.legend(loc='upper right',fontsize=7)
 
 
 if N_files == 1:

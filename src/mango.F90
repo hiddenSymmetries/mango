@@ -210,19 +210,19 @@ module mango
   abstract interface
   subroutine objective_function_interface(N_parameters, state_vector, f, failed, this)
     import
-    integer, intent(in) :: N_parameters
-    double precision, intent(in) :: state_vector(N_parameters)
-    double precision, intent(out) :: f
-    integer, intent(out) :: failed
+    integer(C_int), intent(in) :: N_parameters
+    real(C_double), intent(in) :: state_vector(N_parameters)
+    real(C_double), intent(out) :: f
+    integer(C_int), intent(out) :: failed
     type(mango_problem), value, intent(in) :: this
   end subroutine objective_function_interface
   subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this)
     import
-    integer, intent(in) :: N_parameters, N_terms
-    double precision, intent(in) :: state_vector(N_parameters)
+    integer(C_int), intent(in) :: N_parameters, N_terms
+    real(C_double), intent(in) :: state_vector(N_parameters)
     !double precision, intent(in) :: state_vector(:)
-    double precision, intent(out) :: f(N_terms)
-    integer, intent(out) :: failed
+    real(C_double), intent(out) :: f(N_terms)
+    integer(C_int), intent(out) :: failed
     type(mango_problem), value, intent(in) :: this
   end subroutine residual_function_interface
   end interface

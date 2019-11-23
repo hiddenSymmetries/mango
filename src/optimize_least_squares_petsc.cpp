@@ -60,6 +60,7 @@ void mango::problem::optimize_least_squares_petsc() {
     throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 
+  // TaoSetTolerances(my_tao, 1e-30, 1e-30, 1e-30);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
   if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
