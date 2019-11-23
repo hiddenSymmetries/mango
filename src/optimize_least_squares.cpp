@@ -32,7 +32,7 @@ void mango::problem::optimize_least_squares() {
     throw std::runtime_error("Error in mango::problem::optimize_least_squares(). Unable to open output file.");
   }
   /* Write header line of output file */
-  output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation";
+  output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
   for (j=0; j<N_parameters; j++) {
     output_file << ",x(" << j+1 << ")";
   }
@@ -118,7 +118,7 @@ void mango::problem::optimize_least_squares() {
   /* Copy the line corresponding to the optimum to the bottom of the output file. */
   int function_evaluations_temp= function_evaluations;
   function_evaluations = best_function_evaluation;
-  write_least_squares_file_line(state_vector, best_residual_function);
+  write_least_squares_file_line(state_vector, best_residual_function, best_time);
   function_evaluations = function_evaluations_temp;
 
   output_file.close();

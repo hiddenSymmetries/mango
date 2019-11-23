@@ -4,6 +4,7 @@
 #include<mpi.h>
 #include<string>
 #include<fstream>
+#include<ctime>
 
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
@@ -181,6 +182,7 @@ namespace mango {
     bool bound_constraints_set;
     double* lower_bounds;
     double* upper_bounds;
+    clock_t start_time, best_time;
 
     void group_leaders_loop();
     void group_leaders_least_squares_loop();
@@ -194,8 +196,8 @@ namespace mango {
     void optimize_hopspack();
     void optimize_nlopt();
     // </optimize_packages>
-    void write_file_line(const double*, double);
-    double write_least_squares_file_line(const double*, double*);
+    void write_file_line(const double*, double, clock_t);
+    double write_least_squares_file_line(const double*, double*, clock_t);
     static double nlopt_objective_function(unsigned, const double*, double*, void*); 
 #ifdef MANGO_PETSC_AVAILABLE
     static PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);

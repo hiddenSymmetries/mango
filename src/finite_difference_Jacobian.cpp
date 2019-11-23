@@ -4,6 +4,7 @@
 #include "mpi.h"
 #include "mango.hpp"
 #include<cmath>
+#include<ctime>
 
 void mango::problem::finite_difference_Jacobian(const double* state_vector, double* base_case_residual_function, double* Jacobian) {
 
@@ -96,10 +97,12 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
    objective function.*/
   double total_objective_function;
   bool failed;
+  clock_t now;
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
       function_evaluations += 1;
-      total_objective_function = write_least_squares_file_line(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms]);
+      now = clock();
+      total_objective_function = write_least_squares_file_line(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms], now);
 
       failed = false;
       if (!failed && (!at_least_one_success || total_objective_function < best_objective_function)) {
@@ -108,6 +111,7 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
         best_function_evaluation = function_evaluations;
         memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
         memcpy(best_residual_function, &residual_functions[j_evaluation*N_terms], N_terms * sizeof(double));
+	best_time = now;
       }
     }
   }

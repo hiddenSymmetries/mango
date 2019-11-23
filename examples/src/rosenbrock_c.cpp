@@ -27,7 +27,6 @@ int main(int argc, char *argv[]) {
   double best_residual_function[2];
   mango::problem myprob(2, state_vector, 2, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
-
   /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
   // myprob.set_algorithm("nlopt_ln_neldermead");
   myprob.verbose = verbose_level;

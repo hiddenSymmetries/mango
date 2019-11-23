@@ -4,6 +4,7 @@
 #include "mpi.h"
 #include "mango.hpp"
 #include<cmath>
+#include<ctime>
 
 void mango::problem::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
 
@@ -100,10 +101,12 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   /* Record the results in order in the output file. At the same time, check for any best-yet values of the
    objective function. */
   bool failed;
+  clock_t now;
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
       function_evaluations += 1;
-      write_file_line(&state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation]);
+      now = clock();
+      write_file_line(&state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation], now);
 
       failed = false;
       if (!failed && (!at_least_one_success || objective_functions[j_evaluation] < best_objective_function)) {
@@ -111,6 +114,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
 	best_objective_function = objective_functions[j_evaluation];
 	best_function_evaluation = function_evaluations;
 	memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
+	best_time = now;
       }
     }
   }

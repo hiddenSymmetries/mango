@@ -99,7 +99,7 @@ def compare_2_examples(filename1, filename2, algorithms_to_exclude):
 
         # Make sure the solution vector was the same:
         for j_parameter in range(N_parameters):
-            index = 4+j_parameter
+            index = 5+j_parameter
             x1 = float(results1[index])
             x2 = float(results2[index])
             if not test_float_equality(x1,x2,solution_vector_tolerance):
@@ -108,7 +108,7 @@ def compare_2_examples(filename1, filename2, algorithms_to_exclude):
                 exit(1)
 
         # Make sure the final objective function was the same:
-        index = 4+N_parameters
+        index = 5+N_parameters
         f1 = float(results1[index])
         f2 = float(results2[index])
         if not test_float_equality(f1,f2,objective_function_tolerance):

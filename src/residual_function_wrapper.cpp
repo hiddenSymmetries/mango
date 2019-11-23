@@ -1,6 +1,7 @@
 #include<iostream>
 #include<iomanip>
 #include<cstring>
+#include<ctime>
 #include "mango.hpp"
 
 void mango::problem::residual_function_wrapper(const double* x, double* f, bool* failed) {
@@ -8,6 +9,7 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   int failed_int;
   residual_function(&N_parameters, x, &N_terms, f, &failed_int, this);
   *failed = (failed_int != 0);
+  clock_t now = clock();
 
   if (verbose > 0) {
     std::cout << "Hello from residual_function_wrapper. Here comes x:\n";
@@ -18,23 +20,26 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
     std::cout << "\n";
   }
 
-  double objective_value = write_least_squares_file_line(x, f);
+  double objective_value = write_least_squares_file_line(x, f, now);
 
   if (! *failed && (!at_least_one_success || objective_value < best_objective_function)) {
     at_least_one_success = true;
     best_objective_function = objective_value;
     best_function_evaluation = function_evaluations;
     memcpy(best_state_vector, x, N_parameters * sizeof(double));
-    memcpy(best_residual_function, f, N_terms * sizeof(double)); 
+    memcpy(best_residual_function, f, N_terms * sizeof(double));
+    best_time = now;
   }
 
 }
 
 
 
-double mango::problem::write_least_squares_file_line(const double* x, double* residuals) {
+double mango::problem::write_least_squares_file_line(const double* x, double* residuals, clock_t print_time) {
   double total_objective_function, temp;
   int j;
+
+  double elapsed_time =((float)(print_time - start_time)) / CLOCKS_PER_SEC;
 
   /* Combine the residuals into the total objective function. */
   total_objective_function = 0;
@@ -44,13 +49,13 @@ double mango::problem::write_least_squares_file_line(const double* x, double* re
   }
 
   /* Now actually write the line of the output file. */
-  output_file << std::setw(6) << std::right << function_evaluations;
+  output_file << std::setw(6) << std::right << function_evaluations << "," << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
   for (j=0; j<N_parameters; j++) {
-    output_file << "," << std::setw(26) << std::setprecision(16) << std::scientific << x[j];
+    output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
   }
-  output_file << "," << std::setw(26) << total_objective_function;
+  output_file << "," << std::setw(24) << total_objective_function;
   for (j=0; j<N_terms; j++) {
-    output_file << "," << std::setw(26) << std::setprecision(16) << std::scientific << residuals[j];
+    output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << residuals[j];
   }
   output_file << "\n" << std::flush;
 

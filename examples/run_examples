@@ -247,18 +247,18 @@ for example in examples:
         if len(summary_header)>0:
             f.write("".join(summary_header[:-1]))
             line = "algorithm,"+summary_header[-1]
-            f.write(first_n_items(line,N_parameters+3))
+            f.write(first_n_items(line,N_parameters+4))
             for line in summary_contents:
-                f.write(first_n_items(line,N_parameters+3))
+                f.write(first_n_items(line,N_parameters+4))
         else:
             f.write('No jobs succeeded!')
     with open("output/short_summary_mpi."+example,'w') as f:
         if len(summary_header)>0:
             f.write("".join(summary_header[:-1]))
             line = "algorithm,N_procs,N_worker_groups,"+summary_header[-1]
-            f.write(first_n_items(line,N_parameters+5))
+            f.write(first_n_items(line,N_parameters+6))
             for line in summary_mpi_contents:
-                f.write(first_n_items(line,N_parameters+5))
+                f.write(first_n_items(line,N_parameters+6))
         else:
             f.write('No jobs succeeded!')
 

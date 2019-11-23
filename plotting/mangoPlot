@@ -18,6 +18,7 @@ if len(sys.argv) < 2:
 
 files_function_evaluations = []
 files_objective_function = []
+files_times = []
 filenames = []
 
 for k in range(1,len(sys.argv)):
@@ -52,6 +53,7 @@ for k in range(len(filenames)):
         raise
 
     function_evaluations = []
+    times = []
     objective_function = []
     for j in range(5,len(lines)):
         temp = lines[j].split(',')
@@ -63,9 +65,16 @@ for k in range(len(filenames)):
             raise
 
         try:
-            this_objective_function = float(temp[N_parameters+1])
+            times.append(float(temp[1]))
         except:
-            print("Warning: unable to convert "+temp[N_parameters+1]+" to float in file "+filename)
+            print("ERROR! Unable to convert "+temp[1]+" to float on line "+str(j)+" of file "+filename)
+            print("This probably means this file is not a correctly formatted mango_out file.")
+            raise
+
+        try:
+            this_objective_function = float(temp[N_parameters+2])
+        except:
+            print("Warning: unable to convert "+temp[N_parameters+2]+" to float in file "+filename)
             this_objective_function = np.nan
 
         # Stellopt sets failed results to 1e+12, which makes it hard to see the interesting structure in the objective function for successful runs.
@@ -84,6 +93,7 @@ for k in range(len(filenames)):
 
     # In the next 2 lines, we drop the last elements because these represent a repeat of the optimal point.
     files_function_evaluations.append(function_evaluations[:-1])
+    files_times.append(times[:-1])
     files_objective_function.append(objective_function[:-1])
 
 N_files = len(files_function_evaluations)
@@ -112,12 +122,22 @@ import os
 #if N_files > 1:
 #    plt.legend(loc=0,fontsize=7)
 
+#plt.subplot(numRows,numCols,plotNum)
+#plotNum += 1
+#for j in range(N_files):
+#    plt.semilogy(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
+#plt.xlabel('Function evaluation')
+#plt.ylabel('Objective function')
+#plt.grid(True)
+#if N_files > 1:
+#    plt.legend(loc=0,fontsize=7)
+
 plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 for j in range(N_files):
-    plt.semilogy(files_function_evaluations[j], files_objective_function[j], '.-', label = filenames[j])
+    plt.semilogy(files_function_evaluations[j], files_objective_function[j] - min_objective_function, '.-', label = filenames[j])
 plt.xlabel('Function evaluation')
-plt.ylabel('Objective function')
+plt.ylabel('(Objective function) - (min objective function)')
 plt.grid(True)
 if N_files > 1:
     plt.legend(loc=0,fontsize=7)
@@ -125,8 +145,8 @@ if N_files > 1:
 plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 for j in range(N_files):
-    plt.semilogy(files_function_evaluations[j], files_objective_function[j] - min_objective_function, '.-', label = filenames[j])
-plt.xlabel('Function evaluation')
+    plt.semilogy(files_times[j], files_objective_function[j] - min_objective_function, '.-', label = filenames[j])
+plt.xlabel('Time (seconds)')
 plt.ylabel('(Objective function) - (min objective function)')
 plt.grid(True)
 if N_files > 1:

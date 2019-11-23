@@ -1,11 +1,13 @@
 #include<iostream>
 #include<iomanip>
 #include<cstring>
+#include<ctime>
 #include "mango.hpp"
 
 void mango::problem::objective_function_wrapper(const double* x, double* f, bool* failed) {
   /* For least-squares problems, function_evaluations is incremented in mango_residual_function_wrapper() */
   if (!least_squares) function_evaluations++;
+  clock_t now = clock();
 
   int failed_int;
   objective_function(&N_parameters, x, f, &failed_int, this);
@@ -17,21 +19,24 @@ void mango::problem::objective_function_wrapper(const double* x, double* f, bool
     best_objective_function = *f;
     best_function_evaluation = function_evaluations;
     memcpy(best_state_vector, x, N_parameters * sizeof(double));
+    best_time = now;
   } else {
   }
 
   if (!least_squares) {
     /* For least-squares problems, output is written using mango_residual_function_wrapper() */
-    write_file_line(x, *f);
+    write_file_line(x, *f, now);
   }
 }
 
 
 
-void mango::problem::write_file_line(const double* x, double f) {
-  output_file << std::setw(6) << std::right << function_evaluations;
+void mango::problem::write_file_line(const double* x, double f, clock_t print_time) {
+  double elapsed_time = ((float)(print_time - start_time)) / CLOCKS_PER_SEC;
+
+  output_file << std::setw(6) << std::right << function_evaluations << "," << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
   for (int j=0; j<N_parameters; j++) {
-    output_file << "," << std::setw(26) << std::setprecision(16) << std::scientific << x[j];
+    output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
   }
-  output_file << "," << std::setw(26) << f << "\n" << std::flush;
+  output_file << "," << std::setw(24) << f << "\n" << std::flush;
 }

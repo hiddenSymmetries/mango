@@ -3,6 +3,7 @@
 #include<limits>
 #include<cstring>
 #include<stdexcept>
+#include<ctime>
 #include "mango.hpp"
 
 double mango::problem::optimize() {
@@ -14,6 +15,7 @@ double mango::problem::optimize() {
   at_least_one_success = false;
   best_objective_function = std::numeric_limits<double>::quiet_NaN();
   best_function_evaluation = -1;
+  start_time = clock();
 
   /* To simplify code a bit... */
   MPI_Comm mpi_comm_group_leaders = mpi_partition.get_comm_group_leaders();
@@ -67,7 +69,7 @@ double mango::problem::optimize() {
     throw std::runtime_error("Error! Unable to open output file.");
   }
   /* Write header line of output file */
-  output_file << "Least squares?\nno\nN_parameters:\n" << N_parameters << "\nfunction_evaluation";
+  output_file << "Least squares?\nno\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
   for (int j=0; j<N_parameters; j++) {
     output_file << ",x(" << j+1 << ")";
   }
@@ -102,7 +104,7 @@ double mango::problem::optimize() {
   /* Copy the line corresponding to the optimum to the bottom of the output file. */
   int function_evaluations_temp = function_evaluations;
   function_evaluations = best_function_evaluation;
-  write_file_line(state_vector, best_objective_function);
+  write_file_line(state_vector, best_objective_function, best_time);
   function_evaluations = function_evaluations_temp;
 
   output_file.close();
