@@ -166,10 +166,10 @@ for example in examples:
             N_procs = N_procss[j_procs]
             N_worker_groups = N_worker_groupss[j_procs]
             mpi_string = (str(N_procs)+",").rjust(6) + (str(N_worker_groups)+",").rjust(6)
-            print()
+            #print()
             print(line2)
             print("Beginning example "+example+" with algorithm="+algorithm+", N_procs="+str(N_procs)+", N_worker_groups="+str(N_worker_groups))
-            print(line2)
+            #print(line2)
 
             # Write input file
             input_filename = "input/mango_in."+example
