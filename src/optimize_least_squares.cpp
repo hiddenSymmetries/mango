@@ -14,7 +14,7 @@ void mango::problem::optimize_least_squares() {
   }
   /* Only proc0_world continues past this point. */
 
-  std::cout << "Hello world from optimize_least_squares()\n";
+  if (verbose > 0) std::cout << "Hello world from optimize_least_squares()\n";
   function_evaluations = 0;
 
   /* Verify that the sigmas array is all nonzero. */
@@ -123,20 +123,13 @@ void mango::problem::optimize_least_squares() {
 
   output_file.close();
 
-  std::cout << "Here comes the optimal state_vector from optimize_least_squares.cpp: " << state_vector[0];
-  for (int j=1; j<N_parameters; j++) {
-    std::cout << ", " << state_vector[j];
+  if (verbose > 0) {
+    std::cout << "Here comes the optimal state_vector from optimize_least_squares.cpp: " << state_vector[0];
+    for (int j=1; j<N_parameters; j++) {
+      std::cout << ", " << state_vector[j];
+    }
+    std::cout << "\n";
   }
-  std::cout << "\n";
-
-  /*
-  std::cout << "\nAbout to call objective function from C.\n";
-  double f;
-  int failed;
-  std::cout << "optimize.cpp: objective_function=" << (long int)objective_function << "\n";
-  objective_function(&N_parameters, state_vector, &f, &failed, this);
-  std::cout << "Value of objective function: " << f << "\n";
-  */
 }
 
 /*
@@ -149,7 +142,7 @@ void mango::problem::least_squares_to_single_objective(int* N, const double* x, 
 
   int N_terms = this_problem->get_N_terms();
 
-  std::cout << "Hello from least_squares_to_single_objective\n";
+  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective\n";
   double* residuals = new double[N_terms];
 
   bool failed_bool;

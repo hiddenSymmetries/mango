@@ -21,13 +21,15 @@ extern "C" {
     return new mango::problem(N_parameters,N_terms);
     } */
   mango::problem *mango_problem_create(int* N_parameters, double* state_vector, int* dummy, mango::objective_function_type objective_function) {
-    std::cout << "interface.cpp subroutine mango_problem_create: objective_function=" << (long int)objective_function << "\n";
+    if (false) {
+      std::cout << "interface.cpp subroutine mango_problem_create: objective_function=" << (long int)objective_function << "\n";
 
-    std::cout << "From interface.cpp, N_parameters=" << *N_parameters;
-    for (int j=0; j<*N_parameters; j++) {
-      std::cout << ", state_vector["<<j<<"]=" << state_vector[j];
+      std::cout << "From interface.cpp, N_parameters=" << *N_parameters;
+      for (int j=0; j<*N_parameters; j++) {
+	std::cout << ", state_vector["<<j<<"]=" << state_vector[j];
+      }
+      std::cout << "\ndummy=" << *dummy;
     }
-    std::cout << "\ndummy=" << *dummy;
     /*
     std::cout << "  About to call objective function from interface.cpp\n";
     double f;
@@ -167,6 +169,10 @@ extern "C" {
 
   void mango_set_bound_constraints(mango::problem *This, double* lower_bounds, double* upper_bounds) {
     This->set_bound_constraints(lower_bounds, upper_bounds);
+  }
+
+  void mango_set_verbose(mango::problem *This, int* verbose) {
+    This->verbose = *verbose;
   }
 
 }

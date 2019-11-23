@@ -38,11 +38,13 @@ void mango::problem::optimize_least_squares_petsc() {
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(temp_array, state_vector, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
-  std::cout << "Here comes petsc vec for initial condition:\n";
-  VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
+  if (verbose > 0) {
+    std::cout << "Here comes petsc vec for initial condition:\n";
+    VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
+  }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  std::cout << "PETSc has been initialized.\n";
+  if (verbose > 0) std::cout << "PETSc has been initialized.\n";
 
   switch (algorithm) {
   case PETSC_POUNDERS:
@@ -60,7 +62,7 @@ void mango::problem::optimize_least_squares_petsc() {
 
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
-  TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
   /* Copy PETSc solution to the mango state vector. */
   VecGetArray(tao_state_vec, &temp_array);
@@ -99,16 +101,18 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
   bool failed;
   this_problem->residual_function_wrapper(x_array, f_array, &failed);
 
-  std::cout << "mango_petsc_residual_function before sigma shift. state_vector:";
-  for (j=0; j < this_problem->get_N_parameters(); j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
+  if (this_problem->verbose > 0) {
+    std::cout << "mango_petsc_residual_function before sigma shift. state_vector:";
+    for (j=0; j < this_problem->get_N_parameters(); j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
+    }
+    std::cout << "\n";
+    std::cout << "residual:";
+    for (j=0; j < this_problem->get_N_terms(); j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
+    }
+    std::cout << "\n" << std::flush;
   }
-  std::cout << "\n";
-  std::cout << "residual:";
-  for (j=0; j < this_problem->get_N_terms(); j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
-  }
-  std::cout << "\n" << std::flush;
 
   /* PETSc's definition of the residual function does not include sigmas or targets, so shift and scale the mango residuals appropriately: */
   for (j=0; j<this_problem->get_N_terms(); j++) {
@@ -116,16 +120,18 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
     if (failed) f_array[j] = mango::NUMBER_FOR_FAILED;
   }
 
-  std::cout << "mango_petsc_residual_function after sigma shift. state_vector:";
-  for (j=0; j < this_problem->get_N_parameters(); j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
+  if (this_problem->verbose > 0) {
+    std::cout << "mango_petsc_residual_function after sigma shift. state_vector:";
+    for (j=0; j < this_problem->get_N_parameters(); j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
+    }
+    std::cout << "\n";
+    std::cout << "residual:";
+    for (j=0; j < this_problem->get_N_terms(); j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
+    }
+    std::cout << "\n" << std::flush;
   }
-  std::cout << "\n";
-  std::cout << "residual:";
-  for (j=0; j < this_problem->get_N_terms(); j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
-  }
-  std::cout << "\n" << std::flush;
 
   VecRestoreArray(x, &x_array);
   VecRestoreArray(f, &f_array);

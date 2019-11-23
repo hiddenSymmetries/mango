@@ -194,7 +194,7 @@ for example in examples:
                 raise
             command = submitCommand + " ./"+example
             command = command.replace('NUM_PROCS',str(N_procs))
-            print("Submitting command "+command)
+            #print("Submitting command "+command)
             sys.stdout.flush()
             try:
                 subprocess.call(command.split())

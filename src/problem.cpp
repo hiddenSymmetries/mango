@@ -39,11 +39,12 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
 
 /* Destructor */
 mango::problem::~problem() {
-  std::cout << "Mango problem is being destroyed.\n";
+  if (verbose > 0) std::cout << "Mango problem is being destroyed.\n";
   delete[] best_state_vector;
 }
 
 void mango::problem::defaults() {
+  verbose = 0;
   mpi_partition.set_N_worker_groups(-1);
   set_algorithm(PETSC_NM);
   centered_differences = false;
@@ -93,6 +94,8 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
   if (algorithm < 0) throw std::runtime_error("Error in mango::problem::mpi_init. Algorithm cannot be negative.");
   if (algorithm >= NUM_ALGORITHMS) throw std::runtime_error("Error in mango::problem::mpi_init. Algorithm is too large.");
 
+  mpi_partition.verbose = verbose;
+
   if (algorithms[algorithm].parallel) {
     int mpi_rank_world, N_procs_world;
     MPI_Comm_size(mpi_comm_world, &N_procs_world);
@@ -100,10 +103,8 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
 
     if ((N_procs_world > 1) && (mpi_partition.get_N_worker_groups() == 1) && (mpi_rank_world==0)) {
       std::cout << bold_line;
-      std::cout << bold_line;
       std::cout << "WARNING!!! You have chosen an algorithm that can exploit concurrent function evaluations\n";
       std::cout << "but you have set N_worker_groups=1. You probably want a larger value.\n";
-      std::cout << bold_line;
       std::cout << bold_line;
     }
   } else {

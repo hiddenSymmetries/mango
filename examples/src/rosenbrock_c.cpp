@@ -1,3 +1,5 @@
+#define verbose_level 0
+
 #include<iostream>
 #include<iomanip>
 #include<mpi.h>
@@ -11,7 +13,7 @@ void worker(mango::problem*);
 int main(int argc, char *argv[]) {
   int ierr;
 
-  std::cout << "Hello world from rosenbrock_c.\n";
+  if (verbose_level > 0) std::cout << "Hello world from rosenbrock_c.\n";
 
   ierr = MPI_Init(&argc, &argv);
   if (ierr != 0) {
@@ -28,6 +30,7 @@ int main(int argc, char *argv[]) {
 
   /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
   // myprob.set_algorithm("nlopt_ln_neldermead");
+  myprob.verbose = verbose_level;
   myprob.read_input_file("../input/mango_in.rosenbrock_c");
   myprob.output_filename = "../output/mango_out.rosenbrock_c";
   myprob.mpi_init(MPI_COMM_WORLD);
@@ -46,7 +49,7 @@ int main(int argc, char *argv[]) {
     worker(&myprob);
   }
 
-  if (myprob.mpi_partition.get_proc0_world()) {
+  if (myprob.mpi_partition.get_proc0_world() && (verbose_level > 0)) {
     std::cout << "Best state vector: " << std::setprecision(16);
     for (int j=0; j<2; j++) std::cout << state_vector[j] << "  ";
     std::cout << "\nBest objective function: " << best_objective_function << "\nBest residual vector:";
@@ -62,7 +65,7 @@ int main(int argc, char *argv[]) {
 
 void residual_function(int* N_parameters, const double* x, int* N_terms, double* f, int* failed, mango::problem* this_problem) {
   int j;
-  std::cout << "C residual function called with N="<< *N_parameters << "\n";
+  if (verbose_level > 0) std::cout << "C residual function called with N="<< *N_parameters << "\n";
   /*   *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]); */
   f[0] = x[0];
   f[1] = x[1] - x[0] * x[0];
@@ -77,10 +80,10 @@ void worker(mango::problem* myprob) {
   while (keep_going) {
     MPI_Bcast(data, 1, MPI_INT, 0, myprob->mpi_partition.get_comm_worker_groups());
     if (data[0] < 0) {
-      std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
+      if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
       keep_going = false;
     } else {
-      std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
+      if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
       /* For this problem, the workers don't actually do any work. */
     }
   }

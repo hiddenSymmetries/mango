@@ -13,7 +13,7 @@ void mango::MPI_Partition::init(MPI_Comm mpi_comm_world_in) {
   ierr = MPI_Comm_rank(comm_world, &rank_world);
   proc0_world = (rank_world == 0);
 
-  if (proc0_world) std::cout << "Number of worker groups, before validation: " << N_worker_groups << "\n";
+  // if (proc0_world) std::cout << "Number of worker groups, before validation: " << N_worker_groups << "\n";
 
   /* Make sure all procs agree on certain variables that will be used here. */
   MPI_Bcast(&N_worker_groups, 1, MPI_INT, 0, comm_world);
@@ -23,7 +23,7 @@ void mango::MPI_Partition::init(MPI_Comm mpi_comm_world_in) {
   /* Negative or 0 value for N_worker_groups on input means treat each proc as a worker group */
   if (N_worker_groups < 1) N_worker_groups = N_procs_world;
 
-  if (proc0_world) std::cout << "Number of worker groups, after validation: " << N_worker_groups << "\n";
+  // if (proc0_world) std::cout << "Number of worker groups, after validation: " << N_worker_groups << "\n";
 
   worker_group = (rank_world * N_worker_groups) / N_procs_world; /* Note integer division, so there is an implied floor() */
 

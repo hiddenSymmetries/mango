@@ -1,4 +1,5 @@
 #define N_dims 3
+#define verbose_level 0
 
 #include<iostream>
 #include<iomanip>
@@ -15,7 +16,7 @@ void worker(mango::problem*);
 int main(int argc, char *argv[]) {
   int ierr;
 
-  std::cout << "Hello world from nondifferentiable_c.\n";
+  if (verbose_level > 0) std::cout << "Hello world from nondifferentiable_c.\n";
 
   ierr = MPI_Init(&argc, &argv);
   if (ierr != 0) {
@@ -28,6 +29,7 @@ int main(int argc, char *argv[]) {
 
   mango::problem myprob(N_dims, state_vector, &objective_function, argc, argv);
 
+  myprob.verbose = verbose_level;
   myprob.read_input_file("../input/mango_in.nondifferentiable_c");
   myprob.output_filename = "../output/mango_out.nondifferentiable_c";
   myprob.mpi_init(MPI_COMM_WORLD);
@@ -46,7 +48,7 @@ int main(int argc, char *argv[]) {
     worker(&myprob);
   }
 
-  if (myprob.mpi_partition.get_proc0_world()) {
+  if (myprob.mpi_partition.get_proc0_world() && (verbose_level > 0)) {
     std::cout << "Best state vector: " << std::setprecision(16);
     for (int j=0; j<N_dims; j++) std::cout << state_vector[j] << "  ";
     std::cout << "\nBest objective function: " << best_objective_function << "\nBest function evaluation was " << myprob.get_best_function_evaluation() << "\n";
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
 
 void objective_function(int* N, const double* x, double* f, int* failed, mango::problem* this_problem) {
   int j;
-  std::cout << "C objective function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << "\n";
+  if (verbose_level > 0) std::cout << "C objective function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << "\n";
 
 
   /* Mobilize the workers in the group with this group leader: */
@@ -82,10 +84,10 @@ void worker(mango::problem* myprob) {
   while (keep_going) {
     MPI_Bcast(data, 1, MPI_INT, 0, myprob->mpi_partition.get_comm_worker_groups());
     if (data[0] < 0) {
-      std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
+      if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
       keep_going = false;
     } else {
-      std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation \
+      if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation \
 " << data[0] << "\n";
       /* For this problem, the workers don't actually do any work. */
     }

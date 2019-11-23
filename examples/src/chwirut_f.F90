@@ -1,6 +1,8 @@
 ! This example is based on the PETSc example
 ! src/tao/leastsquares/examples/tutorials/chwirut*
 
+#define verbose_level 0
+
 program chwirut
 
   use mango
@@ -21,7 +23,7 @@ program chwirut
 
   !---------------------------------------------
 
-  print *,"Hello world from chwirut_f"
+  if (verbose_level > 0) print *,"Hello world from chwirut_f"
   call mpi_init(ierr)
 
   targets = 0
@@ -29,9 +31,10 @@ program chwirut
   call init_data(N_terms, t, y)
 
   call mango_problem_create_least_squares(problem, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
-  print *,"Here comes state vector:",state_vector
+  if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
+  call mango_set_verbose(problem, verbose_level)
   call mango_read_input_file(problem, "../input/mango_in.chwirut_f")
   call mango_set_output_filename(problem, "../output/mango_out.chwirut_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
@@ -48,7 +51,7 @@ program chwirut
      call worker(problem)
   end if
 
-  if (mango_get_proc0_world(problem)) then
+  if (mango_get_proc0_world(problem) .and. (verbose_level > 0)) then
      print *,"Best state vector:",state_vector
      print *,"Best objective function: ",best_objective_function
      print *,"Best residual function: ",best_residual_function
@@ -59,7 +62,7 @@ program chwirut
 
   call mpi_finalize(ierr)
 
-  print *,"Good bye!"
+  if (verbose_level > 0) print *,"Good bye!"
 
 contains
 
@@ -95,7 +98,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer :: mpi_comm_worker_groups
 
-  print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
+  if (verbose_level > 0) print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
   N_procs_worker_groups = mango_get_N_procs_worker_groups(problem)
   mpi_comm_worker_groups = mango_get_mpi_comm_worker_groups(problem)
 
@@ -151,10 +154,10 @@ subroutine worker(problem)
      ! Wait until we receive a message to do something.
      call mpi_bcast(data,1,MPI_INTEGER,0,mpi_comm_worker_groups,ierr)
      if (data(1) < 0) then
-        print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
+        if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
         exit
      else
-        print "(a,i4,a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is processing indices",start_index," to",stop_index
+        if (verbose_level > 0) print "(a,i4,a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is processing indices",start_index," to",stop_index
 
         ! Get the state vector
         call mpi_bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups, ierr)

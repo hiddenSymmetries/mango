@@ -11,15 +11,13 @@ void mango::problem::objective_function_wrapper(const double* x, double* f, bool
   objective_function(&N_parameters, x, f, &failed_int, this);
   *failed = (failed_int != 0);
 
-  std::cout << " objective_function_wrapper: *failed=" << *failed << " at_least_one_success=" << at_least_one_success << ", *f < best_objective_function=" << (*f < best_objective_function);
+  if (verbose > 0) std::cout << " objective_function_wrapper: *failed=" << *failed << " at_least_one_success=" << at_least_one_success << ", *f < best_objective_function=" << (*f < best_objective_function) << "\n";
   if (! *failed && (!at_least_one_success || *f < best_objective_function)) {
     at_least_one_success = true;
     best_objective_function = *f;
     best_function_evaluation = function_evaluations;
     memcpy(best_state_vector, x, N_parameters * sizeof(double));
-    std::cout << " Evaluated T\n";
   } else {
-    std::cout << " Evaluated F\n";
   }
 
   if (!least_squares) {

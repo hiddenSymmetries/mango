@@ -39,9 +39,11 @@ double mango::problem::optimize() {
     max_function_and_gradient_evaluations = max_function_evaluations;
   }
 
-  std::cout << "Proc " << mpi_partition.get_rank_world() << " is entering optimize(), and thinks proc0_world=" << mpi_partition.get_proc0_world() << "\n";
-  std::cout << "max_function_evaluations = " << max_function_evaluations << 
-    ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << "\n";
+  if (verbose > 0) {
+    std::cout << "Proc " << mpi_partition.get_rank_world() << " is entering optimize(), and thinks proc0_world=" << mpi_partition.get_proc0_world() << "\n";
+    std::cout << "max_function_evaluations = " << max_function_evaluations << 
+      ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << "\n";
+  }
 
   if (least_squares) {
     optimize_least_squares();
@@ -56,7 +58,7 @@ double mango::problem::optimize() {
   }
   /* Only proc0_world continues past this point. */
 
-  std::cout << "Hello world from optimize()\n";
+  if (verbose > 0) std::cout << "Hello world from optimize()\n";
 
   /* Open output file */
   output_file.open(output_filename.c_str());
@@ -105,20 +107,13 @@ double mango::problem::optimize() {
 
   output_file.close();
 
-  std::cout << "Here comes the optimal state_vector from optimize.cpp: " << state_vector[0];
-  for (int j=1; j<N_parameters; j++) {
-    std::cout << ", " << state_vector[j];
+  if (verbose > 0) {
+    std::cout << "Here comes the optimal state_vector from optimize.cpp: " << state_vector[0];
+    for (int j=1; j<N_parameters; j++) {
+      std::cout << ", " << state_vector[j];
+    }
+    std::cout << "\n";
   }
-  std::cout << "\n";
-
-  /*
-  std::cout << "\nAbout to call objective function from C.\n";
-  double f;
-  int failed;
-  std::cout << "optimize.cpp: objective_function=" << (long int)objective_function << "\n";
-  objective_function(&N_parameters, state_vector, &f, &failed, this);
-  std::cout << "Value of objective function: " << f << "\n";
-  */
 
   return(best_objective_function);
 }

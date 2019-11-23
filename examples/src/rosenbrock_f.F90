@@ -1,3 +1,5 @@
+#define verbose_level 0
+
 program rosenbrock
 
   use mango
@@ -20,14 +22,15 @@ program rosenbrock
 
   !---------------------------------------------
 
-  print *,"Hello world from rosenbrock_f"
+  if (verbose_level > 0) print *,"Hello world from rosenbrock_f"
   call mpi_init(ierr)
 
   !call mango_problem_create(problem,2,state_vector,dummy,objective_function)
   call mango_problem_create_least_squares(problem, 2, state_vector, 2, targets, sigmas, best_residual_function, residual_function)
-  print *,"Here comes state vector:",state_vector
+  if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
+  call mango_set_verbose(problem, verbose_level)
   call mango_read_input_file(problem, "../input/mango_in.rosenbrock_f")
   call mango_set_output_filename(problem, "../output/mango_out.rosenbrock_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
@@ -44,7 +47,7 @@ program rosenbrock
      call worker(problem)
   end if
 
-  if (mango_get_proc0_world(problem)) then
+  if (mango_get_proc0_world(problem) .and. (verbose_level > 0)) then
      print *,"Best state vector:",state_vector
      print *,"Best objective function: ",best_objective_function
      print *,"Best residual function: ",best_residual_function
@@ -55,7 +58,7 @@ program rosenbrock
 
   call mpi_finalize(ierr)
 
-  print *,"Good bye!"
+  if (verbose_level > 0) print *,"Good bye!"
 
 contains
 
@@ -81,7 +84,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
 
-  print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
+  if (verbose_level > 0) print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
   !f = (x(1) - 1) * (x(1) - 1) + 100 * (x(2) - x(1)*x(1)) * (x(2) - x(1)*x(1))
   f(1) = x(1)
   f(2) = x(2) - x(1) * x(1)
@@ -108,10 +111,10 @@ subroutine worker(problem)
   do
      call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
      if (data(1) < 0) then
-        print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
+        if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
         exit
      else
-        print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
+        if (verbose_level > 0) print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
      end if
   end do
 

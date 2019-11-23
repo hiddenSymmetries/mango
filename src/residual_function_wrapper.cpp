@@ -9,20 +9,14 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   residual_function(&N_parameters, x, &N_terms, f, &failed_int, this);
   *failed = (failed_int != 0);
 
-  std::cout << "Hello from residual_function_wrapper. Here comes x:\n";
-  int j;
-  for (j=0; j < N_parameters; j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << x[j];
+  if (verbose > 0) {
+    std::cout << "Hello from residual_function_wrapper. Here comes x:\n";
+    int j;
+    for (j=0; j < N_parameters; j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << x[j];
+    }
+    std::cout << "\n";
   }
-  std::cout << "\n";
-
-  /*
-  std::cout << "residual:";
-  for (j=0; j < N_terms; j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << f[j];
-  }
-  std::cout << "\n" << std::flush;
-  */
 
   double objective_value = write_least_squares_file_line(x, f);
 

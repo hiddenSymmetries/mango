@@ -20,7 +20,7 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   int data;
   int j_evaluation, j_parameter;
 
-  std::cout << "Hello from finite_difference_Jacobian from proc " << mpi_rank_world << "\n";
+  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian from proc " << mpi_rank_world << "\n";
 
   if (proc0_world) {
     /* Tell the group leaders to start this subroutine  */
@@ -44,19 +44,10 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
 
   double* perturbed_state_vector = new double[N_parameters];
   double* residual_functions = new double[N_terms * N_evaluations];
-  /*  double* state_vectors = new double[N_parameters,N_evaluations]; */
   double* state_vectors = new double[N_parameters * N_evaluations];
 
   memset(base_case_residual_function, 0, N_terms*sizeof(double));
   memset(residual_functions, 0, N_terms * N_evaluations*sizeof(double));
-
-  /*
-  std::cout << "Here comes state_vector in 1D when it should be 0: ";
-  for (int j=0; j<N_parameters*N_evaluations; j++) {
-    std::cout << std::setw(25) << state_vectors[j];
-  }
-  std::cout << "\n";
-  */
 
   /* Build the set of state vectors that will be considered. */
   for (j_evaluation = 1; j_evaluation <= N_evaluations; j_evaluation++) {
@@ -70,19 +61,10 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
       /* We must be doing a backwards step */
       perturbed_state_vector[j_evaluation - 2 - N_parameters] = perturbed_state_vector[j_evaluation - 2 - N_parameters] - finite_difference_step_size;
     }
-    /* std::cout << "perturbed_state_vector[0] for j_evaluation " << j_evaluation << " is " <<std::setprecision(15) << perturbed_state_vector[0] << "\n"; */
     memcpy(&state_vectors[(j_evaluation-1)*N_parameters], perturbed_state_vector, N_parameters*sizeof(double));
   }
 
-  /*
-  std::cout << "Here comes state_vector in 1D: ";
-  for (int j=0; j<N_parameters*N_evaluations; j++) {
-    std::cout << std::setw(25) << state_vectors[j];
-  }
-  std::cout << "\n";
-  */
-
-  if (proc0_world) {
+  if (proc0_world && (verbose > 0)) {
     std::cout << "Here comes state_vectors:\n";
     for(j_parameter=0; j_parameter<N_parameters; j_parameter++) {
       for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
@@ -154,7 +136,7 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   delete[] state_vectors;
   delete[] state_vector_copy;
 
-  if (proc0_world) {
+  if (proc0_world && (verbose > 0)) {
     std::cout << "Here comes finite-difference Jacobian:\n";
     for (int j_term=0; j_term<N_terms; j_term++) {
       for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {

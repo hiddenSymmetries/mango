@@ -186,6 +186,11 @@ module mango
        real(C_double) :: lower_bounds, upper_bounds
        type(C_ptr), value :: this
      end subroutine C_mango_set_bound_constraints
+     subroutine C_mango_set_verbose (this, verbose) bind(C,name="mango_set_verbose")
+       import
+       integer(C_int) :: verbose
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_verbose
   end interface
 
   public :: mango_problem
@@ -198,7 +203,8 @@ module mango
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
-       mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints
+       mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
+       mango_set_verbose
   
 
   abstract interface
@@ -262,10 +268,10 @@ contains
     ! For info on passing function pointers, see
     ! https://gcc.gnu.org/onlinedocs/gcc-4.6.1/gfortran/C_005fFUNLOC.html#C_005fFUNLOC
     !print *,"mango.F90 subroutine mango_problem_create: C_funloc(objective_function)=",C_funloc(objective_function)
-    print *,"state_vector size in mango.F90:",size(state_vector_copy)
-    print *,"state_vector in mango.F90:",state_vector_copy
-    call objective_function(2, x, f, failed_temp, this)
-    print *,"Done calling objective fn from mango.F90. f=",f
+    !print *,"state_vector size in mango.F90:",size(state_vector_copy)
+    !print *,"state_vector in mango.F90:",state_vector_copy
+    !call objective_function(2, x, f, failed_temp, this)
+    !print *,"Done calling objective fn from mango.F90. f=",f
   end subroutine mango_problem_create
 
   subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
@@ -482,5 +488,11 @@ contains
     double precision, intent(in) :: lower_bounds(:), upper_bounds(:)
     call C_mango_set_bound_constraints(this%object, lower_bounds(1), upper_bounds(1))
   end subroutine mango_set_bound_constraints
+
+  subroutine mango_set_verbose(this, verbose)
+    type(mango_problem), intent(in) :: this
+    integer, intent(in) :: verbose
+    call C_mango_set_verbose(this%object, verbose)
+  end subroutine mango_set_verbose
 
 end module mango

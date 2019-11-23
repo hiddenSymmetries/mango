@@ -1,4 +1,5 @@
 #define N_dims 3
+#define verbose_level 0
 
 #include<iostream>
 #include<iomanip>
@@ -14,7 +15,7 @@ void worker(mango::problem*);
 int main(int argc, char *argv[]) {
   int ierr;
 
-  std::cout << "Hello world from quadratic_c.\n";
+  if (verbose_level > 0) std::cout << "Hello world from quadratic_c.\n";
 
   ierr = MPI_Init(&argc, &argv);
   if (ierr != 0) {
@@ -32,12 +33,15 @@ int main(int argc, char *argv[]) {
     targets[j] = (double) j+1;
   }
 
-  std::cout << "Is foobar a valid algorithm? " << mango::does_algorithm_exist("foobar") << "\n";
-  std::cout << "Is petsc_nm a valid algorithm? " << mango::does_algorithm_exist("petsc_nm") << "\n";
+  if (verbose_level > 0) {
+    std::cout << "Is foobar a valid algorithm? " << mango::does_algorithm_exist("foobar") << "\n";
+    std::cout << "Is petsc_nm a valid algorithm? " << mango::does_algorithm_exist("petsc_nm") << "\n";
+  }
 
   double best_residual_function[N_dims];
   mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
+  myprob.verbose = verbose_level;
   myprob.read_input_file("../input/mango_in.quadratic_c");
   myprob.output_filename = "../output/mango_out.quadratic_c";
   myprob.mpi_init(MPI_COMM_WORLD);
@@ -65,7 +69,7 @@ int main(int argc, char *argv[]) {
     worker(&myprob);
   }
 
-  if (myprob.mpi_partition.get_proc0_world()) {
+  if (myprob.mpi_partition.get_proc0_world() && (verbose_level > 0)) {
     std::cout << "Best state vector: " << std::setprecision(16);
     for (int j=0; j<N_dims; j++) std::cout << state_vector[j] << "  ";
     std::cout << "\nBest objective function: " << best_objective_function << "\nBest residual vector:";
@@ -81,7 +85,7 @@ int main(int argc, char *argv[]) {
 
 void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem) {
   int j;
-  std::cout << "C residual function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << ", M=" << *M << "\n";
+  if (verbose_level > 0) std::cout << "C residual function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << ", M=" << *M << "\n";
 
   /* Mobilize the workers in the group with this group leader: */
   int data[1];
@@ -93,17 +97,18 @@ void residual_function(int* N, const double* x, int* M, double* f, int* failed, 
   }
   *failed = false;
   
-  std::cout << "state_vector:";
-  for (j=0; j < *N; j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << x[j];
+  if (verbose_level > 0) {
+    std::cout << "state_vector:";
+    for (j=0; j < *N; j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << x[j];
+    }
+    std::cout << "\n";
+    std::cout << "residual:";
+    for (j=0; j < *M; j++) {
+      std::cout << std::setw(24) << std::setprecision(15) << f[j];
+    }
+    std::cout << "\n" << std::flush;
   }
-  std::cout << "\n";
-  std::cout << "residual:";
-  for (j=0; j < *M; j++) {
-    std::cout << std::setw(24) << std::setprecision(15) << f[j];
-  }
-  std::cout << "\n" << std::flush;
-  
 }
 
 
@@ -115,10 +120,10 @@ void worker(mango::problem* myprob) {
   while (keep_going) {
     MPI_Bcast(data, 1, MPI_INT, 0, myprob->mpi_partition.get_comm_worker_groups());
     if (data[0] < 0) {
-      std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
+      if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
       keep_going = false;
     } else {
-      std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
+      if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
       /* For this problem, the workers don't actually do any work. */
     }
   }

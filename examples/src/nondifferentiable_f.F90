@@ -1,4 +1,5 @@
 #define N_dim 3
+#define verbose_level 0
 
 program nondifferentiable
 
@@ -21,22 +22,25 @@ program nondifferentiable
 
   !---------------------------------------------
 
-  print *,"Hello world from nondifferentiable_f"
+  if (verbose_level > 0) print *,"Hello world from nondifferentiable_f"
   !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
 
-  print *,"Is foobar a valid algorithm? ", mango_does_algorithm_exist('foobar')
-  print *,"Is petsc_pounders a valid algorithm? ", mango_does_algorithm_exist('petsc_pounders')
-  print *,"Is 'petsc_pounders ' a valid algorithm? ", mango_does_algorithm_exist('petsc_pounders ')
-  print *,"Is petsc_nm_blurg a valid algorithm? ", mango_does_algorithm_exist('petsc_nm_blurg')
-  print *,"Is petsc_n a valid algorithm? ", mango_does_algorithm_exist('petsc_n')
-  print *,"Is nlopt_ld_var2 a valid algorithm? ", mango_does_algorithm_exist('nlopt_ld_var2')
+  if (verbose_level > 0) then
+     print *,"Is foobar a valid algorithm? ", mango_does_algorithm_exist('foobar')
+     print *,"Is petsc_pounders a valid algorithm? ", mango_does_algorithm_exist('petsc_pounders')
+     print *,"Is 'petsc_pounders ' a valid algorithm? ", mango_does_algorithm_exist('petsc_pounders ')
+     print *,"Is petsc_nm_blurg a valid algorithm? ", mango_does_algorithm_exist('petsc_nm_blurg')
+     print *,"Is petsc_n a valid algorithm? ", mango_does_algorithm_exist('petsc_n')
+     print *,"Is nlopt_ld_var2 a valid algorithm? ", mango_does_algorithm_exist('nlopt_ld_var2')
+  end if
 
   state_vector = 0
   call mango_problem_create(problem,N_dim,state_vector,dummy,objective_function)
-  print *,"Here comes state vector:",state_vector
+  if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
+  call mango_set_verbose(problem, verbose_level)
   call mango_read_input_file(problem, "../input/mango_in.nondifferentiable_f")
   call mango_set_output_filename(problem, "../output/mango_out.nondifferentiable_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
@@ -54,7 +58,7 @@ program nondifferentiable
      call worker(problem)
   end if
 
-  if (mango_get_proc0_world(problem)) then
+  if (mango_get_proc0_world(problem) .and. (verbose_level > 0)) then
      print *,"Best state vector:",state_vector
      print *,"Best objective function: ",best_objective_function
      print *,"Best function evaluation was ",mango_get_best_function_evaluation(problem)
@@ -64,7 +68,7 @@ program nondifferentiable
 
   call mpi_finalize(ierr)
 
-  print *,"Good bye!"
+  if (verbose_level > 0) print *,"Good bye!"
 
 contains
 
@@ -90,7 +94,7 @@ subroutine objective_function(N, x, f, failed, problem)
   type(mango_problem), value, intent(in) :: problem
   integer :: j
 
-  print *,"Hi from fortran. N=",N," size(x)=",size(x)
+  if (verbose_level > 0) print *,"Hi from fortran. N=",N," size(x)=",size(x)
 
   f = 0
   do j = 1, N
@@ -120,10 +124,10 @@ subroutine worker(problem)
   do
      call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
      if (data(1) < 0) then
-        print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
+        if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
         exit
      else
-        print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
+        if (verbose_level > 0) print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
      end if
   end do
 

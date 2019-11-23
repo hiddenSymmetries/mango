@@ -9,7 +9,7 @@ void mango::problem::set_algorithm(algorithm_type algorithm_in) {
 
   algorithm = algorithm_in;
 
-  std::cout << "Algorithm set (by integer) to " << algorithm << ", a.k.a. " << algorithms[algorithm].name << "\n";
+  if (verbose > 0) std::cout << "Algorithm set (by integer) to " << algorithm << ", a.k.a. " << algorithms[algorithm].name << "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ void mango::problem::set_algorithm(std::string str) {
     std::cout << "Error in mango::problem::set_algorithm. The following algorithm name was requested but not found: " << str << "\n";
     throw std::runtime_error("Error in mango::problem::set_algorithm: The requested algorithm name was not found.");
   }
-  std::cout << "Algorithm set (by string) to " << algorithm << ", a.k.a. " << algorithms[algorithm].name << "\n";
+  if (verbose > 0) std::cout << "Algorithm set (by string) to " << algorithm << ", a.k.a. " << algorithms[algorithm].name << "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////

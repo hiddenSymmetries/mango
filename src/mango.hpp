@@ -135,6 +135,8 @@ namespace mango {
     void print();
 
   public:
+    int verbose;
+
     MPI_Partition();
     ~MPI_Partition();
     void init(MPI_Comm);
@@ -216,6 +218,7 @@ namespace mango {
     std::string output_filename;
     int max_function_evaluations;
     MPI_Partition mpi_partition;
+    int verbose;
 
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); /* For least-squares problems */

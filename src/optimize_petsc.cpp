@@ -35,11 +35,13 @@ void mango::problem::optimize_petsc() {
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(temp_array, state_vector, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
-  std::cout << "Here comes petsc vec for initial condition:\n";
-  VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
+  if (verbose > 0) {
+    std::cout << "Here comes petsc vec for initial condition:\n";
+    VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
+  }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  std::cout << "PETSc has been initialized.\n";
+  if (verbose > 0) std::cout << "PETSc has been initialized.\n";
 
   switch (algorithm) {
   case PETSC_NM:
@@ -74,7 +76,7 @@ void mango::problem::optimize_petsc() {
 
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
-  TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
   /* Copy PETSc solution to the mango state vector. */
   VecGetArray(tao_state_vec, &temp_array);

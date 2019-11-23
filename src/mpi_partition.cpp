@@ -7,6 +7,7 @@
 mango::MPI_Partition::MPI_Partition() {
   N_worker_groups = -1;
   initialized = false;
+  verbose = false;
 }
 
 /* Destructor */
@@ -14,8 +15,6 @@ mango::MPI_Partition::~MPI_Partition() {
 }
 
 void mango::MPI_Partition::verify_initialized() {
-  // std::cout << "Hello from mango::MPI_Partition::verify_initialized()\n";
-  // std::cout << "initialized=" << initialized << "\n";
   if (!initialized) {
     throw std::runtime_error("Error! MPI_Partition get method was called before initialization.");
   }

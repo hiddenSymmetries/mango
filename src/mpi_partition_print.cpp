@@ -4,6 +4,8 @@
 
 void mango::MPI_Partition::print() {
 
+  if (!verbose) return;
+
   /* Print the processor assignments in order of their rank in mpi_comm_world. */
   const int buffer_length = 1000;
   char proc_assignments_string[buffer_length];
