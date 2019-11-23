@@ -123,7 +123,7 @@ EXTRA_F_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/lib -lnlo
 endif
 
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
-MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS
+MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS --mca btl_base_warn_component_unused 0 --mca orte_base_help_aggregate 0
 
 #####################################################################
 # Matt's laptop, with mpi and petsc via macports
