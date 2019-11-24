@@ -67,6 +67,7 @@ def first_n_items(str,N):
     else:
         return (",".join(splitstr[:N]))+"\n"
 
+from tests.verify_mpi_independence import *
 for example in examples:
 
     print()
@@ -269,6 +270,8 @@ for example in examples:
                 f.write(first_n_items(line,N_parameters+8))
         else:
             f.write('No jobs succeeded!')
+
+    verify_mpi_independence(example)
 
 print()
 print(line1)

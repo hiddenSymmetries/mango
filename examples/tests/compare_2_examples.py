@@ -3,6 +3,13 @@
 import numpy as np
 import os
 
+try:
+    # This case works when this script is run standalone
+    from nondeterministic_algorithms import *
+except:
+    # This case works when this module is imported from another script
+    from tests.nondeterministic_algorithms import *
+
 def test_float_equality(x1,x2,tol):
     # Return true if the _relative_ difference |x1 - x2|/mean(x1,x2) is < tol,
     # except when x1==x2==0, in which case return true.
@@ -11,10 +18,11 @@ def test_float_equality(x1,x2,tol):
         return True
     return np.abs(x2-x1) / avg < tol
 
-def compare_2_examples(filename1, filename2, algorithms_to_exclude):
+def compare_2_examples(filename1, filename2):
     solution_vector_tolerance = 1.0e-17
     objective_function_tolerance = 1.0e-17
     verbose = False
+    algorithms_to_exclude = nondeterministic_algorithms
 
     # Read output from example 1:
     big_filename1 = 'output/short_summary_mpi.'+filename1
