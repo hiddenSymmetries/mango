@@ -2,6 +2,9 @@
 
 myfigsize=(14,6.8)
 
+marker_size = 2
+line_width = 0.7
+
 import os
 print()
 print("usage: " + os.path.basename(__file__) + " <1 or more mango_out.* files>")
@@ -132,25 +135,31 @@ import os
 #if N_files > 1:
 #    plt.legend(loc=0,fontsize=7)
 
-plt.subplot(numRows,numCols,plotNum)
-plotNum += 1
-for j in range(N_files):
-    plt.semilogy(files_function_evaluations[j], files_objective_function[j] - min_objective_function, '.-', label = filenames[j])
-plt.xlabel('Function evaluation')
-plt.ylabel('(Objective function) - (min objective function)')
-plt.grid(True)
-if N_files > 1:
-    plt.legend(loc='upper right',fontsize=7)
+linespecs = ['o','^','s','v']
 
 plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 for j in range(N_files):
-    plt.semilogy(files_times[j], files_objective_function[j] - min_objective_function, '.-', label = filenames[j])
+    linespec=linespecs[np.mod(int(np.floor(j/10)),len(linespecs))]+'-'
+    plt.semilogy(files_function_evaluations[j], files_objective_function[j] - min_objective_function, linespec, label = filenames[j], markersize=marker_size, linewidth=line_width)
+plt.xlabel('Function evaluation')
+plt.ylabel('(Objective function) - (min objective function)')
+plt.grid(True)
+ncol=int(np.floor(N_files/20))+1
+if N_files > 1:
+    plt.legend(loc='upper right',fontsize=7,ncol=ncol)
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+for j in range(N_files):
+    linespec=linespecs[np.mod(int(np.floor(j/10)),len(linespecs))]+'-'
+    plt.semilogy(files_times[j], files_objective_function[j] - min_objective_function, linespec, label = filenames[j], markersize=marker_size, linewidth=line_width)
 plt.xlabel('Time (seconds)')
 plt.ylabel('(Objective function) - (min objective function)')
 plt.grid(True)
+ncol=int(np.floor(N_files/20))+1
 if N_files > 1:
-    plt.legend(loc='upper right',fontsize=7)
+    plt.legend(loc='upper right',fontsize=7,ncol=ncol)
 
 
 if N_files == 1:
@@ -158,7 +167,8 @@ if N_files == 1:
 
 plt.figtext(0.5,0.005, "Run in "+os.getcwd(), ha='center',va='bottom',fontsize=7)
 
-plt.tight_layout()
+#plt.tight_layout()
+plt.subplots_adjust(left=0.06, bottom=0.09, right=0.99, top=0.97, hspace=0.17)
 
 ##############################################################
 

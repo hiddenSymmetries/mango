@@ -88,8 +88,17 @@ def compare_2_examples(filename1, filename2, algorithms_to_exclude):
                 print('2 failures count as a match')
             continue
 
-        # Make sure the number of function evaluations was the same:
+        # Make sure the total number of function evaluations was the same:
         index = 3
+        function_evaluations1 = int(results1[index])
+        function_evaluations2 = int(results2[index])
+        if function_evaluations1 != function_evaluations2:
+            print('Error! On line '+str(j_line)+', function_evaluations does not match between '+big_filename1+' and '+big_filename2)
+            print('function_evaluations1 = ',results1[index],',  function_evaluations2 = ',results2[index])
+            exit(1)
+
+        # Make sure the function evaluations at which the optimum was found was the same:
+        index = 5
         function_evaluations1 = int(results1[index])
         function_evaluations2 = int(results2[index])
         if function_evaluations1 != function_evaluations2:
@@ -99,7 +108,7 @@ def compare_2_examples(filename1, filename2, algorithms_to_exclude):
 
         # Make sure the solution vector was the same:
         for j_parameter in range(N_parameters):
-            index = 5+j_parameter
+            index = 7+j_parameter
             x1 = float(results1[index])
             x2 = float(results2[index])
             if not test_float_equality(x1,x2,solution_vector_tolerance):
@@ -108,7 +117,7 @@ def compare_2_examples(filename1, filename2, algorithms_to_exclude):
                 exit(1)
 
         # Make sure the final objective function was the same:
-        index = 5+N_parameters
+        index = 7+N_parameters
         f1 = float(results1[index])
         f2 = float(results2[index])
         if not test_float_equality(f1,f2,objective_function_tolerance):

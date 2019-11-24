@@ -215,14 +215,22 @@ for example in examples:
             if len(lines) > 5:
                 # This run succeeded
                 summary_header = lines[:5]
-                summary_mpi_contents.append(algorithm_with_spaces + mpi_string + lines[-1])
+                # Combine 'last' info from the penultimate line with 'best' info from the last line:
+                penultimate_line = lines[-2].split(',')
+                contents_line = (",".join(penultimate_line[:2])) + ',' + lines[-1]
+                summary_mpi_contents.append(algorithm_with_spaces + mpi_string + contents_line)
                 if j_procs==0:
-                    summary_contents.append(algorithm_with_spaces+lines[-1])
+                    summary_contents.append(algorithm_with_spaces+contents_line)
             else:
                 # This run failed
                 summary_mpi_contents.append(algorithm_with_spaces + mpi_string + " FAILED\n")
                 if j_procs==0:
                     summary_contents.append(algorithm_with_spaces+" FAILED\n")
+
+    # Add both 'best' and 'last' versions of function_evaluation and seconds:
+    old_headings = summary_header[-1].split(',')
+    headings = "last_function_evaluation,last_seconds,best_function_evaluation,best_seconds," + (",".join(old_headings[2:]))
+    summary_header = summary_header[:-1] + [headings]
 
     # Write summary files
     N_parameters = 0
@@ -247,18 +255,18 @@ for example in examples:
         if len(summary_header)>0:
             f.write("".join(summary_header[:-1]))
             line = "algorithm,"+summary_header[-1]
-            f.write(first_n_items(line,N_parameters+4))
+            f.write(first_n_items(line,N_parameters+6))
             for line in summary_contents:
-                f.write(first_n_items(line,N_parameters+4))
+                f.write(first_n_items(line,N_parameters+6))
         else:
             f.write('No jobs succeeded!')
     with open("output/short_summary_mpi."+example,'w') as f:
         if len(summary_header)>0:
             f.write("".join(summary_header[:-1]))
             line = "algorithm,N_procs,N_worker_groups,"+summary_header[-1]
-            f.write(first_n_items(line,N_parameters+6))
+            f.write(first_n_items(line,N_parameters+8))
             for line in summary_mpi_contents:
-                f.write(first_n_items(line,N_parameters+6))
+                f.write(first_n_items(line,N_parameters+8))
         else:
             f.write('No jobs succeeded!')
 
