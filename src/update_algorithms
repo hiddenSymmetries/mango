@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # This script uses the database of algorithms in "algorithms.dat" to populate
-# several sections of mango.hpp, ensuring they are consistent.
+# several sections of mango.hpp and other files, ensuring they are consistent.
 
-print(__file__ + ": Using the database of algorithms to generate code in mango.hpp")
+print(__file__ + ": Using the database of algorithms to generate code in mango.hpp and other source files.")
 
 # Read in the database of algorithms:
 database_filename = "algorithms.dat"
@@ -227,6 +227,40 @@ for j in range(len(packages)):
         newlines.append('    case PACKAGE_'+packages[j].upper()+':\n')
         newlines.append('      optimize_'+packages[j]+'();\n')
         newlines.append('      break;\n')
+lines = newlines + lines[end:]
+
+# Write new file
+try:
+    f = open(filename,'w')
+except:
+    print("Error! Unable to open "+filename+" for writing")
+    raise
+f.writelines(lines)
+f.close()
+
+##################################################################
+# Editing optimize_nlopt.cpp
+##################################################################
+
+# Read in the file to preprocess
+filename = 'optimize_nlopt.cpp'
+try:
+    f = open(filename)
+except:
+    print("Error! Unable to open "+filename+" for reading")
+    raise
+
+lines = f.readlines()
+f.close()
+
+# Replace <nlopt_algorithms> .. </nlopt_algorithms>
+start, end = find_markup(lines,'nlopt_algorithms','//')
+newlines = lines[:start+1] + comment_line
+for j in range(len(database)):
+    if database[j][0] == 'nlopt':
+        newlines.append('  case mango::'+names[j].upper()+':\n')
+        newlines.append('    mango_nlopt_algorithm = nlopt::'+database[j][1].upper()+';\n')
+        newlines.append('    break;\n')
 lines = newlines + lines[end:]
 
 # Write new file

@@ -1,6 +1,6 @@
 # This is the master list of optimization algorithms available in mango.
-# This file is used by the "preprocess" script to populate several sections of mango.hpp and other source files.
-# If any changes are made to this file, run the preprocess script to activate the changes.
+# This file is used by the "update_algorithms" script to populate several sections of mango.hpp and other source files.
+# If any changes are made to this file, run the update_algorithms script to propagate the changes from this file to the main source code.
 
 # package,                      name, least_squares, uses_derivatives, parallel, requires_bound_constraints, deterministic
     petsc,                        nm,             F,                F,        F,                          F,             T
