@@ -68,6 +68,7 @@ def first_n_items(str,N):
         return (",".join(splitstr[:N]))+"\n"
 
 from tests.verify_mpi_independence import *
+from tests.regression_test import *
 for example in examples:
 
     print()
@@ -272,6 +273,7 @@ for example in examples:
             f.write('No jobs succeeded!')
 
     verify_mpi_independence(example)
+    regression_test(example)
 
 print()
 print(line1)
