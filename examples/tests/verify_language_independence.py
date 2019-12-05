@@ -10,6 +10,7 @@ except:
     from tests.compare_2_examples import *
 
 def verify_language_independence():
+    compare_2_examples('chwirut_c','chwirut_f')
     compare_2_examples('quadratic_c','quadratic_f')
     compare_2_examples('rosenbrock_c','rosenbrock_f')
     compare_2_examples('nondifferentiable_c','nondifferentiable_f')

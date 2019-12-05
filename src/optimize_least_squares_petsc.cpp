@@ -63,7 +63,8 @@ void mango::problem::optimize_least_squares_petsc() {
   // TaoSetTolerances(my_tao, 1e-30, 1e-30, 1e-30);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
-  if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  //if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
   /* Copy PETSc solution to the mango state vector. */
   VecGetArray(tao_state_vec, &temp_array);
