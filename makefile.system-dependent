@@ -117,9 +117,9 @@ EXTRA_C_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 EXTRA_F_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 
 ifeq ($(MANGO_NLOPT_AVAILABLE),T)
-EXTRA_C_COMPILE_FLAGS += -I ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/include
-EXTRA_C_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/lib -lnlopt
-EXTRA_F_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/nlopt/nlopt-2.6.1/install/lib -lnlopt
+EXTRA_C_COMPILE_FLAGS += -I ${TRAVIS_BUILD_DIR}/external_packages/nlopt/nlopt-2.6.1/install/include
+EXTRA_C_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib -lnlopt
+EXTRA_F_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib -lnlopt
 endif
 
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.

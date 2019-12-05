@@ -16,10 +16,12 @@ which mpiexec
 
 make test_make
 
-./tests/install_nlopt.sh
+cd external_packages
+./install_nlopt.sh
+cd ..
 
 # Executables need to know where to find the nlopt shared library:
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/landreman/mango/nlopt/nlopt-2.6.1/install/lib
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/landreman/mango/external_packages/nlopt/nlopt-2.6.1/install/lib
 
 make
 

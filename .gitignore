@@ -13,3 +13,10 @@ examples/output/short_summary*
 examples/.DS_Store
 examples/temp
 examples/tests/__pycache__/
+external_packages/nlopt
+external_packages/hopspack/hopspack-2.0.2-src.tar.gz
+external_packages/hopspack/hopspack-2.0.2-src/*
+external_packages/hopspack/HOPSPACK_main_mpi
+external_packages/hopspack/src/*
+external_packages/hopspack/obj/*
+
