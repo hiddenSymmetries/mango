@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
   myprob.verbose = verbose_level;
   myprob.read_input_file("../input/mango_in.quadratic_c");
   myprob.output_filename = "../output/mango_out.quadratic_c";
+  if (myprob.get_algorithm() == 1) myprob.verbose = 1;
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.centered_differences = true; 
   myprob.max_function_evaluations = 2000;

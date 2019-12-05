@@ -228,6 +228,7 @@ namespace mango {
     void mpi_init(MPI_Comm);
     void set_algorithm(algorithm_type);
     void set_algorithm(std::string);
+    algorithm_type get_algorithm();
     void read_input_file(std::string);
     void set_output_filename(std::string);
     void set_bound_constraints(double*, double*);

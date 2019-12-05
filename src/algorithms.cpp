@@ -15,7 +15,7 @@ void mango::problem::set_algorithm(algorithm_type algorithm_in) {
 ///////////////////////////////////////////////////////////////////////////
 
 void mango::problem::set_algorithm(std::string str) {
-  bool found_match = get_algorithm(str, &algorithm);
+  bool found_match = mango::get_algorithm(str, &algorithm);
   if (!found_match) {
     std::cout << "Error in mango::problem::set_algorithm. The following algorithm name was requested but not found: " << str << "\n";
     throw std::runtime_error("Error in mango::problem::set_algorithm: The requested algorithm name was not found.");

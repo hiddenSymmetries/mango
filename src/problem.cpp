@@ -114,3 +114,7 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
 
   mpi_partition.init(mpi_comm_world);
 }
+
+mango::algorithm_type mango::problem::get_algorithm() {
+  return algorithm;
+}
