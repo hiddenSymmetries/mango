@@ -38,6 +38,7 @@
 */
 
 #include <string.h>    //-- FOR strcpy() and strlen()
+#include<stdexcept> // MJL
 
 #include "HOPSPACK_common.hpp"
 //#include "HOPSPACK_EvaluatorDefault.hpp" // MJL
@@ -236,7 +237,6 @@ static int  behaveAsMaster_ (const int                      nArgc,
     using HOPSPACK::ExecutorMpi;
     using HOPSPACK::Hopspack;
 
-
     if (nArgc < 2)
     {
         cerr << "ERROR: Need the input file name." << endl;
@@ -247,11 +247,37 @@ static int  behaveAsMaster_ (const int                      nArgc,
         return( nERROR );
     }
     ParameterList  cParams;
+
+    // <MJL> Edit parameters
+    HOPSPACK::ParameterList*  cProblemParams = &(cParams.getOrSetSublist ("Problem Definition"));
+    cProblemParams->setParameter("Objective Type","Minimize");
+    cProblemParams->setParameter("Number Unknowns",2);
+    HOPSPACK::Vector scaling(2,1.0);
+    cProblemParams->setParameter("Scaling",scaling);
+    HOPSPACK::Vector x0(2,0.0);
+    cProblemParams->setParameter("Initial X",x0);
+    cProblemParams->setParameter("Display",2);
+
+    HOPSPACK::ParameterList*  cMedParams = &(cParams.getOrSetSublist ("Mediator"));
+    //cout << "MJL Number Processors:" << cMedParams->getParameter("Number Processors",-17) << endl;
+    cMedParams->setParameter("Number Processors",2);
+    cMedParams->setParameter("Citizen Count",1);
+    cMedParams->setParameter("Display",2);
+
+    HOPSPACK::ParameterList*  cCitizenParams = &(cParams.getOrSetSublist ("Citizen 1"));
+    cCitizenParams->setParameter("Type","GSS");
+    cCitizenParams->setParameter("Display",1);
+    cCitizenParams->setParameter("Step Tolerance",1e-5);
+
+    // </MJL>
+
+    
     if (parseTextInputFile (saArgv[1], cParams) == false)
     {
         masterEndsProcComm_ (cGPC);
         return( nERROR );
     }
+    
 
     //---- ALLOCATE MPI PROCESSES FOR VARIOUS TYPES OF WORKERS.
     int  nNumProcs = 0;
@@ -545,6 +571,11 @@ int  main (const int           nArgc,
     }
     int  nCopyArgc = nArgc;
 
+    // <MJL> Move MPI_Init to the driver.
+    int e = MPI_Init(&nCopyArgc, &saCopyArgv);
+    if (e != MPI_SUCCESS) throw std::runtime_error("Error initializing MPI");
+    // </MJL>
+
     GenProcComm &  cGPC = GenProcComm::getTheInstance();
 
     //---- START INTER-PROCESS COMMUNICATION.
@@ -564,6 +595,8 @@ int  main (const int           nArgc,
     {
         nReturnValue = behaveAsWorker_ (nProcRank, cGPC);
     }
+
+    MPI_Finalize();
 
     return( nReturnValue );
 }

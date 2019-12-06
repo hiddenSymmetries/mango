@@ -140,6 +140,8 @@ int GenProcComm::init(int &argc, char ** &argv, MPI_Comm mpi_comm_in)
   int groupSize;
   int* ranksInOldGroup;
 
+  
+  /* <MJL> Commented this out, so MPI_Init can be called by the driver.
   e = MPI_Init(&argc, &argv);
 
   if (e != MPI_SUCCESS) 
@@ -147,6 +149,7 @@ int GenProcComm::init(int &argc, char ** &argv, MPI_Comm mpi_comm_in)
     cerr << "ERROR: GenProcComm::init - error initializing MPI." << endl;
     throw MPI_PVM_ERROR;
   }
+  </MJL> */
   
   // Get the set of processes (group, in MPI lingo) associated with 
   // MPI_COMM_WORLD.
@@ -368,12 +371,14 @@ void GenProcComm::exit()
     throw MPI_PVM_ERROR;
   }
   // End MPI.
+  /* <MJL>
   e = MPI_Finalize();
   if (e != MPI_SUCCESS) 
   {
     cerr << "ERROR: GenProcComm::exit - error in MPI finalize" << endl;
     throw MPI_PVM_ERROR;
   }
+  </MJL> */
 
 #endif
 

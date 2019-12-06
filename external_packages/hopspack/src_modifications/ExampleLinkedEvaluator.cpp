@@ -132,7 +132,8 @@ void  ExampleLinkedEvaluator::printDebugInfo (void) const
 double  ExampleLinkedEvaluator::evaluateF_
     (const HOPSPACK::Vector &  cX) const
 {
-    double  f = cX[0] + (2 * cX[1]);
+  //    double  f = cX[0] + (2 * cX[1]);
+  double  f = (cX[0] - 1) * (cX[0] - 1) + 3 * (cX[1] - cX[0]*cX[0]) * (cX[1] - cX[0]*cX[0]);
     return( f );
 }
 
@@ -140,12 +141,13 @@ double  ExampleLinkedEvaluator::evaluateF_
 //----------------------------------------------------------------------
 //  Private method evaluateCIneqs_
 //----------------------------------------------------------------------
+
 void  ExampleLinkedEvaluator::evaluateCIneqs_
     (const HOPSPACK::Vector &  cX,
            HOPSPACK::Vector &  cIneqs) const
 {
-    cIneqs.resize (1);
+  /*    cIneqs.resize (1);
     cIneqs[0] = 1 - (cX[0] - 1)*(cX[0] - 1) - (cX[1] - 1)*(cX[1] - 1);
-
+  */
     return;
 }

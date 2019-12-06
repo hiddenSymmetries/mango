@@ -1,0 +1,68 @@
+# $Id: example4_params.txt 166 2010-03-22 19:58:07Z tplante $
+# $URL: svn+ssh://software.sandia.gov/svn/private/hopspack/trunk/examples/4-nonlinear-constraints/example4_params.txt $
+#
+# ************************************************************************
+#         HOPSPACK: Hybrid Optimization Parallel Search Package
+#                Copyright 2009-2010 Sandia Corporation
+#
+#   Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+#   the U.S. Government retains certain rights in this software.
+# ************************************************************************
+
+# HOPSPACK parameters for example 4
+# See nonlinear_constraints.cpp for the definition of the objective function
+# and constraints.
+
+
+#-- SUBLIST TO DEFINE THE NUMBER OF UNKNOWNS, VARIABLE BOUNDS, ETC.
+
+@ "Problem Definition"
+  "Objective Type" string "Maximize"
+  "Number Unknowns" int 2
+  "Scaling" vector 2  1  1                    # Scale the variables
+  "Number Nonlinear Ineqs" int 1              # Number of nonlinear inequalities
+  "Nonlinear Active Tolerance" double 1.0e-5  # Nonlinear constraint tolerance
+  "Display" int 2
+
+  #-- DEFINE AN INITIAL POINT AND ITS FUNCTION AND NONLINEAR CONSTRAINT VALUES.
+  "Initial X" vector 2  1  1
+  "Initial F" vector 1  3.0
+  "Initial Nonlinear Ineqs" vector 1  1.0
+@@
+
+#-- SUBLIST TO DEFINE GENERAL LINEAR CONSTRAINTS IN THE PROBLEM.
+
+#@ "Linear Constraints"
+#  #-- PROBLEM HAS ONE LINEAR INEQUALITY.
+#  "Inequality Matrix" matrix 1 2
+#   1  1
+#  "Inequality Lower" vector 1    1
+#  "Inequality Upper" vector 1  DNE
+#  "Display" int 2
+#@@
+
+
+#-- SUBLIST TO DEFINE HOW THE OBJECTIVE FUNCTION IS EVALUATED.
+
+@ "Evaluator"
+  "Executable Name" string "nonlinear_constraints"
+@@
+
+
+#-- SUBLIST OF MEDIATOR CONTROL PARAMETERS.
+
+@ "Mediator" 
+  "Citizen Count" int 1               # One citizen will be invoked
+#  "Number Processors" int 4           # Used with MPI executable
+  "Number Threads" int 2              # Used with multithreaded executable
+  "Maximum Evaluations" int -1
+  "Display" int 2                     # 0 = no debug info, 5 = most detail
+@@
+
+
+#-- SUBLISTS TO DEFINE EACH CITIZEN (ONLY ONE IN THIS EXAMPLE).
+
+@ "Citizen 1"                         # Citizen name
+  "Type" string "GSS-NLC"             # GSS for nonlinear constraints
+  "Display" int 2                     # 0 = no debug info, 2 = most detail
+@@
