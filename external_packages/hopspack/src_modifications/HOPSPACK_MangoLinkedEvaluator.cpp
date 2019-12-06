@@ -58,7 +58,7 @@
 */
 
 #include "HOPSPACK_common.hpp"
-#include "ExampleLinkedEvaluator.hpp"
+#include "HOPSPACK_MangoLinkedEvaluator.hpp"
 
 
 //----------------------------------------------------------------------

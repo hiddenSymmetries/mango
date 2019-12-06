@@ -15,8 +15,14 @@ else ifneq ($(MANGO_PETSC_AVAILABLE),F)
 endif
 
 ifeq ($(MANGO_HOPSPACK_AVAILABLE),T)
-  EXTRA_C_COMPILE_FLAGS += -DMANGO_HOPSPACK_AVAILABLE
+  # See if hopspack files are present in the expected location
+  ifeq (,$(wildcard external_packages/hopspack/src/HOPSPACK_MangoLinkedEvaluator.cpp))
+    $(error HOPSPACK modified source files are not present in the expected location external_packages/hopspack/src. You probably need to run "cd external_packages; ./install_hopspack.sh")
+  endif
+  EXTRA_C_COMPILE_FLAGS += -DMANGO_HOPSPACK_AVAILABLE -I external_packages/hopspack/src
   EXTRA_F_COMPILE_FLAGS += -DMANGO_HOPSPACK_AVAILABLE
+  HOPSPACK_CPP_SRC_FILES = $(wildcard external_packages/hopspack/src/*.cpp)
+  HOPSPACK_C_SRC_FILES   = $(wildcard external_packages/hopspack/src/*.c)
 else ifneq ($(MANGO_HOPSPACK_AVAILABLE),F)
   $(error MANGO_HOPSPACK_AVAILABLE must be set to either T or F (case-sensitive))
 endif
@@ -41,28 +47,39 @@ EXTRA_F_COMPILE_FLAGS += -J obj -I obj
 
 export
 
+CXX = $(CC)
+
 # Automatically detect all the examples:
 F_SRC_FILES = $(wildcard src/*.F90)
-F_OBJ_FILES = $(patsubst src/%.F90, obj/%.o, $(F_SRC_FILES))
-C_SRC_FILES = $(wildcard src/*.cpp)
-C_OBJ_FILES = $(patsubst src/%.cpp, obj/%.o, $(C_SRC_FILES))
+F_OBJ_FILES = $(patsubst src/%.F90, obj/%.f.o, $(F_SRC_FILES))
+CPP_SRC_FILES = $(wildcard src/*.cpp)
+CPP_OBJ_FILES = $(patsubst src/%.cpp, obj/%.cpp.o, $(CPP_SRC_FILES))
+HOPSPACK_CPP_OBJ_FILES = $(patsubst external_packages/hopspack/src/%.cpp, obj/%.cpp.o, $(HOPSPACK_CPP_SRC_FILES))
+HOPSPACK_C_OBJ_FILES   = $(patsubst external_packages/hopspack/src/%.c,   obj/%.c.o,   $(HOPSPACK_C_SRC_FILES))
+HOPSPACK_HEADERS = $(wildcard external_packages/hopspack/src/*.h) $(wildcard external_packages/hopspack/src/*.hpp)
 
 include makefile.dependencies
 
-obj/%.o: src/%.F90
-	$(FC) $(EXTRA_F_COMPILE_FLAGS) -c $< -o $@
-#	$(FC) $(EXTRA_COMPILE_FLAGS) -c $<
+# For info about the "Static pattern rules" below, see e.g.
+# https://www.gnu.org/savannah-checkouts/gnu/make/manual/html_node/Static-Usage.html
+# https://stackoverflow.com/questions/4320416/how-to-use-a-variable-list-as-a-target-in-a-makefile
 
-obj/%.o: src/%.f90
+$(F_OBJ_FILES): obj/%.f.o: src/%.F90
 	$(FC) $(EXTRA_F_COMPILE_FLAGS) -c $< -o $@
-#	$(FC) $(EXTRA_COMPILE_FLAGS) -c $<
 
-obj/%.o: src/%.cpp include/mango.hpp
+$(CPP_OBJ_FILES): obj/%.cpp.o: src/%.cpp include/mango.hpp
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
+
+# Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
+$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS)
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
+
+$(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPACK_HEADERS)
 	$(CC) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
-#	$(FC) $(EXTRA_COMPILE_FLAGS) -c $<
 
-lib/libmango.a: $(F_OBJ_FILES) $(C_OBJ_FILES)
-	ar rcs lib/libmango.a $(F_OBJ_FILES) $(C_OBJ_FILES)
+
+lib/libmango.a: $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
+	ar rcs lib/libmango.a $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
 	cp obj/mango.* include
 #	rm include/mango.o
 #	cp obj/mango.* include
@@ -84,10 +101,11 @@ retest: $(TARGET)
 test_make:
 	@echo MANGO_HOST is $(MANGO_HOST)
 	@echo HOSTNAME is $(HOSTNAME)
-	@echo FC is $(FC)
-	@echo FLINKER is $(FLINKER)
 	@echo CC is $(CC)
+	@echo CXX is $(CXX)
+	@echo FC is $(FC)
 	@echo CLINKER is $(CLINKER)
+	@echo FLINKER is $(FLINKER)
 	@echo MANGO_PETSC_AVAILABLE is $(MANGO_PETSC_AVAILABLE)
 	@echo MANGO_HOPSPACK_AVAILABLE is $(MANGO_HOPSPACK_AVAILABLE)
 	@echo MANGO_DAKOTA_AVAILABLE is $(MANGO_DAKOTA_AVAILABLE)
@@ -99,3 +117,8 @@ test_make:
 	@echo EXTRA_C_LINK_FLAGS is $(EXTRA_C_LINK_FLAGS)
 	@echo F_OBJ_FILES is $(F_OBJ_FILES)
 	@echo C_OBJ_FILES is $(C_OBJ_FILES)
+	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_CPP_SRC_FILES)
+	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_C_SRC_FILES)
+	@echo HOPSPACK_C_OBJ_FILES is $(HOPSPACK_CPP_OBJ_FILES)
+	@echo HOPSPACK_C_OBJ_FILES is $(HOPSPACK_C_OBJ_FILES)
+	@echo HOPSPACK_HEADERS is $(HOPSPACK_HEADERS)

@@ -42,7 +42,7 @@
 
 #include "HOPSPACK_common.hpp"
 //#include "HOPSPACK_EvaluatorDefault.hpp" // MJL
-#include "ExampleLinkedEvaluator.hpp" // MJL
+#include "HOPSPACK_MangoLinkedEvaluator.hpp" // MJL
 #include "HOPSPACK_ExecutorMpi.hpp"
 #include "HOPSPACK_GenProcComm.hpp"
 #include "HOPSPACK_Hopspack.hpp"
