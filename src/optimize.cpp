@@ -53,27 +53,32 @@ double mango::problem::optimize() {
   }
 
   // Beyond this point, the problem must be non-least-squares.
-
-  if (!mpi_partition.get_proc0_world()) {
+  bool proc0_world = mpi_partition.get_proc0_world();
+  if (algorithms[algorithm].uses_derivatives && !proc0_world) {
     group_leaders_loop();
     return(std::numeric_limits<double>::quiet_NaN());
   }
-  /* Only proc0_world continues past this point. */
 
-  if (verbose > 0) std::cout << "Hello world from optimize()\n";
+  // proc0_world always continues past this point.
+  // For finite-difference-derivative algorithms, the other procs do not go past this point.
+  // For parallel algorithms that do not use finite-difference derivatives, such as HOPSPACK, the other group leader procs DO continue past this point.
 
-  /* Open output file */
-  output_file.open(output_filename.c_str());
-  if (!output_file.is_open()) {
-    std::cout << "output file: " << output_filename << "\n";
-    throw std::runtime_error("Error! Unable to open output file.");
+  if (proc0_world) {
+    if (verbose > 0) std::cout << "Hello world from optimize()\n";
+
+    /* Open output file */
+    output_file.open(output_filename.c_str());
+    if (!output_file.is_open()) {
+      std::cout << "output file: " << output_filename << "\n";
+      throw std::runtime_error("Error! Unable to open output file.");
+    }
+    /* Write header line of output file */
+    output_file << "Least squares?\nno\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
+    for (int j=0; j<N_parameters; j++) {
+      output_file << ",x(" << j+1 << ")";
+    }
+    output_file << ",objective_function\n";
   }
-  /* Write header line of output file */
-  output_file << "Least squares?\nno\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
-  for (int j=0; j<N_parameters; j++) {
-    output_file << ",x(" << j+1 << ")";
-  }
-  output_file << ",objective_function\n";
 
   if (algorithms[algorithm].least_squares)
     throw std::runtime_error("Error! An algorithm for least-squares problems was chosen, but the problem specified is not least-squares.");
@@ -84,16 +89,19 @@ double mango::problem::optimize() {
   case PACKAGE_PETSC:
     optimize_petsc();
     break;
-  case PACKAGE_HOPSPACK:
-    optimize_hopspack();
-    break;
   case PACKAGE_NLOPT:
     optimize_nlopt();
+    break;
+  case PACKAGE_HOPSPACK:
+    optimize_hopspack();
     break;
     // </optimize_packages>
   default:
     throw std::runtime_error("Error! Unrecognized package.");
   }
+
+  if (!proc0_world) return(std::numeric_limits<double>::quiet_NaN());
+  // Only proc0_world continues past this point.
 
   /* Tell the other group leaders to exit. */
   int data = -1;

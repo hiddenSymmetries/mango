@@ -71,15 +71,19 @@ static const int  nWORKER_KILLED   = -4;
  *  MPI may modify command line arguments.
  *  Return the rank of this processor (0, 1, ...), or -1 if startup failed.
  */
+/*
 static int  startProcComm_ (int &                    nCopyArgc,
                             char ** &                saCopyArgv,
                             HOPSPACK::GenProcComm &  cGPC, MPI_Comm mpi_comm_in)
+*/
+int  HOPSPACK_startProcComm(HOPSPACK::GenProcComm &  cGPC, MPI_Comm mpi_comm_in)
 {
     int  nResult = -1;
 
     try
     {
-      nResult = cGPC.init (nCopyArgc, saCopyArgv, mpi_comm_in);
+      //nResult = cGPC.init (nCopyArgc, saCopyArgv, mpi_comm_in);
+      nResult = cGPC.init (mpi_comm_in);
     }
     catch (const char * const)
     {
@@ -226,9 +230,8 @@ static bool  allocateMpiProcesses_
  *  by sending appropriate user parameters.  The master can decide to
  *  stop execution immediately if parameters are not correct.
  */
-static int  behaveAsMaster_ (const int                      nArgc,
-                             const char * const             saArgv[],
-                                   HOPSPACK::GenProcComm &  cGPC)
+int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
+				    HOPSPACK::ParameterList* hopspack_parameters)
 {
     using HOPSPACK::parseTextInputFile;   //-- FROM HOPSPACK_utils.hpp
     using HOPSPACK::ParameterList;
@@ -237,6 +240,9 @@ static int  behaveAsMaster_ (const int                      nArgc,
     using HOPSPACK::ExecutorMpi;
     using HOPSPACK::Hopspack;
 
+    ParameterList  cParams = *hopspack_parameters;
+
+    /*
     if (nArgc < 2)
     {
         cerr << "ERROR: Need the input file name." << endl;
@@ -246,7 +252,7 @@ static int  behaveAsMaster_ (const int                      nArgc,
         masterEndsProcComm_ (cGPC);
         return( nERROR );
     }
-    ParameterList  cParams;
+    ParameterList  cParams = *hopspack_parameters;
 
     // <MJL> Edit parameters
     HOPSPACK::ParameterList*  cProblemParams = &(cParams.getOrSetSublist ("Problem Definition"));
@@ -277,7 +283,7 @@ static int  behaveAsMaster_ (const int                      nArgc,
         masterEndsProcComm_ (cGPC);
         return( nERROR );
     }
-    
+    */
 
     //---- ALLOCATE MPI PROCESSES FOR VARIOUS TYPES OF WORKERS.
     int  nNumProcs = 0;
@@ -466,7 +472,7 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
  *  When finished, call GenProcComm.exit() and return the status that
  *  will be returned by main().
  */
-static int  behaveAsWorker_ (const int                nProcRank,
+int  HOPSPACK_behaveAsWorker(const int                nProcRank,
                              HOPSPACK::GenProcComm &  cGPC)
 {
     using HOPSPACK::GenProcComm;
@@ -548,6 +554,8 @@ static int  behaveAsWorker_ (const int                nProcRank,
  *  @param[in] saArgv  Command line arguments (typically, parameters file name).
  */
 //--------------------------------------------------------------------
+
+/*
 int  main (const int           nArgc,
            const char * const  saArgv[])
 {
@@ -600,3 +608,4 @@ int  main (const int           nArgc,
 
     return( nReturnValue );
 }
+*/

@@ -7,49 +7,55 @@
 
 void mango::problem::optimize_least_squares() {
   int j;
+  bool proc0_world = mpi_partition.get_proc0_world();
 
-  if (!mpi_partition.get_proc0_world()) {
+  if (algorithms[algorithm].uses_derivatives && !proc0_world) {
     group_leaders_least_squares_loop();
     return;
   }
-  /* Only proc0_world continues past this point. */
 
-  if (verbose > 0) std::cout << "Hello world from optimize_least_squares()\n";
-  function_evaluations = 0;
+  // proc0_world always continues past this point.
+  // For finite-difference-derivative algorithms, the other procs do not go past this point.
+  // For parallel algorithms that do not use finite-difference derivatives, such as HOPSPACK, the other group leader procs DO continue past this point.
 
-  /* Verify that the sigmas array is all nonzero. */
-  for (j=0; j<N_terms; j++) {
-    if (sigmas[j] == 0.0) {
-      std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
-      throw std::runtime_error("Error in mango::problem::optimize_least_squares. sigmas is not all nonzero.");
+  if (proc0_world) {
+    if (verbose > 0) std::cout << "Hello world from optimize_least_squares()\n";
+    function_evaluations = 0;
+
+    // Verify that the sigmas array is all nonzero.
+    for (j=0; j<N_terms; j++) {
+      if (sigmas[j] == 0.0) {
+	std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
+	throw std::runtime_error("Error in mango::problem::optimize_least_squares. sigmas is not all nonzero.");
+      }
     }
-  }
 
-  /* Open output file */
-  output_file.open(output_filename.c_str());
-  if (!output_file.is_open()) {
-    std::cout << "output file: " << output_filename << "\n";
-    throw std::runtime_error("Error in mango::problem::optimize_least_squares(). Unable to open output file.");
-  }
-  /* Write header line of output file */
-  output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
-  for (j=0; j<N_parameters; j++) {
-    output_file << ",x(" << j+1 << ")";
-  }
-  output_file << ",objective_function";
-  for (j=0; j<N_terms; j++) {
-    output_file << ",F(" << j+1 << ")";
-  }
-  output_file << "\n" << std::flush;
-
-  /* Sanity test */
-  /* if (!least_squares_algorithm) {
-    std::cout << "Error in optimize_least_squares(). Should not get here!\n";
-    exit(1);
-    }*/
-
-  /*  objective_function = (mango::objective_function_type) &mango::problem::least_squares_to_single_objective; */
-  objective_function = &mango::problem::least_squares_to_single_objective;
+    /* Open output file */
+    output_file.open(output_filename.c_str());
+    if (!output_file.is_open()) {
+      std::cout << "output file: " << output_filename << "\n";
+      throw std::runtime_error("Error in mango::problem::optimize_least_squares(). Unable to open output file.");
+    }
+    /* Write header line of output file */
+    output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
+    for (j=0; j<N_parameters; j++) {
+      output_file << ",x(" << j+1 << ")";
+    }
+    output_file << ",objective_function";
+    for (j=0; j<N_terms; j++) {
+      output_file << ",F(" << j+1 << ")";
+    }
+    output_file << "\n" << std::flush;
+    
+    /* Sanity test */
+    /* if (!least_squares_algorithm) {
+       std::cout << "Error in optimize_least_squares(). Should not get here!\n";
+       exit(1);
+       }*/
+    
+    /*  objective_function = (mango::objective_function_type) &mango::problem::least_squares_to_single_objective; */
+    objective_function = &mango::problem::least_squares_to_single_objective;
+  } // if (proc0_world)
 
   if (algorithms[algorithm].least_squares) {
     switch (algorithms[algorithm].package) {
@@ -70,44 +76,19 @@ void mango::problem::optimize_least_squares() {
     case PACKAGE_PETSC:
       optimize_petsc();
       break;
-    case PACKAGE_HOPSPACK:
-      optimize_hopspack();
-      break;
     case PACKAGE_NLOPT:
       optimize_nlopt();
+      break;
+    case PACKAGE_HOPSPACK:
+      optimize_hopspack();
       break;
     // </non_least_squares_packages>
     default:
       throw std::runtime_error("Error in optimize_least_squares.cpp! Unrecognized non-least-squares package.");
     }
   }
-
-  /*
-  switch (algorithms[algorithm].package) {
-  case PACKAGE_PETSC:
-    if (algorithms[algorithm].least_squares) {
-      optimize_least_squares_petsc();
-    } else {
-      optimize_petsc();
-    }
-    break;
-  case PACKAGE_NLOPT:
-    optimize_nlopt();
-    break;
-  case PACKAGE_HOPSPACK:
-    optimize_hopspack();
-    break;
-  case PACKAGE_GSL:
-    if (algorithms[algorithm].least_squares) {
-      optimize_least_squares_gsl();
-    } else {
-      optimize_gsl();
-    }
-    break;
-  default:
-    throw std::runtime_error("Error! Unrecognized package.");
-  }
-  */
+  if (!proc0_world) return;
+  // Only proc0_world continues past this point.
 
   /* Tell the other group leaders to exit. */
   int data = -1;

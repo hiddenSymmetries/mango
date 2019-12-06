@@ -106,7 +106,8 @@ GenProcComm::~GenProcComm (void)
 // Initialize & Exit
 // ----------------------------------------------------------------------
 
-int GenProcComm::init(int &argc, char ** &argv, MPI_Comm mpi_comm_in)
+//int GenProcComm::init(int &argc, char ** &argv, MPI_Comm mpi_comm_in)
+int GenProcComm::init(MPI_Comm mpi_comm_in)
 { 
 
   #if defined(DEBUGGPC)
@@ -129,11 +130,13 @@ int GenProcComm::init(int &argc, char ** &argv, MPI_Comm mpi_comm_in)
   // of processes HOPS should use. This function returns the process'
   // rank.
 
+  /*
   if (argc == -1) 
   {
     cerr << "ERROR: GenProcComm::init - must specify argc and argv when using MPI" << endl;
     throw MPI_PVM_ERROR;
   }
+  */
 
   MPI_Group worldGroup, appsGroup;
   int e;

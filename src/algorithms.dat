@@ -31,4 +31,4 @@
     nlopt,                   ld_var1,             F,                T,        T,                          F
     nlopt,                   ld_var2,             F,                T,        T,                          F
 
- hopspack,                          ,             F,                F,        T,                          T
+ hopspack,                          ,             F,                F,        T,                          F

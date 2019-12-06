@@ -101,7 +101,8 @@ public:
         one communicator, in order to do multi-level parallelism for
         instance, should add code to pare down worldgroup to just the set
         of processes HOPSPACK should use. */
-  int init(int &argc, char ** &argv, MPI_Comm);
+  //  int init(int &argc, char ** &argv, MPI_Comm); // MJL
+  int init(MPI_Comm);
 
   #if defined(HAVE_PVM)
     //! For PVM, returns PVM taskid. Otherwise, throws an error.
