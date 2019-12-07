@@ -51,6 +51,7 @@
 #include "HOPSPACK_utils.hpp"
 #include "HOPSPACK_Vector.hpp"
 
+#include "mango.hpp"
 
 //----------------------------------------------------------------------
 //  Static declarations
@@ -357,11 +358,11 @@ int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
  */
 static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
                                 const int                        nProcRank,
-                                      HOPSPACK::GenProcComm   &  cGPC)
+				HOPSPACK::GenProcComm   &  cGPC,
+				mango::problem* this_problem)
 {
     using HOPSPACK::EvalRequestType;
     //using HOPSPACK::EvaluatorDefault; // MJL
-    //using ExampleLinkedEvaluator; // MJL
     using HOPSPACK::GenProcComm;
     using HOPSPACK::Vector;
 
@@ -372,7 +373,7 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
 
     /*    EvaluatorDefault *  pEvaluator
 	  = EvaluatorDefault::newInstance (cEvalParams);  //MJL */
-    ExampleLinkedEvaluator *  pEvaluator = new ExampleLinkedEvaluator (cEvalParams); // MJL
+    ExampleLinkedEvaluator *  pEvaluator = new ExampleLinkedEvaluator (cEvalParams, this_problem); // MJL
     if (pEvaluator == NULL)
     {
         cerr << "ERROR: Could not construct Evaluator." << endl;
@@ -473,7 +474,8 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
  *  will be returned by main().
  */
 int  HOPSPACK_behaveAsWorker(const int                nProcRank,
-                             HOPSPACK::GenProcComm &  cGPC)
+                             HOPSPACK::GenProcComm &  cGPC,
+			     mango::problem* this_problem)
 {
     using HOPSPACK::GenProcComm;
     using HOPSPACK::ParameterList;
@@ -504,7 +506,7 @@ int  HOPSPACK_behaveAsWorker(const int                nProcRank,
             cout << "[np=" << nProcRank << "]"
                  << " <end printing input parameters>" << endl;
         }
-        doEvalWorkerLoop_ (cWorkerParams, nProcRank, cGPC);
+        doEvalWorkerLoop_ (cWorkerParams, nProcRank, cGPC, this_problem);
         cGPC.exit();
     }
     else if (nMsgTag == GenProcComm::INITWORKER_CTZN)

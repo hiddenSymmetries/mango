@@ -44,6 +44,7 @@
 #include "HOPSPACK_ParameterList.hpp"
 #include "HOPSPACK_Vector.hpp"
 
+#include "mango.hpp"
 
 //----------------------------------------------------------------------
 //! Implements HOPSPACK::Evaluator as a linked application.
@@ -74,7 +75,7 @@ class ExampleLinkedEvaluator : public HOPSPACK::Evaluator
      *                          Parameter value "Evaluator Type" determines
      *                          the particular implementation.
      */
-    ExampleLinkedEvaluator (const HOPSPACK::ParameterList &  cEvalParams);
+  ExampleLinkedEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::problem*);
 
     //! Destructor.
     ~ExampleLinkedEvaluator (void);
@@ -139,6 +140,7 @@ class ExampleLinkedEvaluator : public HOPSPACK::Evaluator
     double  evaluateF_ (const HOPSPACK::Vector &  cX) const;
     void    evaluateCIneqs_ (const HOPSPACK::Vector &  cX,
                                    HOPSPACK::Vector &  cIneqs) const;
+  mango::problem* this_problem;
 
 };
 

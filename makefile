@@ -71,7 +71,8 @@ $(CPP_OBJ_FILES): obj/%.cpp.o: src/%.cpp include/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
-$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS)
+# Similarly, only the modified hopspack source files depend on mango.hpp, but it is easier to make the dependency apply to all hopspack files here.
+$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS) src/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPACK_HEADERS)

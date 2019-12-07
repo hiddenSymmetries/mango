@@ -9,7 +9,7 @@
 
 int HOPSPACK_startProcComm(HOPSPACK::GenProcComm &, MPI_Comm);
 int HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &, HOPSPACK::ParameterList*);
-int HOPSPACK_behaveAsWorker(const int, HOPSPACK::GenProcComm &);
+int HOPSPACK_behaveAsWorker(const int, HOPSPACK::GenProcComm &, mango::problem*);
 #endif
 
 
@@ -64,7 +64,7 @@ void mango::problem::optimize_hopspack() {
   if (nProcRank == 0) {
     nReturnValue = HOPSPACK_behaveAsMaster(cGPC, &hopspack_parameters);
   } else {
-    nReturnValue = HOPSPACK_behaveAsWorker(nProcRank, cGPC);
+    nReturnValue = HOPSPACK_behaveAsWorker(nProcRank, cGPC, this);
   }
 
   if (nReturnValue != 0) throw std::runtime_error("Error! HOPSPACK returned an error code.");

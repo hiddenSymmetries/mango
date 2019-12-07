@@ -18,18 +18,23 @@ void mango::problem::optimize_least_squares() {
   // For finite-difference-derivative algorithms, the other procs do not go past this point.
   // For parallel algorithms that do not use finite-difference derivatives, such as HOPSPACK, the other group leader procs DO continue past this point.
 
-  if (proc0_world) {
-    if (verbose > 0) std::cout << "Hello world from optimize_least_squares()\n";
-    function_evaluations = 0;
+  if (verbose > 0) std::cout << "Hello world from optimize_least_squares()\n";
+  function_evaluations = 0;
 
-    // Verify that the sigmas array is all nonzero.
-    for (j=0; j<N_terms; j++) {
-      if (sigmas[j] == 0.0) {
-	std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
-	throw std::runtime_error("Error in mango::problem::optimize_least_squares. sigmas is not all nonzero.");
-      }
+  // If this algorithm is one like HOPSPACK, one that uses >1 worker group but not finite-difference Jacobians,
+  // then we should verify that all procs agree on sigmas and targets.
+  MPI_Bcast(targets, N_terms, MPI_DOUBLE, 0, mpi_partition.get_comm_group_leaders());
+  MPI_Bcast(sigmas,  N_terms, MPI_DOUBLE, 0, mpi_partition.get_comm_group_leaders());
+
+  // Verify that the sigmas array is all nonzero.
+  for (j=0; j<N_terms; j++) {
+    if (sigmas[j] == 0.0) {
+      std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
+      throw std::runtime_error("Error in mango::problem::optimize_least_squares. sigmas is not all nonzero.");
     }
+  }
 
+  if (proc0_world) {
     /* Open output file */
     output_file.open(output_filename.c_str());
     if (!output_file.is_open()) {
@@ -54,8 +59,9 @@ void mango::problem::optimize_least_squares() {
        }*/
     
     /*  objective_function = (mango::objective_function_type) &mango::problem::least_squares_to_single_objective; */
-    objective_function = &mango::problem::least_squares_to_single_objective;
   } // if (proc0_world)
+
+  objective_function = &mango::problem::least_squares_to_single_objective;
 
   if (algorithms[algorithm].least_squares) {
     switch (algorithms[algorithm].package) {
@@ -120,10 +126,11 @@ void mango::problem::optimize_least_squares() {
 
 void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem) {
   /* Note that this function is static, so "this" does not exist, and hence we must use "this_problem" instead. */
+  std::cout << "Hello from least_squares_to_single_objective AAA\n";
 
   int N_terms = this_problem->get_N_terms();
 
-  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective\n";
+  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective BBB\n";
   double* residuals = new double[N_terms];
 
   bool failed_bool;

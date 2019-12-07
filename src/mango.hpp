@@ -10,6 +10,8 @@
 #include <petsctao.h>
 #endif
 
+class ExampleLinkedEvaluator;
+
 namespace mango {
 
   typedef enum {
@@ -237,6 +239,8 @@ namespace mango {
     int get_N_terms();
     int get_best_function_evaluation();
     int get_function_evaluations();
+
+    friend class ::ExampleLinkedEvaluator;
   };
 }
 

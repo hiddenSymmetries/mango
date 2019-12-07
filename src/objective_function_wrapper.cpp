@@ -5,6 +5,8 @@
 #include "mango.hpp"
 
 void mango::problem::objective_function_wrapper(const double* x, double* f, bool* failed) {
+  if (verbose > 0) std::cout << "Hello from objective_funciton_wrapper\n";
+
   /* For least-squares problems, function_evaluations is incremented in mango_residual_function_wrapper() */
   if (!least_squares) function_evaluations++;
   clock_t now = clock();

@@ -59,15 +59,18 @@
 
 #include "HOPSPACK_common.hpp"
 #include "HOPSPACK_MangoLinkedEvaluator.hpp"
+#include "HOPSPACK_float.hpp"
 
+#include "mango.hpp"
 
 //----------------------------------------------------------------------
 //  Constructor
 //----------------------------------------------------------------------
 ExampleLinkedEvaluator::ExampleLinkedEvaluator
-    (const HOPSPACK::ParameterList &  cEvalParams)
+(const HOPSPACK::ParameterList &  cEvalParams, mango::problem* this_problem_in)
 {
     //---- THIS SIMPLE EXAMPLE DOES NOT USE EVALUATOR PARAMETERS.
+  this_problem = this_problem_in;
     return;
 }
 
@@ -133,8 +136,17 @@ double  ExampleLinkedEvaluator::evaluateF_
     (const HOPSPACK::Vector &  cX) const
 {
   //    double  f = cX[0] + (2 * cX[1]);
-  double  f = (cX[0] - 1) * (cX[0] - 1) + 3 * (cX[1] - cX[0]*cX[0]) * (cX[1] - cX[0]*cX[0]);
-    return( f );
+  //  double  f = (cX[0] - 1) * (cX[0] - 1) + 3 * (cX[1] - cX[0]*cX[0]) * (cX[1] - cX[0]*cX[0]);
+  //  return( f );
+  double f;
+  bool failed;
+  std::vector<double> vec = cX.getStlVector();
+  double* x = &vec[0]; // This effectively converts a HOPSPACK::Vector to a double array.
+  //double* x = &cX[0]; // This effectively converts a HOPSPACK::Vector to a double array.
+  //double* x = cX.data(); // This effectively converts a HOPSPACK::Vector to a double array.
+  this_problem->objective_function_wrapper(x, &f, &failed);
+  if (failed) f = HOPSPACK::dne();
+  return(f);
 }
 
 
