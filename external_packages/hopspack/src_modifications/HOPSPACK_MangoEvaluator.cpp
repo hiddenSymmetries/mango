@@ -58,7 +58,7 @@
 */
 
 #include "HOPSPACK_common.hpp"
-#include "HOPSPACK_MangoLinkedEvaluator.hpp"
+#include "HOPSPACK_MangoEvaluator.hpp"
 #include "HOPSPACK_float.hpp"
 
 #include "mango.hpp"
@@ -66,7 +66,7 @@
 //----------------------------------------------------------------------
 //  Constructor
 //----------------------------------------------------------------------
-ExampleLinkedEvaluator::ExampleLinkedEvaluator
+HOPSPACK_MangoEvaluator::HOPSPACK_MangoEvaluator
 (const HOPSPACK::ParameterList &  cEvalParams, mango::problem* this_problem_in)
 {
     //---- THIS SIMPLE EXAMPLE DOES NOT USE EVALUATOR PARAMETERS.
@@ -78,7 +78,7 @@ ExampleLinkedEvaluator::ExampleLinkedEvaluator
 //----------------------------------------------------------------------
 //  Destructor
 //----------------------------------------------------------------------
-ExampleLinkedEvaluator::~ExampleLinkedEvaluator (void)
+HOPSPACK_MangoEvaluator::~HOPSPACK_MangoEvaluator (void)
 {
     return;
 }
@@ -87,7 +87,7 @@ ExampleLinkedEvaluator::~ExampleLinkedEvaluator (void)
 //----------------------------------------------------------------------
 //  Method evalF
 //----------------------------------------------------------------------
-void  ExampleLinkedEvaluator::evalF (const int                 nTag,
+void  HOPSPACK_MangoEvaluator::evalF (const int                 nTag,
                                      const HOPSPACK::Vector &  cX,
                                            HOPSPACK::Vector &  cFns,
                                            string &            sMsg)
@@ -102,7 +102,7 @@ void  ExampleLinkedEvaluator::evalF (const int                 nTag,
 //----------------------------------------------------------------------
 //  Method evalFC
 //----------------------------------------------------------------------
-void  ExampleLinkedEvaluator::evalFC (const int                 nTag,
+void  HOPSPACK_MangoEvaluator::evalFC (const int                 nTag,
                                       const HOPSPACK::Vector &  cX,
                                             HOPSPACK::Vector &  cFns,
                                             HOPSPACK::Vector &  cEqs,
@@ -120,9 +120,9 @@ void  ExampleLinkedEvaluator::evalFC (const int                 nTag,
 //----------------------------------------------------------------------
 //  Method printDebugInfo
 //----------------------------------------------------------------------
-void  ExampleLinkedEvaluator::printDebugInfo (void) const
+void  HOPSPACK_MangoEvaluator::printDebugInfo (void) const
 {
-    cout << "      ExampleLinkedEvaluator --"
+    cout << "      HOPSPACK_MangoEvaluator --"
          << " call compiled code for evaluations" << endl;
 
     return;
@@ -132,7 +132,7 @@ void  ExampleLinkedEvaluator::printDebugInfo (void) const
 //----------------------------------------------------------------------
 //  Private method evaluateF_
 //----------------------------------------------------------------------
-double  ExampleLinkedEvaluator::evaluateF_
+double  HOPSPACK_MangoEvaluator::evaluateF_
     (const HOPSPACK::Vector &  cX) const
 {
   //    double  f = cX[0] + (2 * cX[1]);
@@ -140,10 +140,11 @@ double  ExampleLinkedEvaluator::evaluateF_
   //  return( f );
   double f;
   bool failed;
+
+  // The next 2 lines effectively convert a HOPSPACK::Vector to a double array.
   std::vector<double> vec = cX.getStlVector();
-  double* x = &vec[0]; // This effectively converts a HOPSPACK::Vector to a double array.
-  //double* x = &cX[0]; // This effectively converts a HOPSPACK::Vector to a double array.
-  //double* x = cX.data(); // This effectively converts a HOPSPACK::Vector to a double array.
+  double* x = &vec[0];
+
   this_problem->objective_function_wrapper(x, &f, &failed);
   if (failed) f = HOPSPACK::dne();
   return(f);
@@ -154,12 +155,14 @@ double  ExampleLinkedEvaluator::evaluateF_
 //  Private method evaluateCIneqs_
 //----------------------------------------------------------------------
 
-void  ExampleLinkedEvaluator::evaluateCIneqs_
+void  HOPSPACK_MangoEvaluator::evaluateCIneqs_
     (const HOPSPACK::Vector &  cX,
            HOPSPACK::Vector &  cIneqs) const
 {
   /*    cIneqs.resize (1);
     cIneqs[0] = 1 - (cX[0] - 1)*(cX[0] - 1) - (cX[1] - 1)*(cX[1] - 1);
   */
+
+  // For now, Mango does not support nonlinear constraints, so do nothing here.
     return;
 }

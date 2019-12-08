@@ -10,7 +10,7 @@
 #include <petsctao.h>
 #endif
 
-class ExampleLinkedEvaluator;
+class HOPSPACK_MangoEvaluator;
 
 namespace mango {
 
@@ -240,7 +240,7 @@ namespace mango {
     int get_best_function_evaluation();
     int get_function_evaluations();
 
-    friend class ::ExampleLinkedEvaluator;
+    friend class ::HOPSPACK_MangoEvaluator;
   };
 }
 

@@ -16,7 +16,7 @@ endif
 
 ifeq ($(MANGO_HOPSPACK_AVAILABLE),T)
   # See if hopspack files are present in the expected location
-  ifeq (,$(wildcard external_packages/hopspack/src/HOPSPACK_MangoLinkedEvaluator.cpp))
+  ifeq (,$(wildcard external_packages/hopspack/src/HOPSPACK_MangoEvaluator.cpp))
     $(error HOPSPACK modified source files are not present in the expected location external_packages/hopspack/src. You probably need to run "cd external_packages; ./install_hopspack.sh")
   endif
   EXTRA_C_COMPILE_FLAGS += -DMANGO_HOPSPACK_AVAILABLE -I external_packages/hopspack/src

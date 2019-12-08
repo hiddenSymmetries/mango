@@ -42,7 +42,7 @@
 
 #include "HOPSPACK_common.hpp"
 //#include "HOPSPACK_EvaluatorDefault.hpp" // MJL
-#include "HOPSPACK_MangoLinkedEvaluator.hpp" // MJL
+#include "HOPSPACK_MangoEvaluator.hpp" // MJL
 #include "HOPSPACK_ExecutorMpi.hpp"
 #include "HOPSPACK_GenProcComm.hpp"
 #include "HOPSPACK_Hopspack.hpp"
@@ -373,7 +373,7 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
 
     /*    EvaluatorDefault *  pEvaluator
 	  = EvaluatorDefault::newInstance (cEvalParams);  //MJL */
-    ExampleLinkedEvaluator *  pEvaluator = new ExampleLinkedEvaluator (cEvalParams, this_problem); // MJL
+    HOPSPACK_MangoEvaluator *  pEvaluator = new HOPSPACK_MangoEvaluator (cEvalParams, this_problem); // MJL
     if (pEvaluator == NULL)
     {
         cerr << "ERROR: Could not construct Evaluator." << endl;

@@ -36,8 +36,8 @@
   @brief Declaration for ExampleLinkedEvaluator, subclass of Evaluator.
 */
 
-#ifndef EXAMPLELINKEDEVALUATOR_HPP
-#define EXAMPLELINKEDEVALUATOR_HPP
+#ifndef HOPSPACK_MANGOEVALUATOR_HPP
+#define HOPSPACK_MANGOEVALUATOR_HPP
 
 #include "HOPSPACK_common.hpp"
 #include "HOPSPACK_Evaluator.hpp"
@@ -62,7 +62,7 @@
  *  See README_linked_evaluator.txt for more information.
  */
 //----------------------------------------------------------------------
-class ExampleLinkedEvaluator : public HOPSPACK::Evaluator
+class HOPSPACK_MangoEvaluator : public HOPSPACK::Evaluator
 {
   public:
 
@@ -75,10 +75,10 @@ class ExampleLinkedEvaluator : public HOPSPACK::Evaluator
      *                          Parameter value "Evaluator Type" determines
      *                          the particular implementation.
      */
-  ExampleLinkedEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::problem*);
+  HOPSPACK_MangoEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::problem*);
 
     //! Destructor.
-    ~ExampleLinkedEvaluator (void);
+    ~HOPSPACK_MangoEvaluator (void);
 
 
     //! Evaluate the objective function(s) at a point x.
@@ -133,9 +133,9 @@ class ExampleLinkedEvaluator : public HOPSPACK::Evaluator
   private:
 
     //! By design, there is no copy constructor.
-    ExampleLinkedEvaluator (const ExampleLinkedEvaluator &);
+    HOPSPACK_MangoEvaluator (const HOPSPACK_MangoEvaluator &);
     //! By design, there is no assignment operator.
-    ExampleLinkedEvaluator & operator= (const ExampleLinkedEvaluator &);
+    HOPSPACK_MangoEvaluator & operator= (const HOPSPACK_MangoEvaluator &);
 
     double  evaluateF_ (const HOPSPACK::Vector &  cX) const;
     void    evaluateCIneqs_ (const HOPSPACK::Vector &  cX,
@@ -144,4 +144,4 @@ class ExampleLinkedEvaluator : public HOPSPACK::Evaluator
 
 };
 
-#endif     //-- EXAMPLELINKEDEVALUATOR_HPP
+#endif     //-- HOPSPACK_MANGOEVALUATOR_HPP
