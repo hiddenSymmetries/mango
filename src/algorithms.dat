@@ -1,34 +1,36 @@
-# This file is used by the "preprocess" script to populate several sections of mango.hpp.
+# This is the master list of optimization algorithms available in mango.
+# This file is used by the "update_algorithms" script to populate several sections of mango.hpp and other source files.
+# If any changes are made to this file, run the update_algorithms script to propagate the changes from this file to the main source code.
 
-# package,                      name, least_squares, uses_derivatives, parallel, requires_bound_constraints
-    petsc,                        nm,             F,                F,        F,                          F
-    petsc,                  pounders,             T,                F,        F,                          F
+# package,                      name, least_squares, uses_derivatives, parallel, requires_bound_constraints, deterministic
+    petsc,                        nm,             F,                F,        F,                          F,             T
+    petsc,                  pounders,             T,                F,        F,                          F,             F
 
-    nlopt,                 gn_direct,             F,                F,        F,                          T
-    nlopt,               gn_direct_l,             F,                F,        F,                          T
-    nlopt,          gn_direct_l_rand,             F,                F,        F,                          T
-    nlopt,          gn_direct_noscal,             F,                F,        F,                          T
-    nlopt,        gn_direct_l_noscal,             F,                F,        F,                          T
-    nlopt,   gn_direct_l_rand_noscal,             F,                F,        F,                          T
-    nlopt,            gn_orig_direct,             F,                F,        F,                          T
-    nlopt,          gn_orig_direct_l,             F,                F,        F,                          T
-    nlopt,                gn_crs2_lm,             F,                F,        F,                          T
+    nlopt,                 gn_direct,             F,                F,        F,                          T,             T
+    nlopt,               gn_direct_l,             F,                F,        F,                          T,             T
+    nlopt,          gn_direct_l_rand,             F,                F,        F,                          T,             F
+    nlopt,          gn_direct_noscal,             F,                F,        F,                          T,             T
+    nlopt,        gn_direct_l_noscal,             F,                F,        F,                          T,             T
+    nlopt,   gn_direct_l_rand_noscal,             F,                F,        F,                          T,             F
+    nlopt,            gn_orig_direct,             F,                F,        F,                          T,             T
+    nlopt,          gn_orig_direct_l,             F,                F,        F,                          T,             T
+    nlopt,                gn_crs2_lm,             F,                F,        F,                          T,             F
 
-    nlopt,                 ln_cobyla,             F,                F,        F,                          F
-    nlopt,                 ln_bobyqa,             F,                F,        F,                          F
-    nlopt,                 ln_praxis,             F,                F,        F,                          F
-    nlopt,             ln_neldermead,             F,                F,        F,                          F
-    nlopt,                  ln_sbplx,             F,                F,        F,                          F
+    nlopt,                 ln_cobyla,             F,                F,        F,                          F,             T
+    nlopt,                 ln_bobyqa,             F,                F,        F,                          F,             T
+    nlopt,                 ln_praxis,             F,                F,        F,                          F,             F
+    nlopt,             ln_neldermead,             F,                F,        F,                          F,             T
+    nlopt,                  ln_sbplx,             F,                F,        F,                          F,             T
 
-    nlopt,                    ld_mma,             F,                T,        T,                          F
-    nlopt,                  ld_ccsaq,             F,                T,        T,                          F
-    nlopt,                  ld_slsqp,             F,                T,        T,                          F
-    nlopt,                  ld_lbfgs,             F,                T,        T,                          F
-    nlopt,ld_tnewton_precond_restart,             F,                T,        T,                          F
-    nlopt,        ld_tnewton_precond,             F,                T,        T,                          F
-    nlopt,        ld_tnewton_restart,             F,                T,        T,                          F
-    nlopt,                ld_tnewton,             F,                T,        T,                          F
-    nlopt,                   ld_var1,             F,                T,        T,                          F
-    nlopt,                   ld_var2,             F,                T,        T,                          F
+    nlopt,                    ld_mma,             F,                T,        T,                          F,             T
+    nlopt,                  ld_ccsaq,             F,                T,        T,                          F,             T
+    nlopt,                  ld_slsqp,             F,                T,        T,                          F,             T
+    nlopt,                  ld_lbfgs,             F,                T,        T,                          F,             T
+    nlopt,ld_tnewton_precond_restart,             F,                T,        T,                          F,             T
+    nlopt,        ld_tnewton_precond,             F,                T,        T,                          F,             T
+    nlopt,        ld_tnewton_restart,             F,                T,        T,                          F,             T
+    nlopt,                ld_tnewton,             F,                T,        T,                          F,             T
+    nlopt,                   ld_var1,             F,                T,        T,                          F,             T
+    nlopt,                   ld_var2,             F,                T,        T,                          F,             T
 
- hopspack,                          ,             F,                F,        T,                          F
+ hopspack,                          ,             F,                F,        T,                          F,             F
