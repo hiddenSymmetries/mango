@@ -66,7 +66,7 @@
 //----------------------------------------------------------------------
 //  Constructor
 //----------------------------------------------------------------------
-HOPSPACK_MangoEvaluator::HOPSPACK_MangoEvaluator
+HOPSPACK::MangoEvaluator::MangoEvaluator
 (const HOPSPACK::ParameterList &  cEvalParams, mango::problem* this_problem_in)
 {
     //---- THIS SIMPLE EXAMPLE DOES NOT USE EVALUATOR PARAMETERS.
@@ -78,7 +78,7 @@ HOPSPACK_MangoEvaluator::HOPSPACK_MangoEvaluator
 //----------------------------------------------------------------------
 //  Destructor
 //----------------------------------------------------------------------
-HOPSPACK_MangoEvaluator::~HOPSPACK_MangoEvaluator (void)
+HOPSPACK::MangoEvaluator::~MangoEvaluator (void)
 {
     return;
 }
@@ -87,7 +87,7 @@ HOPSPACK_MangoEvaluator::~HOPSPACK_MangoEvaluator (void)
 //----------------------------------------------------------------------
 //  Method evalF
 //----------------------------------------------------------------------
-void  HOPSPACK_MangoEvaluator::evalF (const int                 nTag,
+void  HOPSPACK::MangoEvaluator::evalF (const int                 nTag,
                                      const HOPSPACK::Vector &  cX,
                                            HOPSPACK::Vector &  cFns,
                                            string &            sMsg)
@@ -103,7 +103,7 @@ void  HOPSPACK_MangoEvaluator::evalF (const int                 nTag,
 //----------------------------------------------------------------------
 //  Method evalFC
 //----------------------------------------------------------------------
-void  HOPSPACK_MangoEvaluator::evalFC (const int                 nTag,
+void  HOPSPACK::MangoEvaluator::evalFC (const int                 nTag,
                                       const HOPSPACK::Vector &  cX,
                                             HOPSPACK::Vector &  cFns,
                                             HOPSPACK::Vector &  cEqs,
@@ -122,9 +122,9 @@ void  HOPSPACK_MangoEvaluator::evalFC (const int                 nTag,
 //----------------------------------------------------------------------
 //  Method printDebugInfo
 //----------------------------------------------------------------------
-void  HOPSPACK_MangoEvaluator::printDebugInfo (void) const
+void  HOPSPACK::MangoEvaluator::printDebugInfo (void) const
 {
-    cout << "      HOPSPACK_MangoEvaluator --"
+    cout << "      HOPSPACK::MangoEvaluator --"
          << " call compiled code for evaluations" << endl;
 
     return;
@@ -134,7 +134,7 @@ void  HOPSPACK_MangoEvaluator::printDebugInfo (void) const
 //----------------------------------------------------------------------
 //  Private method evaluateF_
 //----------------------------------------------------------------------
-double  HOPSPACK_MangoEvaluator::evaluateF_
+double  HOPSPACK::MangoEvaluator::evaluateF_
 (const HOPSPACK::Vector &  cX, string & sMsg) const
 {
   //    double  f = cX[0] + (2 * cX[1]);
@@ -161,7 +161,7 @@ double  HOPSPACK_MangoEvaluator::evaluateF_
     sMsg += residuals_string;
   }
 
-  //std::cout << "Here comes sMsg from HOPSPACK_MangoEvaluator:" << sMsg << endl;
+  //std::cout << "Here comes sMsg from HOPSPACK::MangoEvaluator:" << sMsg << endl;
   return(f);
 }
 
@@ -170,7 +170,7 @@ double  HOPSPACK_MangoEvaluator::evaluateF_
 //  Private method evaluateCIneqs_
 //----------------------------------------------------------------------
 
-void  HOPSPACK_MangoEvaluator::evaluateCIneqs_
+void  HOPSPACK::MangoEvaluator::evaluateCIneqs_
     (const HOPSPACK::Vector &  cX,
            HOPSPACK::Vector &  cIneqs) const
 {

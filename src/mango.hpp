@@ -10,8 +10,9 @@
 #include <petsctao.h>
 #endif
 
-class HOPSPACK_MangoEvaluator;
+// We must declare these classes here so we can declare them to be friends of mango::problem below.
 namespace HOPSPACK {
+  class MangoEvaluator;
   class Conveyor;
 }
 
@@ -249,7 +250,7 @@ namespace mango {
     int get_best_function_evaluation();
     int get_function_evaluations();
 
-    friend class ::HOPSPACK_MangoEvaluator;
+    friend class ::HOPSPACK::MangoEvaluator;
     friend class ::HOPSPACK::Conveyor;
   };
 }

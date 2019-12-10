@@ -62,7 +62,9 @@
  *  See README_linked_evaluator.txt for more information.
  */
 //----------------------------------------------------------------------
-class HOPSPACK_MangoEvaluator : public HOPSPACK::Evaluator
+
+namespace HOPSPACK {
+class MangoEvaluator : public HOPSPACK::Evaluator
 {
   public:
 
@@ -75,10 +77,10 @@ class HOPSPACK_MangoEvaluator : public HOPSPACK::Evaluator
      *                          Parameter value "Evaluator Type" determines
      *                          the particular implementation.
      */
-  HOPSPACK_MangoEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::problem*);
+  MangoEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::problem*);
 
     //! Destructor.
-    ~HOPSPACK_MangoEvaluator (void);
+    ~MangoEvaluator (void);
 
 
     //! Evaluate the objective function(s) at a point x.
@@ -133,9 +135,9 @@ class HOPSPACK_MangoEvaluator : public HOPSPACK::Evaluator
   private:
 
     //! By design, there is no copy constructor.
-    HOPSPACK_MangoEvaluator (const HOPSPACK_MangoEvaluator &);
+    MangoEvaluator (const MangoEvaluator &);
     //! By design, there is no assignment operator.
-    HOPSPACK_MangoEvaluator & operator= (const HOPSPACK_MangoEvaluator &);
+    MangoEvaluator & operator= (const MangoEvaluator &);
 
   double  evaluateF_ (const HOPSPACK::Vector &  cX, string & sMsg) const;
     void    evaluateCIneqs_ (const HOPSPACK::Vector &  cX,
@@ -143,5 +145,6 @@ class HOPSPACK_MangoEvaluator : public HOPSPACK::Evaluator
   mango::problem* this_problem;
 
 };
+} // namespace HOPSPACK
 
 #endif     //-- HOPSPACK_MANGOEVALUATOR_HPP

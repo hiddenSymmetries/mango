@@ -374,7 +374,7 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
 
     /*    EvaluatorDefault *  pEvaluator
 	  = EvaluatorDefault::newInstance (cEvalParams);  //MJL */
-    HOPSPACK_MangoEvaluator *  pEvaluator = new HOPSPACK_MangoEvaluator (cEvalParams, this_problem); // MJL
+    HOPSPACK::MangoEvaluator *  pEvaluator = new HOPSPACK::MangoEvaluator (cEvalParams, this_problem); // MJL
     if (pEvaluator == NULL)
     {
         cerr << "ERROR: Could not construct Evaluator." << endl;
