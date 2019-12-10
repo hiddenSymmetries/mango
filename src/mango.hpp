@@ -202,8 +202,8 @@ namespace mango {
     void optimize_nlopt();
     void optimize_hopspack();
     // </optimize_packages>
-    void write_function_evaluations();
-    void compose_time_x_f_string(std::string&, clock_t, const double*, double);
+    void write_function_evaluation_and_time(clock_t);
+    void compose_x_f_string(std::string&, const double*, double);
     void compose_residuals_string(std::string&, double*);
     void write_file_line(clock_t, const double*, double);
     double residuals_to_single_objective(double*);
@@ -220,7 +220,7 @@ namespace mango {
     void finite_difference_gradient(const double*, double*, double*);
     void finite_difference_Jacobian(const double*, double*, double*);
     void finite_difference_Jacobian_to_gradient(const double*, double*, double*);
-    void write_hopspack_line_to_file(std::string line);
+    void write_hopspack_line_to_file(std::string line, double);
 
   public:
     double* state_vector;

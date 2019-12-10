@@ -268,7 +268,7 @@ void HOPSPACK::Conveyor::exchange
           counter.getCountString (sMsg);
           ptr->setEvalFC (f, cEqs, cIneqs, sMsg);
 
-	  mango_problem->write_hopspack_line_to_file(msg);
+	  mango_problem->write_hopspack_line_to_file(msg, f[0]);
 	  /*
 	  int rank;
 	  MPI_Comm_rank(MPI_COMM_WORLD, &rank);

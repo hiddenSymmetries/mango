@@ -153,8 +153,7 @@ double  HOPSPACK_MangoEvaluator::evaluateF_
 
   // Prepare the line to write to the output file. This string will be passed by MPI to proc 0 to write to the output file,
   // since only proc 0 knows the global # of function evaluations.
-  clock_t print_time = clock();
-  this_problem->compose_time_x_f_string(sMsg, print_time, x, f);
+  this_problem->compose_x_f_string(sMsg, x, f);
   if (this_problem->least_squares) {
     string residuals_string;
     // this_problem->residuals has been set by least_squares_to_single_objective(), which is objective_function(), which was called by objective_function_wrapper().
@@ -162,6 +161,7 @@ double  HOPSPACK_MangoEvaluator::evaluateF_
     sMsg += residuals_string;
   }
 
+  //std::cout << "Here comes sMsg from HOPSPACK_MangoEvaluator:" << sMsg << endl;
   return(f);
 }
 
