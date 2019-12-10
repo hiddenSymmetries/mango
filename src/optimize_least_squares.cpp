@@ -123,13 +123,11 @@ void mango::problem::optimize_least_squares() {
   }
 }
 
-/*
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem) {
-  /* Note that this function is static, so "this" does not exist, and hence we must use "this_problem" instead. */
+  // Note that this function is static, so "this" does not exist, and hence we must use "this_problem" instead.
 
   // Note that this subroutine sets the 'residuals' array of the mango::problem class.
 
@@ -155,3 +153,21 @@ void mango::problem::least_squares_to_single_objective(int* N, const double* x, 
 
   //delete[] residuals;
 }
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+double mango::problem::residuals_to_single_objective(double* residuals) {
+  // Combine the residuals into the total objective function.
+  double total_objective_function, temp;
+  int j;
+
+  total_objective_function = 0;
+  for (j=0; j<N_terms; j++) {
+    temp = (residuals[j] - targets[j]) / sigmas[j];
+    total_objective_function += temp*temp;
+  }
+  return(total_objective_function);
+}
+
+
