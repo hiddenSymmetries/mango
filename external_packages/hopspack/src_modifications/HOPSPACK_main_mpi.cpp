@@ -232,7 +232,8 @@ static bool  allocateMpiProcesses_
  *  stop execution immediately if parameters are not correct.
  */
 int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
-				    HOPSPACK::ParameterList* hopspack_parameters)
+			     HOPSPACK::ParameterList* hopspack_parameters,
+			     mango::problem* mango_problem)
 {
     using HOPSPACK::parseTextInputFile;   //-- FROM HOPSPACK_utils.hpp
     using HOPSPACK::ParameterList;
@@ -325,7 +326,7 @@ int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
 
     //---- CONSTRUCT THE OPTIMIZER, CONFIGURE IT, AND RUN IT.
     Hopspack  optimizer (pExecutor);
-    if (optimizer.setInputParameters (cParams) == true)
+    if (optimizer.setInputParameters (cParams, mango_problem) == true)
     {
         if (Print::doPrint (Print::FINAL_SOLUTION))
         {

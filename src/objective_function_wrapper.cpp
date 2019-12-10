@@ -2,6 +2,7 @@
 #include<iomanip>
 #include<cstring>
 #include<ctime>
+#include<sstream>
 #include "mango.hpp"
 
 void mango::problem::objective_function_wrapper(const double* x, double* f, bool* failed) {
@@ -41,4 +42,20 @@ void mango::problem::write_file_line(const double* x, double f, clock_t print_ti
     output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
   }
   output_file << "," << std::setw(24) << f << "\n" << std::flush;
+}
+
+
+void mango::problem::compose_hopspack_file_line(const double* x, const double f, std::string & file_string) {
+  clock_t print_time = clock();
+  double elapsed_time = ((float)(print_time - start_time)) / CLOCKS_PER_SEC;
+
+  std::ostringstream string_stream;
+  //string_stream << std::setw(6) << std::right << function_evaluations << "," << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
+  string_stream << std::right << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
+  for (int j=0; j<N_parameters; j++) {
+    string_stream << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
+  }
+  string_stream << "," << std::setw(24) << f;
+  // Finally, convert the stream to a std::string:
+  file_string = string_stream.str();
 }

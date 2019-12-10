@@ -137,7 +137,7 @@ class HOPSPACK_MangoEvaluator : public HOPSPACK::Evaluator
     //! By design, there is no assignment operator.
     HOPSPACK_MangoEvaluator & operator= (const HOPSPACK_MangoEvaluator &);
 
-    double  evaluateF_ (const HOPSPACK::Vector &  cX) const;
+  double  evaluateF_ (const HOPSPACK::Vector &  cX, string & sMsg) const;
     void    evaluateCIneqs_ (const HOPSPACK::Vector &  cX,
                                    HOPSPACK::Vector &  cIneqs) const;
   mango::problem* this_problem;

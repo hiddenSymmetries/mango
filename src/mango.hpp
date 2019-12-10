@@ -11,6 +11,9 @@
 #endif
 
 class HOPSPACK_MangoEvaluator;
+namespace HOPSPACK {
+  class Conveyor;
+}
 
 namespace mango {
 
@@ -212,6 +215,8 @@ namespace mango {
     void finite_difference_gradient(const double*, double*, double*);
     void finite_difference_Jacobian(const double*, double*, double*);
     void finite_difference_Jacobian_to_gradient(const double*, double*, double*);
+    void compose_hopspack_file_line(const double*, const double, std::string &);
+    void write_hopspack_line_to_file(std::string line);
 
   public:
     double* state_vector;
@@ -241,6 +246,7 @@ namespace mango {
     int get_function_evaluations();
 
     friend class ::HOPSPACK_MangoEvaluator;
+    friend class ::HOPSPACK::Conveyor;
   };
 }
 

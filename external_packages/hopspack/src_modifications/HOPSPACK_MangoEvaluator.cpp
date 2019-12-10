@@ -92,10 +92,11 @@ void  HOPSPACK_MangoEvaluator::evalF (const int                 nTag,
                                            HOPSPACK::Vector &  cFns,
                                            string &            sMsg)
 {
-    cFns.push_back (evaluateF_ (cX));
+  cFns.push_back (evaluateF_ (cX, sMsg));
 
-    sMsg = "Success";
-    return;
+  //sMsg = "Success";
+  //sMsg = "Mango! evalF";
+  return;
 }
 
 
@@ -109,10 +110,11 @@ void  HOPSPACK_MangoEvaluator::evalFC (const int                 nTag,
                                             HOPSPACK::Vector &  cIneqs,
                                             string &            sMsg)
 {
-    cFns.push_back (evaluateF_ (cX));
+  cFns.push_back (evaluateF_ (cX, sMsg));
     evaluateCIneqs_ (cX, cIneqs);
 
-    sMsg = "Success";
+    //sMsg = "Success";
+    sMsg = "Mango! evalFC";
     return;
 }
 
@@ -133,7 +135,7 @@ void  HOPSPACK_MangoEvaluator::printDebugInfo (void) const
 //  Private method evaluateF_
 //----------------------------------------------------------------------
 double  HOPSPACK_MangoEvaluator::evaluateF_
-    (const HOPSPACK::Vector &  cX) const
+(const HOPSPACK::Vector &  cX, string & sMsg) const
 {
   //    double  f = cX[0] + (2 * cX[1]);
   //  double  f = (cX[0] - 1) * (cX[0] - 1) + 3 * (cX[1] - cX[0]*cX[0]) * (cX[1] - cX[0]*cX[0]);
@@ -145,7 +147,10 @@ double  HOPSPACK_MangoEvaluator::evaluateF_
   std::vector<double> vec = cX.getStlVector();
   double* x = &vec[0];
 
+  // Call Mango objective function
   this_problem->objective_function_wrapper(x, &f, &failed);
+  this_problem->compose_hopspack_file_line(x, f, sMsg);
+
   if (failed) f = HOPSPACK::dne();
   return(f);
 }

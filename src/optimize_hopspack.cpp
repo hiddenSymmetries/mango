@@ -1,4 +1,5 @@
 #include<iostream>
+#include<iomanip>
 #include<stdexcept>
 #include "mango.hpp"
 
@@ -8,7 +9,7 @@
 #include "HOPSPACK_Vector.hpp"
 
 int HOPSPACK_startProcComm(HOPSPACK::GenProcComm &, MPI_Comm);
-int HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &, HOPSPACK::ParameterList*);
+int HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &, HOPSPACK::ParameterList*, mango::problem*);
 int HOPSPACK_behaveAsWorker(const int, HOPSPACK::GenProcComm &, mango::problem*);
 #endif
 
@@ -50,6 +51,7 @@ void mango::problem::optimize_hopspack() {
     cMedParams->setParameter("Number Processors",mpi_partition.get_N_procs_group_leaders());
     cMedParams->setParameter("Citizen Count",1);
     cMedParams->setParameter("Display",2);
+    cMedParams->setParameter("Maximum Evaluations",max_function_evaluations);
     
     HOPSPACK::ParameterList*  cCitizenParams = &(hopspack_parameters.getOrSetSublist ("Citizen 1"));
     cCitizenParams->setParameter("Type","GSS");
@@ -62,15 +64,23 @@ void mango::problem::optimize_hopspack() {
   // Run HOPSPACK
   int nReturnValue;
   if (nProcRank == 0) {
-    nReturnValue = HOPSPACK_behaveAsMaster(cGPC, &hopspack_parameters);
+    nReturnValue = HOPSPACK_behaveAsMaster(cGPC, &hopspack_parameters, this);
   } else {
     nReturnValue = HOPSPACK_behaveAsWorker(nProcRank, cGPC, this);
   }
 
   if (nReturnValue != 0) throw std::runtime_error("Error! HOPSPACK returned an error code.");
 
+  // How do I get the global function evaluation index of the best function eval??
+
 #else
   // MANGO_HOPSPACK_AVAILABLE is not defined
   throw std::runtime_error("Error! The HOPSPACK algorithm was requested, but Mango was compiled without HOPSPACK support.");
 #endif  
+}
+
+
+void mango::problem::write_hopspack_line_to_file(std::string line) {
+  function_evaluations += 1; // This line is how proc 0 keeps track of the total number of function evaluations.
+  output_file << std::setw(6) << std::right << function_evaluations << "," << line << "\n";
 }
