@@ -188,6 +188,7 @@ namespace mango {
     double* lower_bounds;
     double* upper_bounds;
     clock_t start_time, best_time;
+    double* residuals;
 
     void group_leaders_loop();
     void group_leaders_least_squares_loop();
@@ -201,8 +202,12 @@ namespace mango {
     void optimize_nlopt();
     void optimize_hopspack();
     // </optimize_packages>
-    void write_file_line(const double*, double, clock_t);
-    double write_least_squares_file_line(const double*, double*, clock_t);
+    void write_function_evaluations();
+    void compose_time_x_f_string(std::string&, clock_t, const double*, double);
+    void compose_residuals_string(std::string&, double*);
+    void write_file_line(clock_t, const double*, double);
+    double residuals_to_single_objective(double*);
+    void write_least_squares_file_line(clock_t, const double*, double, double*);
     static double nlopt_objective_function(unsigned, const double*, double*, void*); 
 #ifdef MANGO_PETSC_AVAILABLE
     static PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);
@@ -215,7 +220,6 @@ namespace mango {
     void finite_difference_gradient(const double*, double*, double*);
     void finite_difference_Jacobian(const double*, double*, double*);
     void finite_difference_Jacobian_to_gradient(const double*, double*, double*);
-    void compose_hopspack_file_line(const double*, const double, std::string &);
     void write_hopspack_line_to_file(std::string line);
 
   public:

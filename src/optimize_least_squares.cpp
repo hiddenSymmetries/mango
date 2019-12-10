@@ -10,7 +10,8 @@ void mango::problem::optimize_least_squares() {
   bool proc0_world = mpi_partition.get_proc0_world();
 
   // I need to think about this next bit. Do all group leaders need a copy of sigmas and targets?
-  // For hopspack, they probably do, but for finite difference Jacobians they do not.
+  // For hopspack, they do, because the residuals are combined into the total objective function on each group leader.
+  // But for finite difference Jacobians, only proc0 needs sigmas and targets.
   // If they do, then they must all agree on N_terms; otherwise probably the size of targets and sigmas
   // will be incorrect on non-master procs.
   // Make sure that all procs agree on sigmas and targets.
@@ -108,7 +109,7 @@ void mango::problem::optimize_least_squares() {
   /* Copy the line corresponding to the optimum to the bottom of the output file. */
   int function_evaluations_temp= function_evaluations;
   function_evaluations = best_function_evaluation;
-  write_least_squares_file_line(state_vector, best_residual_function, best_time);
+  write_least_squares_file_line(best_time, state_vector, best_objective_function, best_residual_function);
   function_evaluations = function_evaluations_temp;
 
   output_file.close();
@@ -130,13 +131,15 @@ void mango::problem::optimize_least_squares() {
 void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem) {
   /* Note that this function is static, so "this" does not exist, and hence we must use "this_problem" instead. */
 
+  // Note that this subroutine sets the 'residuals' array of the mango::problem class.
+
   int N_terms = this_problem->get_N_terms();
 
-  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective BBB\n";
-  double* residuals = new double[N_terms];
+  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective\n";
+  //double* residuals = new double[N_terms];
 
   bool failed_bool;
-  this_problem->residual_function_wrapper(x, residuals, &failed_bool);
+  this_problem->residual_function_wrapper(x, this_problem->residuals, &failed_bool);
   if (failed_bool) {
     *failed_int = 1; 
   } else {
@@ -146,9 +149,9 @@ void mango::problem::least_squares_to_single_objective(int* N, const double* x, 
   double term;
   *f = 0;
   for (int j=0; j<N_terms; j++) {
-    term = (residuals[j] - this_problem->targets[j]) / this_problem->sigmas[j];
+    term = (this_problem->residuals[j] - this_problem->targets[j]) / this_problem->sigmas[j];
     *f += term*term;
   }
 
-  delete[] residuals;
+  //delete[] residuals;
 }

@@ -106,7 +106,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
       function_evaluations += 1;
       now = clock();
-      write_file_line(&state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation], now);
+      write_file_line(now, &state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation]);
 
       failed = false;
       if (!failed && (!at_least_one_success || objective_functions[j_evaluation] < best_objective_function)) {

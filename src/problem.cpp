@@ -28,6 +28,7 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
   N_parameters = N_parameters_in;
   N_terms = N_terms_in;
   best_state_vector = new double[N_parameters];
+  residuals = new double[N_terms];
   objective_function = NULL;
   residual_function = residual_function_in;
   least_squares = true;
@@ -41,6 +42,7 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
 mango::problem::~problem() {
   if (verbose > 0) std::cout << "Mango problem is being destroyed.\n";
   delete[] best_state_vector;
+  if (least_squares) delete[] residuals;
 }
 
 void mango::problem::defaults() {

@@ -79,8 +79,3 @@ void mango::problem::optimize_hopspack() {
 #endif  
 }
 
-
-void mango::problem::write_hopspack_line_to_file(std::string line) {
-  function_evaluations += 1; // This line is how proc 0 keeps track of the total number of function evaluations.
-  output_file << std::setw(6) << std::right << function_evaluations << "," << line << "\n";
-}

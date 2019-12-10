@@ -112,7 +112,7 @@ double mango::problem::optimize() {
   /* Copy the line corresponding to the optimum to the bottom of the output file. */
   int function_evaluations_temp = function_evaluations;
   function_evaluations = best_function_evaluation;
-  write_file_line(state_vector, best_objective_function, best_time);
+  write_file_line(best_time, state_vector, best_objective_function);
   function_evaluations = function_evaluations_temp;
 
   output_file.close();

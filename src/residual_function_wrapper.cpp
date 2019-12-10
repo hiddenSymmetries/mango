@@ -5,6 +5,13 @@
 #include "mango.hpp"
 
 void mango::problem::residual_function_wrapper(const double* x, double* f, bool* failed) {
+  // This subroutine is used to call the residual function when N_worker_groups = 1 (i.e. parallelization only within the objective function evaluation),
+  // or for algorithms like hopspack that allow concurrent evaluations of the objective function but not using finite difference Jacobians.
+  // This subroutine is not used for finite difference Jacobians.
+
+  // I chose to make this subroutine take a parameter f[] to store the residuals rather than always storing them
+  // in the "residuals" array of the mango::problem class because PETSc uses its own storage for the residuals.
+
   function_evaluations++;
   int failed_int;
   residual_function(&N_parameters, x, &N_terms, f, &failed_int, this);
@@ -20,7 +27,14 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
     std::cout << "\n";
   }
 
-  double objective_value = write_least_squares_file_line(x, f, now);
+  double objective_value = residuals_to_single_objective(f);
+
+  // I may want to change the logic in the next line at some point. The idea is that only proc 0 should write to the output file.
+  // This subroutine is only called on proc 0 except for hopspack, where this subroutine is called by all group leaders.
+  // Hence, for hopspack, we should not write to the file here.
+  if (!algorithms[algorithm].parallel) {
+    write_least_squares_file_line(now, x, objective_value, f);
+  }
 
   if (! *failed && (!at_least_one_success || objective_value < best_objective_function)) {
     at_least_one_success = true;
@@ -33,31 +47,3 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
 
 }
 
-
-
-double mango::problem::write_least_squares_file_line(const double* x, double* residuals, clock_t print_time) {
-  double total_objective_function, temp;
-  int j;
-
-  double elapsed_time =((float)(print_time - start_time)) / CLOCKS_PER_SEC;
-
-  /* Combine the residuals into the total objective function. */
-  total_objective_function = 0;
-  for (j=0; j<N_terms; j++) {
-    temp = (residuals[j] - targets[j]) / sigmas[j];
-    total_objective_function += temp*temp;
-  }
-
-  /* Now actually write the line of the output file. */
-  output_file << std::setw(6) << std::right << function_evaluations << "," << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
-  for (j=0; j<N_parameters; j++) {
-    output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
-  }
-  output_file << "," << std::setw(24) << total_objective_function;
-  for (j=0; j<N_terms; j++) {
-    output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << residuals[j];
-  }
-  output_file << "\n" << std::flush;
-
-  return(total_objective_function);
-}

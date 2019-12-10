@@ -102,7 +102,8 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
       function_evaluations += 1;
       now = clock();
-      total_objective_function = write_least_squares_file_line(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms], now);
+      total_objective_function = residuals_to_single_objective(&residual_functions[j_evaluation*N_terms]);
+      write_least_squares_file_line(now, &state_vectors[j_evaluation*N_parameters], total_objective_function, &residual_functions[j_evaluation*N_terms]);
 
       failed = false;
       if (!failed && (!at_least_one_success || total_objective_function < best_objective_function)) {

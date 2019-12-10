@@ -26,36 +26,13 @@ void mango::problem::objective_function_wrapper(const double* x, double* f, bool
   } else {
   }
 
-  if (!least_squares) {
-    /* For least-squares problems, output is written using mango_residual_function_wrapper() */
-    write_file_line(x, *f, now);
+  if ((!least_squares) && (!algorithms[algorithm].parallel)) {
+    // For parallel gradient-based problems, output is written using finite_difference_gradient() or finite_difference_Jacobian().
+    // For non-gradient-based problems with concurrent function evaluations (e.g. hopspack), output is written elsewhere.
+    // For least-squares problems with no concurrent function evaluations, output is written using residual_function_wrapper().
+    // In the remaining case, we write the output here:
+    write_file_line(now, x, *f);
   }
 }
 
 
-
-void mango::problem::write_file_line(const double* x, double f, clock_t print_time) {
-  double elapsed_time = ((float)(print_time - start_time)) / CLOCKS_PER_SEC;
-
-  output_file << std::setw(6) << std::right << function_evaluations << "," << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
-  for (int j=0; j<N_parameters; j++) {
-    output_file << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
-  }
-  output_file << "," << std::setw(24) << f << "\n" << std::flush;
-}
-
-
-void mango::problem::compose_hopspack_file_line(const double* x, const double f, std::string & file_string) {
-  clock_t print_time = clock();
-  double elapsed_time = ((float)(print_time - start_time)) / CLOCKS_PER_SEC;
-
-  std::ostringstream string_stream;
-  //string_stream << std::setw(6) << std::right << function_evaluations << "," << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
-  string_stream << std::right << std::setw(12) << std::setprecision(4) << std::scientific << elapsed_time;
-  for (int j=0; j<N_parameters; j++) {
-    string_stream << "," << std::setw(24) << std::setprecision(16) << std::scientific << x[j];
-  }
-  string_stream << "," << std::setw(24) << f;
-  // Finally, convert the stream to a std::string:
-  file_string = string_stream.str();
-}
