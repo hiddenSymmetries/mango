@@ -10,6 +10,28 @@ print()
 print("usage: " + os.path.basename(__file__) + " <1 or more examples to run>")
 print("Wildcards (*) are accepted in the example names. For a wildcard as a first character, enclose the string in single or double quotes. Do not include bin/ in the example names. If no examples are specified, all examples will be run")
 
+#####################################################################
+# Detect which packages mango was built with:
+#####################################################################
+
+filename = 'packages_available'
+if not os.path.isfile(filename):
+    print("Error! The '",filename,"' file is not present in the examples directory.")
+    exit(1)
+
+f = open(filename)
+lines = f.readlines()
+f.close()
+if len(lines) < 1:
+    print('Error! The file ',filename,' is empty')
+    exit(1)
+packages_available = lines[0].strip().split(' ')
+print("Mango appears to have been built with the following packages: ",packages_available)
+
+#####################################################################
+# Get MANGO_COMMAND_TO_SUBMIT_JOB
+#####################################################################
+
 try:
     submitCommand = os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"]
 except:
@@ -24,6 +46,10 @@ if submitCommand == "":
     submitCommand = make_results.stdout.decode('utf-8').strip()
 
 print("MANGO_COMMAND_TO_SUBMIT_JOB=",submitCommand)
+
+#####################################################################
+# Decide which examples will be run
+#####################################################################
 
 print("Running mango examples.")
 print()
@@ -58,6 +84,10 @@ print("Here are the examples that will be run:")
 for example in examples:
     print("   "+example)
 
+#####################################################################
+# Prepare to loop over the examples
+#####################################################################
+
 line1="######################################################################################################"
 line2="------------------------------------------------------------------------------------------------------"
 
@@ -75,10 +105,23 @@ def first_n_items(str,N):
     else:
         return (",".join(splitstr[:N]))+"\n"
 
+def algorithm_available(algorithm):
+    # This subroutine takes an algorithm name and checks it against the list of available packages.
+    for j in range(len(packages_available)):
+        package = packages_available[j]
+        if package == algorithm[:len(package)]:
+            return True
+    return False
+
 from tests.verify_mpi_independence import *
 from tests.regression_test import *
 from tests.verify_increment_and_last_line_matches_internal_line import *
 
+#####################################################################
+# Begin the main loop over examples
+#####################################################################
+
+examples_actually_run = []
 for example in examples:
 
     print()
@@ -132,7 +175,9 @@ for example in examples:
     for j in range(j0,len(lines)):
         if comment_line(lines[j]):
             break
-        algorithms.append(lines[j].strip())
+        candidate_algorithm = lines[j].strip()
+        if algorithm_available(candidate_algorithm):
+            algorithms.append(candidate_algorithm)
     # Skip comment line(s):
     j0=j
     for j in range(j0,len(lines)):
@@ -157,6 +202,11 @@ for example in examples:
     print("Algorithms:",algorithms)
     print("True optima:",true_optima)
     print()
+
+    if len(algorithms) == 0:
+        print('Skipping this example since no algorithms are available')
+        continue
+    examples_actually_run.append(example)
 
     # Remove previous summary files, if they exist:
     filenames = ['output/summary.'+example, 'output/summary_mpi.'+example, 'output/short_summary.'+example, 'output/short_summary_mpi.'+example]
@@ -284,12 +334,13 @@ for example in examples:
             f.write('No jobs succeeded!')
 
     verify_mpi_independence(example)
-    regression_test(example)
+    regression_test(example,packages_available=packages_available)
 
 print()
 print(line1)
 print(line1)
 print("Done running examples.")
 print()
+
 from tests.verify_language_independence import *
-verify_language_independence()
+verify_language_independence(examples_run=examples_actually_run)

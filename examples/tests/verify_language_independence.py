@@ -9,11 +9,11 @@ except:
     # This case works when this module is imported from another script
     from tests.compare_2_examples import *
 
-def verify_language_independence():
-    compare_2_examples('chwirut_c','chwirut_f')
-    compare_2_examples('quadratic_c','quadratic_f')
-    compare_2_examples('rosenbrock_c','rosenbrock_f')
-    compare_2_examples('nondifferentiable_c','nondifferentiable_f')
+def verify_language_independence(examples_run=0):
+    compare_2_examples('chwirut_c','chwirut_f',examples_run=examples_run)
+    compare_2_examples('quadratic_c','quadratic_f',examples_run=examples_run)
+    compare_2_examples('rosenbrock_c','rosenbrock_f',examples_run=examples_run)
+    compare_2_examples('nondifferentiable_c','nondifferentiable_f',examples_run=examples_run)
 
 # Allow this module to be run as a standalone script.
 if __name__ == '__main__':

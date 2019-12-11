@@ -16,7 +16,7 @@ which mpiexec
 
 cd external_packages
 ./install_nlopt.sh
-./install_hopspack.sh
+#./install_hopspack.sh
 cd ..
 
 make test_make

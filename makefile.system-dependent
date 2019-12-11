@@ -29,8 +29,9 @@ MANGO_HOST = pppl
 
 MANGO_PETSC_AVAILABLE = F
 MANGO_HOPSPACK_AVAILABLE = F
-MANGO_DAKOTA_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
+MANGO_GSL_AVAILABLE = F
+MANGO_DAKOTA_AVAILABLE = F
 
 CC = mpicc
 FC = mpif90
@@ -52,8 +53,9 @@ MANGO_HOST = draco
 # On Draco, you sometimes seem to need 'module load gcc', sometimes not.
 MANGO_PETSC_AVAILABLE = T
 MANGO_HOPSPACK_AVAILABLE = F
-MANGO_DAKOTA_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
+MANGO_GSL_AVAILABLE = F
+MANGO_DAKOTA_AVAILABLE = F
 
 #ifeq ($(PETSC_DIR),)
 #$(error PETSC_DIR is not defined. This probably means you have not loaded the petsc-real module.)
@@ -97,9 +99,10 @@ else ifneq (,$(TRAVIS_ARCH))
 MANGO_HOST = travis
 
 MANGO_PETSC_AVAILABLE = T
-MANGO_HOPSPACK_AVAILABLE = T
-MANGO_DAKOTA_AVAILABLE = F
+MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
+MANGO_GSL_AVAILABLE = F
+MANGO_DAKOTA_AVAILABLE = F
 
 # Locations of PETSc files as they will be located in travis's Ubuntu filesystem can be found at
 # https://packages.ubuntu.com/bionic/amd64/libpetsc3.7.7-dev/filelist
@@ -136,8 +139,9 @@ MANGO_HOST = osx
 
 MANGO_PETSC_AVAILABLE = T
 MANGO_HOPSPACK_AVAILABLE = T
-MANGO_DAKOTA_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
+MANGO_GSL_AVAILABLE = F
+MANGO_DAKOTA_AVAILABLE = F
 
 PETSC_DIR=/opt/local/lib/petsc
 include ${PETSC_DIR}/lib/petsc/conf/variables
@@ -151,6 +155,10 @@ EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
 EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
 EXTRA_C_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 EXTRA_F_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
+
+# The next 2 lines seem necessary if building without PETSC
+EXTRA_C_LINK_FLAGS += -lstdc++ 
+EXTRA_F_LINK_FLAGS += -lstdc++ 
 
 ifeq ($(MANGO_NLOPT_AVAILABLE),T)
 EXTRA_C_COMPILE_FLAGS += -I/usr/local/include

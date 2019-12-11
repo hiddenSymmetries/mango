@@ -1,15 +1,18 @@
 .PHONY: all clean examples test retest test_make
 
-all: lib/libmango.a examples
+all: lib/libmango.a examples examples/packages_available
 #	cp obj/mango.mod* include
 #	cp obj/mango.MOD* include
 
 include makefile.system-dependent
 
+MANGO_AVAILABLE_PACKAGES = mango
+
 ifeq ($(MANGO_PETSC_AVAILABLE),T)
   EXTRA_C_COMPILE_FLAGS += -DMANGO_PETSC_AVAILABLE
   EXTRA_F_COMPILE_FLAGS += -DMANGO_PETSC_AVAILABLE
   EXTRA_LINK_FLAGS += $(PETSC_LIB)
+  MANGO_AVAILABLE_PACKAGES += petsc
 else ifneq ($(MANGO_PETSC_AVAILABLE),F)
   $(error MANGO_PETSC_AVAILABLE must be set to either T or F (case-sensitive))
 endif
@@ -23,22 +26,33 @@ ifeq ($(MANGO_HOPSPACK_AVAILABLE),T)
   EXTRA_F_COMPILE_FLAGS += -DMANGO_HOPSPACK_AVAILABLE
   HOPSPACK_CPP_SRC_FILES = $(wildcard external_packages/hopspack/src/*.cpp)
   HOPSPACK_C_SRC_FILES   = $(wildcard external_packages/hopspack/src/*.c)
+  MANGO_AVAILABLE_PACKAGES += hopspack
 else ifneq ($(MANGO_HOPSPACK_AVAILABLE),F)
   $(error MANGO_HOPSPACK_AVAILABLE must be set to either T or F (case-sensitive))
-endif
-
-ifeq ($(MANGO_DAKOTA_AVAILABLE),T)
-  EXTRA_C_COMPILE_FLAGS += -DMANGO_DAKOTA_AVAILABLE
-  EXTRA_F_COMPILE_FLAGS += -DMANGO_DAKOTA_AVAILABLE
-else ifneq ($(MANGO_DAKOTA_AVAILABLE),F)
-  $(error MANGO_DAKOTA_AVAILABLE must be set to either T or F (case-sensitive))
 endif
 
 ifeq ($(MANGO_NLOPT_AVAILABLE),T)
   EXTRA_C_COMPILE_FLAGS += -DMANGO_NLOPT_AVAILABLE
   EXTRA_F_COMPILE_FLAGS += -DMANGO_NLOPT_AVAILABLE
+  MANGO_AVAILABLE_PACKAGES += nlopt
 else ifneq ($(MANGO_NLOPT_AVAILABLE),F)
   $(error MANGO_NLOPT_AVAILABLE must be set to either T or F (case-sensitive))
+endif
+
+ifeq ($(MANGO_GSL_AVAILABLE),T)
+  EXTRA_C_COMPILE_FLAGS += -DMANGO_GSL_AVAILABLE
+  EXTRA_F_COMPILE_FLAGS += -DMANGO_GSL_AVAILABLE
+  MANGO_AVAILABLE_PACKAGES += gsl
+else ifneq ($(MANGO_GSL_AVAILABLE),F)
+  $(error MANGO_GSL_AVAILABLE must be set to either T or F (case-sensitive))
+endif
+
+ifeq ($(MANGO_DAKOTA_AVAILABLE),T)
+  EXTRA_C_COMPILE_FLAGS += -DMANGO_DAKOTA_AVAILABLE
+  EXTRA_F_COMPILE_FLAGS += -DMANGO_DAKOTA_AVAILABLE
+  MANGO_AVAILABLE_PACKAGES += dakota
+else ifneq ($(MANGO_DAKOTA_AVAILABLE),F)
+  $(error MANGO_DAKOTA_AVAILABLE must be set to either T or F (case-sensitive))
 endif
 
 # Put .mod files in the ./obj/ directory:
@@ -89,8 +103,11 @@ lib/libmango.a: $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPS
 examples: lib/libmango.a
 	$(MAKE) -C examples	
 
+examples/packages_available:
+	@echo $(MANGO_AVAILABLE_PACKAGES) > examples/packages_available
+
 clean:
-	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~
+	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ examples/packages_available
 	$(MAKE) -C examples clean
 
 test: $(TARGET)
@@ -113,8 +130,10 @@ test_make:
 	@echo FLINKER is $(FLINKER)
 	@echo MANGO_PETSC_AVAILABLE is $(MANGO_PETSC_AVAILABLE)
 	@echo MANGO_HOPSPACK_AVAILABLE is $(MANGO_HOPSPACK_AVAILABLE)
-	@echo MANGO_DAKOTA_AVAILABLE is $(MANGO_DAKOTA_AVAILABLE)
 	@echo MANGO_NLOPT_AVAILABLE is $(MANGO_NLOPT_AVAILABLE)
+	@echo MANGO_GSL_AVAILABLE is $(MANGO_GSL_AVAILABLE)
+	@echo MANGO_DAKOTA_AVAILABLE is $(MANGO_DAKOTA_AVAILABLE)
+	@echo MANGO_AVAILABLE_PACKAGES is $(MANGO_AVAILABLE_PACKAGES)
 	@echo EXTRA_F_COMPILE_FLAGS is $(EXTRA_F_COMPILE_FLAGS)
 	@echo EXTRA_C_COMPILE_FLAGS is $(EXTRA_C_COMPILE_FLAGS)
 	@echo EXTRA_LINK_FLAGS is $(EXTRA_LINK_FLAGS)

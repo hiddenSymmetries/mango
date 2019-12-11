@@ -1,6 +1,7 @@
 #include<iostream>
 #include<iomanip>
 #include<stdexcept>
+#include<cmath>
 #include "mango.hpp"
 
 #ifdef MANGO_HOPSPACK_AVAILABLE
@@ -137,7 +138,7 @@ void mango::problem::optimize_hopspack() {
       //std::cout << "Best_proc_index: " << best_proc_index << std::endl;
       
       // Verify apparent_best_objective_function here coincides with the best_objective_function we found in write_hopspack_line_to_file:
-      if (fabs(apparent_best_objective_function - best_objective_function) > 1e-30) {
+      if (std::fabs(apparent_best_objective_function - best_objective_function) > 1e-30) {
 	std::cerr << "WARNING!!! Significant difference between apparent_best_objective_function and best_objective_function." << std::endl;
 	std::cerr << "apparent_best_objective_function: " << std::scientific << apparent_best_objective_function << "  best_objective_function: " << best_objective_function
 		  << "  diff: " << apparent_best_objective_function - best_objective_function << std::endl;

@@ -18,11 +18,17 @@ def test_float_equality(x1,x2,tol):
         return True
     return np.abs(x2-x1) / avg < tol
 
-def compare_2_examples(filename1, filename2):
+def compare_2_examples(filename1, filename2, examples_run = 0):
     solution_vector_tolerance = 1.0e-17
     objective_function_tolerance = 1.0e-17
     verbose = False
     algorithms_to_exclude = nondeterministic_algorithms
+
+    # First, verify that both filenames are included among examples_run, if the latter was specified
+    if examples_run != 0:
+        if (not (filename1 in examples_run)) or (not (filename2 in examples_run)):
+            print('Skipping comparison of '+filename1+' and '+filename2+' since 1 or both examples were not run.')
+            return
 
     # Read output from example 1:
     big_filename1 = 'output/short_summary_mpi.'+filename1
