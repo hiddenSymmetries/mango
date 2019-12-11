@@ -14,12 +14,12 @@ which mpif90
 which gfortran
 which mpiexec
 
-make test_make
-
 cd external_packages
 ./install_nlopt.sh
 ./install_hopspack.sh
 cd ..
+
+make test_make
 
 # Executables need to know where to find the nlopt shared library:
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/landreman/mango/external_packages/nlopt/nlopt-2.6.1/install/lib
