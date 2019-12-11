@@ -33,7 +33,7 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   // I may want to change the logic in the next line at some point. The idea is that only proc 0 should write to the output file.
   // This subroutine is only called on proc 0 except for hopspack, where this subroutine is called by all group leaders.
   // Hence, for hopspack, we should not write to the file here.
-  if (!algorithms[algorithm].parallel) {
+  if (algorithms[algorithm].package != PACKAGE_HOPSPACK) {
     write_least_squares_file_line(now, x, objective_value, f);
   }
 

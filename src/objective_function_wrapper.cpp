@@ -26,8 +26,9 @@ void mango::problem::objective_function_wrapper(const double* x, double* f, bool
   } else {
   }
 
-  if ((!least_squares) && (!algorithms[algorithm].parallel)) {
-    // For parallel gradient-based problems, output is written using finite_difference_gradient() or finite_difference_Jacobian().
+  if ((!least_squares) && (algorithms[algorithm].package != PACKAGE_HOPSPACK)) {
+    // For parallel gradient-based problems, output is ususally written using finite_difference_gradient() or finite_difference_Jacobian(),
+    // but may be written here during the line search.
     // For non-gradient-based problems with concurrent function evaluations (e.g. hopspack), output is written elsewhere.
     // For least-squares problems with no concurrent function evaluations, output is written using residual_function_wrapper().
     // In the remaining case, we write the output here:

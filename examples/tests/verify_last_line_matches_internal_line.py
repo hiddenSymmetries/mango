@@ -12,8 +12,27 @@ def verify_last_line_matches_internal_line(filename):
 
     min_N_lines = 7
     if len(lines) < min_N_lines:
-        print('File '+filename+' is <'+str(min_N_lines)+' lines long, so it must not have completed')
-        exit(1)
+        print('File '+filename+' is <'+str(min_N_lines)+' lines long, so it must not have stopped before completing. Treating this as a success.')
+        return
+
+    # Verify that the first element in each line is an integer that increments each line.
+    for index in range(5, len(lines)-1):
+        splitline = lines[index].split(',')
+        first_element = splitline[0]
+        try:
+            first_int = int(first_element)
+        except:
+            print('Error converting first element of line ',index,' to an integer. Here is the line:')
+            print(splitline)
+            raise
+
+        expected_int = index - 4
+        if first_int != expected_int:
+            print('Error! First element is not incrementing properly. First_int=',first_int,', expected ',expected_int)
+            print('Here are the preceding lines and the line in question:')
+            print(lines[index-1].strip())
+            print(lines[index].strip())
+            exit(1)
 
     splitline = lines[-1].split(',')
     min_N_entries = 4

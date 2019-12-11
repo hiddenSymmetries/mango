@@ -99,6 +99,10 @@ test: $(TARGET)
 retest: $(TARGET)
 	@echo "Testing existing output files for examples without re-running then." && cd examples && export MANGO_RETEST=yes && ./run_examples
 
+# This next target is used by examples/run_examples to get MANGO_COMMAND_TO_SUBMIT_JOB when run_examples is run standalone.
+print_command_to_submit_job:
+	@echo $(MANGO_COMMAND_TO_SUBMIT_JOB)
+
 test_make:
 	@echo MANGO_HOST is $(MANGO_HOST)
 	@echo HOSTNAME is $(HOSTNAME)
