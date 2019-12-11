@@ -18,6 +18,7 @@ make test_make
 
 cd external_packages
 ./install_nlopt.sh
+./install_hopspack.sh
 cd ..
 
 # Executables need to know where to find the nlopt shared library:

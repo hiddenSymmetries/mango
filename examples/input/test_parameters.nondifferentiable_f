@@ -8,6 +8,7 @@
 5,5
 ! algorithms:
 foo
+hopspack
 petsc_nm
 blorp
 nlopt_ln_cobyla

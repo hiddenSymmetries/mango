@@ -4,6 +4,7 @@ N_parameters:
 3
 algorithm,last_function_evaluation,last_seconds,best_function_evaluation,best_seconds,x(1),x(2),x(3),objective_function,abs_tolerance_x,abs_tolerance_f
 foo,                                FAILED
+hopspack,                             112,  1.6459e-02,    11,  3.3470e-03,  1.0000000000000000e+00,  2.0000000000000000e+00,  3.0000000000000000e+00,  0.0000000000000000e+00, 1e-3,  1e-4
 petsc_nm,                             211,  4.2360e-03,   204,  4.0930e-03,  9.9999999117558303e-01,  2.0000000096351735e+00,  3.0000000167409642e+00,  1.9222325139030733e-08, 1e-13, 1e-15
 blorp,                              FAILED
 nlopt_ln_cobyla,                     1008,  8.6780e-03,     4,  4.4000e-04,  1.0000000000000000e+00,  1.0000000000000000e+00,  1.0000000000000000e+00,  1.1666666666666665e+00, 1e-13, 1e-15
