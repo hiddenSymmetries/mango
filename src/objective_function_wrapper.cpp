@@ -6,7 +6,7 @@
 #include "mango.hpp"
 
 void mango::problem::objective_function_wrapper(const double* x, double* f, bool* failed) {
-  if (verbose > 0) std::cout << "Hello from objective_function_wrapper\n";
+  if (verbose > 0) std::cout << "Hello from objective_function_wrapper << std::endl";
 
   // For least-squares problems, function_evaluations is incremented in mango_residual_function_wrapper()
   if (!least_squares) function_evaluations++;
@@ -16,7 +16,8 @@ void mango::problem::objective_function_wrapper(const double* x, double* f, bool
   objective_function(&N_parameters, x, f, &failed_int, this);
   *failed = (failed_int != 0);
 
-  if (verbose > 0) std::cout << " objective_function_wrapper: *failed=" << *failed << " at_least_one_success=" << at_least_one_success << ", *f < best_objective_function=" << (*f < best_objective_function) << "\n";
+  if (verbose > 0) std::cout << " objective_function_wrapper: *failed=" << *failed << " at_least_one_success=" << at_least_one_success 
+			     << ", *f < best_objective_function=" << (*f < best_objective_function) << std::endl;
   if (! *failed && (!at_least_one_success || *f < best_objective_function)) {
     at_least_one_success = true;
     best_objective_function = *f;

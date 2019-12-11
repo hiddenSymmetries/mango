@@ -3,14 +3,14 @@
 #include<stdexcept>
 #include "mango.hpp"
 
-/* Constructor */
+// Constructor
 mango::MPI_Partition::MPI_Partition() {
   N_worker_groups = -1;
   initialized = false;
   verbose = false;
 }
 
-/* Destructor */
+// Destructor
 mango::MPI_Partition::~MPI_Partition() {
 }
 
@@ -81,7 +81,7 @@ int mango::MPI_Partition::get_worker_group() {
 }
 
 int mango::MPI_Partition::get_N_worker_groups() {
-  /* Don't call verify_initialized() for this get method. problem::mpi_init fails otherwise, and there is no problem with querying N_worker_groups before initialization. */
+  // Don't call verify_initialized() for this get method. problem::mpi_init fails otherwise, and there is no problem with querying N_worker_groups before initialization.
   return N_worker_groups;
 }
 

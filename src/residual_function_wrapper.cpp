@@ -20,12 +20,12 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   clock_t now = clock();
 
   if (verbose > 0) {
-    std::cout << "Hello from residual_function_wrapper. Here comes x:\n";
+    std::cout << "Hello from residual_function_wrapper. Here comes x:" << std::endl;
     int j;
     for (j=0; j < N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x[j];
     }
-    std::cout << "\n";
+    std::cout << std::endl;
   }
 
   double objective_value = residuals_to_single_objective(f);

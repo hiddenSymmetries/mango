@@ -21,7 +21,7 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   int data;
   int j_evaluation, j_parameter;
 
-  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian from proc " << mpi_rank_world << "\n";
+  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian from proc " << mpi_rank_world << std::endl;
 
   if (proc0_world) {
     /* Tell the group leaders to start this subroutine  */
@@ -66,12 +66,12 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   }
 
   if (proc0_world && (verbose > 0)) {
-    std::cout << "Here comes state_vectors:\n";
+    std::cout << "Here comes state_vectors:" << std::endl;
     for(j_parameter=0; j_parameter<N_parameters; j_parameter++) {
       for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
 	std::cout << std::setw(25) << std::setprecision(15) << state_vectors[j_evaluation*N_parameters + j_parameter];
       }
-      std::cout << "\n";
+      std::cout << std::endl;
     }
   }
 
@@ -142,12 +142,12 @@ void mango::problem::finite_difference_Jacobian(const double* state_vector, doub
   delete[] state_vector_copy;
 
   if (proc0_world && (verbose > 0)) {
-    std::cout << "Here comes finite-difference Jacobian:\n";
+    std::cout << "Here comes finite-difference Jacobian:" << std::endl;
     for (int j_term=0; j_term<N_terms; j_term++) {
       for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {
 	std::cout << std::setw(25) << std::setprecision(15) << Jacobian[j_parameter*N_terms+j_term];
       }
-      std::cout << "\n";
+      std::cout << std::endl;
     }
   }
 

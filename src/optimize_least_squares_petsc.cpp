@@ -6,18 +6,12 @@
 #include <petsctao.h>
 #endif
 
-/*
-#ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango_petsc_residual_function(Tao, Vec, Vec, void*);
-#endif
-*/
-
 static  char help[]="";
 
 void mango::problem::optimize_least_squares_petsc() {
 #ifdef MANGO_PETSC_AVAILABLE
 
-  /* The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html */
+  // The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
   PETSC_COMM_WORLD = MPI_COMM_SELF;
 
   int ierr;
@@ -33,18 +27,18 @@ void mango::problem::optimize_least_squares_petsc() {
   Vec tao_residual_vec;
   VecCreateSeq(PETSC_COMM_SELF, N_terms, &tao_residual_vec);
 
-  /* Set initial condition */
+  // Set initial condition
   double* temp_array;
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(temp_array, state_vector, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
   if (verbose > 0) {
-    std::cout << "Here comes petsc vec for initial condition:\n";
+    std::cout << "Here comes petsc vec for initial condition:" << std::endl;
     VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
   }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  if (verbose > 0) std::cout << "PETSc has been initialized.\n";
+  if (verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
 
   switch (algorithm) {
   case PETSC_POUNDERS:
@@ -56,7 +50,7 @@ void mango::problem::optimize_least_squares_petsc() {
 #endif
     break;
   default:
-    std::cout << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithms[algorithm].name << "\n";
+    std::cerr << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithms[algorithm].name << std::endl;
     throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 
@@ -66,7 +60,7 @@ void mango::problem::optimize_least_squares_petsc() {
   if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
   //TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
-  /* Copy PETSc solution to the mango state vector. */
+  // Copy PETSc solution to the mango state vector.
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(state_vector, temp_array, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
@@ -83,11 +77,8 @@ void mango::problem::optimize_least_squares_petsc() {
 
 }
 
-
-/*
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 
 #ifdef MANGO_PETSC_AVAILABLE
 PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, Vec f, void* user_context) {
@@ -108,15 +99,15 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
     for (j=0; j < this_problem->get_N_parameters(); j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
     }
-    std::cout << "\n";
+    std::cout << std::endl;
     std::cout << "residual:";
     for (j=0; j < this_problem->get_N_terms(); j++) {
       std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
     }
-    std::cout << "\n" << std::flush;
+    std::cout << std::endl << std::flush;
   }
 
-  /* PETSc's definition of the residual function does not include sigmas or targets, so shift and scale the mango residuals appropriately: */
+  // PETSc's definition of the residual function does not include sigmas or targets, so shift and scale the mango residuals appropriately:
   for (j=0; j<this_problem->get_N_terms(); j++) {
     f_array[j] = (f_array[j] - this_problem->targets[j]) / this_problem->sigmas[j];
     if (failed) f_array[j] = mango::NUMBER_FOR_FAILED;
@@ -127,12 +118,12 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
     for (j=0; j < this_problem->get_N_parameters(); j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
     }
-    std::cout << "\n";
+    std::cout << std::endl;
     std::cout << "residual:";
     for (j=0; j < this_problem->get_N_terms(); j++) {
       std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
     }
-    std::cout << "\n" << std::flush;
+    std::cout << std::endl << std::flush;
   }
 
   VecRestoreArray(x, &x_array);

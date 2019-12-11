@@ -3,12 +3,11 @@
 #include "mango.hpp"
 
 #define mango_interface_string_length 256
+ 
+// C interfaces to C++ subroutines 
+// See https://modelingguru.nasa.gov/docs/DOC-2642
+// and http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objects
 
-/* 
-C interfaces to C++ subroutines 
-See https://modelingguru.nasa.gov/docs/DOC-2642
-and http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objects
-*/
 extern "C" {
   /*  mango::problem *mango_problem_create() {
     return new mango::problem;
@@ -22,13 +21,13 @@ extern "C" {
     } */
   mango::problem *mango_problem_create(int* N_parameters, double* state_vector, int* dummy, mango::objective_function_type objective_function) {
     if (false) {
-      std::cout << "interface.cpp subroutine mango_problem_create: objective_function=" << (long int)objective_function << "\n";
+      std::cout << "interface.cpp subroutine mango_problem_create: objective_function=" << (long int)objective_function << std::endl;
 
       std::cout << "From interface.cpp, N_parameters=" << *N_parameters;
       for (int j=0; j<*N_parameters; j++) {
 	std::cout << ", state_vector["<<j<<"]=" << state_vector[j];
       }
-      std::cout << "\ndummy=" << *dummy;
+      std::cout << std::endl << "dummy=" << *dummy;
     }
     /*
     std::cout << "  About to call objective function from interface.cpp\n";
@@ -159,7 +158,7 @@ extern "C" {
 
   int mango_does_algorithm_exist(char algorithm_name[mango_interface_string_length]) {
     bool return_bool = mango::does_algorithm_exist(algorithm_name);
-    /* Convert bool to integer: */
+    // Convert bool to integer:
     return(return_bool ? 1 : 0);
   }
 

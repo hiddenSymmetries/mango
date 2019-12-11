@@ -10,7 +10,7 @@ void mango::problem::read_input_file(std::string filename) {
 
   file.open(filename.c_str());
   if (!file.is_open()) {
-    std::cout << "Error! Unable to open file " << filename << "\n";
+    std::cerr << "Error! Unable to open file " << filename << std::endl;
     throw std::runtime_error("Error in mango::problem::read_input_file. Unable to open file.");
   }
 

@@ -105,13 +105,13 @@ void mango::problem::optimize_nlopt() {
     throw std::runtime_error("Error in optimize_nlopt. Unexpected algorithm!");
   }
 
-  /* I'll use the C interface of nlopt rather than the C++ interface, because the C++ interface requires 
-     converting things back and forth between double[] and std::vector<double>.
-     However, some nlopt constants like NLOPT_LN_NELDERMEAD conflict with mango's constants. 
-     We can get around the latter issue by using the C++ nlopt:: constants and casting them
-     from nlopt::algorithm to nlopt_algorithm. */
+  // I'll use the C interface of nlopt rather than the C++ interface, because the C++ interface requires 
+  // converting things back and forth between double[] and std::vector<double>.
+  // However, some nlopt constants like NLOPT_LN_NELDERMEAD conflict with mango's constants. 
+  // We can get around the latter issue by using the C++ nlopt:: constants and casting them
+  // from nlopt::algorithm to nlopt_algorithm. 
   nlopt_opt opt = nlopt_create((nlopt_algorithm)mango_nlopt_algorithm, N_parameters);
-  /*  nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this); */
+  //  nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this);
   nlopt_set_min_objective(opt, (nlopt_func) &mango::problem::nlopt_objective_function, (void*)this);
 
   nlopt_set_maxeval(opt, max_function_and_gradient_evaluations);
@@ -126,25 +126,25 @@ void mango::problem::optimize_nlopt() {
 
   switch (result) {
   case nlopt::SUCCESS:
-    if (verbose > 0) std::cout << "nlopt generic success\n";
+    if (verbose > 0) std::cout << "nlopt generic success" << std::endl;
     break;
   case nlopt::STOPVAL_REACHED:
-    if (verbose > 0) std::cout << "nlopt success: stopval reached.\n";
+    if (verbose > 0) std::cout << "nlopt success: stopval reached." << std::endl;
     break;
   case nlopt::FTOL_REACHED:
-    if (verbose > 0) std::cout << "nlopt success: ftol reached.\n";
+    if (verbose > 0) std::cout << "nlopt success: ftol reached." << std::endl;
     break;
   case nlopt::XTOL_REACHED:
-    if (verbose > 0) std::cout << "nlopt success: xtol reached.\n";
+    if (verbose > 0) std::cout << "nlopt success: xtol reached." << std::endl;
     break;
   case nlopt::MAXEVAL_REACHED:
-    if (verbose > 0) std::cout << "nlopt: maxeval reached\n";
+    if (verbose > 0) std::cout << "nlopt: maxeval reached" << std::endl;
     break;
   case nlopt::MAXTIME_REACHED:
-    if (verbose > 0) std::cout << "nlopt: maxtime reached.\n";
+    if (verbose > 0) std::cout << "nlopt: maxtime reached." << std::endl;
     break;
   case nlopt::FAILURE:
-    if (verbose > 0) std::cout << "WARNING!!! NLOPT reported a generic failure. Results may or may not make sense.\n";
+    if (verbose > 0) std::cerr << "WARNING!!! NLOPT reported a generic failure. Results may or may not make sense." << std::endl;
     break;
   case nlopt::INVALID_ARGS:
     throw std::runtime_error("nlopt failure: invalid arguments!");
@@ -153,7 +153,7 @@ void mango::problem::optimize_nlopt() {
     throw std::runtime_error("nlopt out of memory!");
     break;
   case nlopt::ROUNDOFF_LIMITED:
-    if (verbose > 0) std::cout << "nlopt: WARNING! Limited by roundoff. Results may or may not make sense.\n";
+    if (verbose > 0) std::cerr << "nlopt: WARNING! Limited by roundoff. Results may or may not make sense." << std::endl;
     break;
   case nlopt::FORCED_STOP:
     throw std::runtime_error("nlopt forced stop!");
@@ -175,19 +175,19 @@ double mango::problem::nlopt_objective_function(unsigned n, const double* x, dou
   bool failed;
   double f;
 
-  if (this_problem->verbose > 0) std::cout << "Hello from nlopt_objective_function\n" << std::flush;
+  if (this_problem->verbose > 0) std::cout << "Hello from nlopt_objective_function" << std::endl << std::flush;
 
   if (grad == NULL) {
-    /* Gradient is not required. */
+    // Gradient is not required.
     this_problem->objective_function_wrapper(x, &f, &failed);
   } else {
-    /* Gradient is required. */
+    // Gradient is required.
     this_problem->finite_difference_gradient(x, &f, grad);
   }
 
   if (failed) f = mango::NUMBER_FOR_FAILED;
 
-  if (this_problem->verbose > 0) std::cout << "Good-bye from nlopt_objective_function\n" << std::flush;
+  if (this_problem->verbose > 0) std::cout << "Good-bye from nlopt_objective_function" << std::endl << std::flush;
 
   return f;
 }

@@ -17,10 +17,10 @@ double mango::problem::optimize() {
   best_function_evaluation = -1;
   start_time = clock();
 
-  /* To simplify code a bit... */
+  // To simplify code a bit...
   MPI_Comm mpi_comm_group_leaders = mpi_partition.get_comm_group_leaders();
 
-  /* Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders: */
+  // Make sure that parameters used by the finite-difference gradient routine are the same for all group leaders:
   MPI_Bcast(&N_parameters, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&N_terms, 1, MPI_INT, 0, mpi_comm_group_leaders);
   MPI_Bcast(&centered_differences, 1, MPI_C_BOOL, 0, mpi_comm_group_leaders);
@@ -42,9 +42,9 @@ double mango::problem::optimize() {
   }
 
   if (verbose > 0) {
-    std::cout << "Proc " << mpi_partition.get_rank_world() << " is entering optimize(), and thinks proc0_world=" << mpi_partition.get_proc0_world() << "\n";
+    std::cout << "Proc " << mpi_partition.get_rank_world() << " is entering optimize(), and thinks proc0_world=" << mpi_partition.get_proc0_world() << std::endl;
     std::cout << "max_function_evaluations = " << max_function_evaluations << 
-      ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << "\n";
+      ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << std::endl;
   }
 
   if (least_squares) {
@@ -64,20 +64,20 @@ double mango::problem::optimize() {
   // For parallel algorithms that do not use finite-difference derivatives, such as HOPSPACK, the other group leader procs DO continue past this point.
 
   if (proc0_world) {
-    if (verbose > 0) std::cout << "Hello world from optimize()\n";
+    if (verbose > 0) std::cout << "Hello world from optimize()" << std::endl;
 
-    /* Open output file */
+    // Open output file
     output_file.open(output_filename.c_str());
     if (!output_file.is_open()) {
-      std::cout << "output file: " << output_filename << "\n";
+      std::cerr << "output file: " << output_filename << std::endl;
       throw std::runtime_error("Error! Unable to open output file.");
     }
-    /* Write header line of output file */
-    output_file << "Least squares?\nno\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
+    // Write header line of output file
+    output_file << "Least squares?" << std::endl << "no" << std::endl << "N_parameters:" << std::endl << N_parameters << std::endl << "function_evaluation,seconds";
     for (int j=0; j<N_parameters; j++) {
       output_file << ",x(" << j+1 << ")";
     }
-    output_file << ",objective_function\n";
+    output_file << ",objective_function" << std::endl;
   }
 
   if (algorithms[algorithm].least_squares)
@@ -103,13 +103,13 @@ double mango::problem::optimize() {
   if (!proc0_world) return(std::numeric_limits<double>::quiet_NaN());
   // Only proc0_world continues past this point.
 
-  /* Tell the other group leaders to exit. */
+  // Tell the other group leaders to exit.
   int data = -1;
   MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
 
-  memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); /* Make sure we leave state_vector equal to the best state vector seen. */
+  memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); // Make sure we leave state_vector equal to the best state vector seen.
 
-  /* Copy the line corresponding to the optimum to the bottom of the output file. */
+  // Copy the line corresponding to the optimum to the bottom of the output file.
   int function_evaluations_temp = function_evaluations;
   function_evaluations = best_function_evaluation;
   write_file_line(best_time, state_vector, best_objective_function);
@@ -122,7 +122,7 @@ double mango::problem::optimize() {
     for (int j=1; j<N_parameters; j++) {
       std::cout << ", " << state_vector[j];
     }
-    std::cout << "\n";
+    std::cout << std::endl;
   }
 
   return(best_objective_function);

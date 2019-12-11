@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def verify_last_line_matches_internal_line(filename):
+def verify_increment_and_last_line_matches_internal_line(filename):
     try:
         f = open(filename)
     except:
@@ -60,8 +60,9 @@ def verify_last_line_matches_internal_line(filename):
         print('0-based line ',line_that_should_match)
         print(lines[line_that_should_match])
         exit(1)
+
     # If we make it this far, then success.
-    print('Verified that last line of '+filename+' matches the corresponding line in the interior of the file.')
+    #print('Verified that last line of '+filename+' matches the corresponding line in the interior of the file.')
 
 
 # Allow this module to be run as a standalone script.
@@ -71,5 +72,5 @@ if __name__ == '__main__':
         print('Error! Must supply 1 argument: the filename to check.')
         exit(1)
     filename = sys.argv[1]
-    verify_last_line_matches_internal_line(filename)
-    print('Verified that last line of '+filename+' matches the corresponding line in the interior of the file.')
+    verify_increment_and_last_line_matches_internal_line(filename)
+    print('In file '+filename+', verified that function_evaluation increments properly, and the last line matches the corresponding line in the interior of the file.')

@@ -26,7 +26,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   int data;
   int j_evaluation, j_parameter;
 
-  if (verbose > 0) std::cout << "Hello from finite_difference_gradient from proc " << mpi_rank_world << "\n" << std::flush;
+  if (verbose > 0) std::cout << "Hello from finite_difference_gradient from proc " << mpi_rank_world << std::endl << std::flush;
 
   if (proc0_world) {
     /* Tell the group leaders to start this subroutine  */
@@ -70,12 +70,12 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   }
 
   if (proc0_world && (verbose > 0)) {
-    std::cout << "Here comes state_vectors:\n";
+    std::cout << "Here comes state_vectors:" << std::endl;
     for(j_parameter=0; j_parameter<N_parameters; j_parameter++) {
       for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
 	std::cout << std::setw(25) << std::setprecision(15) << state_vectors[j_evaluation*N_parameters + j_parameter];
       }
-      std::cout << "\n";
+      std::cout << std::endl;
     }
   }
 
@@ -137,7 +137,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     for(j_parameter=0; j_parameter<N_parameters; j_parameter++) {
       std::cout << std::setw(25) << std::setprecision(15) << gradient[j_parameter];
       }
-    std::cout << "\n";
+    std::cout << std::endl;
   }
 
   /* Clean up. */

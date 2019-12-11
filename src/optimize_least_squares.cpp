@@ -3,8 +3,6 @@
 #include<stdexcept>
 #include "mango.hpp"
 
-/* void least_squares_to_single_objective(int*, const double*, double*, int*); */
-
 void mango::problem::optimize_least_squares() {
   int j;
   bool proc0_world = mpi_partition.get_proc0_world();
@@ -27,26 +25,26 @@ void mango::problem::optimize_least_squares() {
   // For finite-difference-derivative algorithms, the other procs do not go past this point.
   // For parallel algorithms that do not use finite-difference derivatives, such as HOPSPACK, the other group leader procs DO continue past this point.
 
-  if (verbose > 0) std::cout << "Hello world from optimize_least_squares()\n";
+  if (verbose > 0) std::cout << "Hello world from optimize_least_squares()" << std::endl;
   function_evaluations = 0;
 
   // Verify that the sigmas array is all nonzero.
   for (j=0; j<N_terms; j++) {
     if (sigmas[j] == 0.0) {
-      std::cout << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero.\n";
+      std::cerr << "Error! The (0-based) entry " << j << " in the sigmas array is 0. sigmas must all be nonzero." << std::endl;
       throw std::runtime_error("Error in mango::problem::optimize_least_squares. sigmas is not all nonzero.");
     }
   }
 
   if (proc0_world) {
-    /* Open output file */
+    // Open output file
     output_file.open(output_filename.c_str());
     if (!output_file.is_open()) {
-      std::cout << "output file: " << output_filename << "\n";
+      std::cout << "output file: " << output_filename << std::endl;
       throw std::runtime_error("Error in mango::problem::optimize_least_squares(). Unable to open output file.");
     }
-    /* Write header line of output file */
-    output_file << "Least squares?\nyes\nN_parameters:\n" << N_parameters << "\nfunction_evaluation,seconds";
+    // Write header line of output file
+    output_file << "Least squares?" << std::endl << "yes" << std::endl << "N_parameters:" << std::endl << N_parameters << std::endl << "function_evaluation,seconds";
     for (j=0; j<N_parameters; j++) {
       output_file << ",x(" << j+1 << ")";
     }
@@ -54,7 +52,7 @@ void mango::problem::optimize_least_squares() {
     for (j=0; j<N_terms; j++) {
       output_file << ",F(" << j+1 << ")";
     }
-    output_file << "\n" << std::flush;
+    output_file << std::endl << std::flush;
     
     /* Sanity test */
     /* if (!least_squares_algorithm) {
@@ -100,13 +98,13 @@ void mango::problem::optimize_least_squares() {
   if (!proc0_world) return;
   // Only proc0_world continues past this point.
 
-  /* Tell the other group leaders to exit. */
+  // Tell the other group leaders to exit.
   int data = -1;
   MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
 
-  memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); /* Make sure we leave state_vector equal to the best state vector seen. */
+  memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); // Make sure we leave state_vector equal to the best state vector seen.
 
-  /* Copy the line corresponding to the optimum to the bottom of the output file. */
+  // Copy the line corresponding to the optimum to the bottom of the output file.
   int function_evaluations_temp= function_evaluations;
   function_evaluations = best_function_evaluation;
   write_least_squares_file_line(best_time, state_vector, best_objective_function, best_residual_function);
@@ -119,7 +117,7 @@ void mango::problem::optimize_least_squares() {
     for (int j=1; j<N_parameters; j++) {
       std::cout << ", " << state_vector[j];
     }
-    std::cout << "\n";
+    std::cout << std::endl;
   }
 }
 
@@ -133,7 +131,7 @@ void mango::problem::least_squares_to_single_objective(int* N, const double* x, 
 
   int N_terms = this_problem->get_N_terms();
 
-  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective\n";
+  if (this_problem->verbose > 0) std::cout << "Hello from least_squares_to_single_objective" << std::endl;
   //double* residuals = new double[N_terms];
 
   bool failed_bool;

@@ -6,9 +6,9 @@
 
 void mango::problem::finite_difference_Jacobian_to_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
 
-  /* gradient should have been allocated already, with size N_parameters. */
+  // gradient should have been allocated already, with size N_parameters.
 
-  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_partition.get_rank_world() << "\n";
+  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_partition.get_rank_world() << std::endl;
 
   if (!mpi_partition.get_proc0_world()) throw std::runtime_error("Only proc0_world should get here!");
 

@@ -25,7 +25,7 @@ void mango::problem::optimize_hopspack() {
   int mpi_rank_group_leaders = mpi_partition.get_rank_group_leaders();
   bool proc0 = (mpi_rank_group_leaders == 0);
 
-  if (verbose > 0) std::cout << "Entering optimize_hopspack\n";
+  if (verbose > 0) std::cout << "Entering optimize_hopspack" << std::endl;
 
   //  if (mpi_partition.get_N_procs_group_leaders() < 2) throw std::runtime_error("Hopspack requires at least 2 worker groups");
 
@@ -35,7 +35,7 @@ void mango::problem::optimize_hopspack() {
   int  nProcRank = HOPSPACK_startProcComm(cGPC, mpi_partition.get_comm_group_leaders());
   if (nProcRank == -1) throw std::runtime_error("Error starting MPI in HOPSPACK");
 
-  if (verbose > 0) std::cout << "Done initializing HOPSPACK MPI variables.\n";
+  if (verbose > 0) std::cout << "Done initializing HOPSPACK MPI variables." << std::endl;
 
   // Set HOPSPACK's parameters:
   // See the HOPSPACK manual for the paramter sublists and parameters.
@@ -72,7 +72,7 @@ void mango::problem::optimize_hopspack() {
       cCitizenParams->setParameter("Display",0);
     }
     
-    if (verbose > 0) std::cout << "Done setting HOPSPACK parameters.\n";
+    if (verbose > 0) std::cout << "Done setting HOPSPACK parameters." << std::endl;
   }
 
   // Run HOPSPACK
@@ -182,14 +182,6 @@ void mango::problem::write_hopspack_line_to_file(std::string line, double object
   // and the 'if' block above did not executre, since objective_function is no longer < best_objective_function.
   // For consistency, then, we should use that time, not the time measured above in this subroutine.
   if (best_function_evaluation == function_evaluations) now = best_time;
-
-  /*    
-    std::cout << ", DID update best";
-  } else {
-    std::cout << ", did NOT update best";
-  }
-  std::cout << "\n";
-  */
 
   // Now actually write the line of the file.
   write_function_evaluation_and_time(now);

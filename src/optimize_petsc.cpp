@@ -5,18 +5,12 @@
 #include <petsctao.h>
 #endif
 
-/*
-#ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);
-#endif
-*/
-
 static  char help[]="";
 
 void mango::problem::optimize_petsc() {
 #ifdef MANGO_PETSC_AVAILABLE
 
-  /* The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html */
+  // The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
   PETSC_COMM_WORLD = MPI_COMM_SELF;
 
   int ierr;
@@ -30,18 +24,18 @@ void mango::problem::optimize_petsc() {
   Vec tao_state_vec;
   VecCreateSeq(PETSC_COMM_SELF, N_parameters, &tao_state_vec);
 
-  /* Set initial condition */
+  // Set initial condition
   double* temp_array;
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(temp_array, state_vector, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
   if (verbose > 0) {
-    std::cout << "Here comes petsc vec for initial condition:\n";
+    std::cout << "Here comes petsc vec for initial condition:" << std::endl;
     VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
   }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  if (verbose > 0) std::cout << "PETSc has been initialized.\n";
+  if (verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
 
   switch (algorithm) {
   case PETSC_NM:
@@ -79,7 +73,7 @@ void mango::problem::optimize_petsc() {
   TaoSolve(my_tao);
   if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
-  /* Copy PETSc solution to the mango state vector. */
+  // Copy PETSc solution to the mango state vector.
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(state_vector, temp_array, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
@@ -100,11 +94,8 @@ void mango::problem::optimize_petsc() {
 
 }
 
-
-/*
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 #ifdef MANGO_PETSC_AVAILABLE
 PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
@@ -117,7 +108,6 @@ PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x,
   bool failed;
   double f;
   this_problem->objective_function_wrapper(x_array, &f, &failed);
-  /* objective_function_wrapper(x, &f, &failed); */
 
   if (failed) f = (PetscReal)mango::NUMBER_FOR_FAILED;
 

@@ -3,7 +3,7 @@
 #include<stdexcept>
 #include "mango.hpp"
 
-/* Constructor for non-least-squares problems */
+// Constructor for non-least-squares problems
 mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_function_type objective_function_in, int argc_in, char* argv_in[]) {
   defaults();
   argc = argc_in;
@@ -19,7 +19,7 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_
   sigmas = NULL;
 }
 
-/* Constructor for least-squares problems */
+// Constructor for least-squares problems
 mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_terms_in, double* targets_in, double* sigmas_in, 
 			double* best_residual_function_in, residual_function_type residual_function_in, int argc_in, char* argv_in[]) {
   defaults();
@@ -38,9 +38,9 @@ mango::problem::problem(int N_parameters_in, double* state_vector_in, int N_term
   best_residual_function = best_residual_function_in;
 }
 
-/* Destructor */
+// Destructor
 mango::problem::~problem() {
-  if (verbose > 0) std::cout << "Mango problem is being destroyed.\n";
+  if (verbose > 0) std::cout << "Mango problem is being destroyed." << std::endl;
   delete[] best_state_vector;
   if (least_squares) delete[] residuals;
 }
@@ -88,10 +88,10 @@ void mango::problem::set_bound_constraints(double* lb, double* ub) {
   bound_constraints_set = true;
 }
 
-#define bold_line "****************************************************************************************\n"
+#define bold_line "****************************************************************************************"
 void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
-  /* This method basically just calls MPI_Partition::init, but first checks to see if the algorithm
-     chosen can support parallel function evaluations. If not, N_worker_groups is set to 1. */
+  // This method basically just calls MPI_Partition::init, but first checks to see if the algorithm
+  // chosen can support parallel function evaluations. If not, N_worker_groups is set to 1.
 
   if (algorithm < 0) throw std::runtime_error("Error in mango::problem::mpi_init. Algorithm cannot be negative.");
   if (algorithm >= NUM_ALGORITHMS) throw std::runtime_error("Error in mango::problem::mpi_init. Algorithm is too large.");
@@ -104,13 +104,13 @@ void mango::problem::mpi_init(MPI_Comm mpi_comm_world) {
     MPI_Comm_rank(mpi_comm_world, &mpi_rank_world);
 
     if ((N_procs_world > 1) && (mpi_partition.get_N_worker_groups() == 1) && (mpi_rank_world==0)) {
-      std::cout << bold_line;
-      std::cout << "WARNING!!! You have chosen an algorithm that can exploit concurrent function evaluations\n";
-      std::cout << "but you have set N_worker_groups=1. You probably want a larger value.\n";
-      std::cout << bold_line;
+      std::cerr << bold_line << std::endl;
+      std::cerr << "WARNING!!! You have chosen an algorithm that can exploit concurrent function evaluations" << std::endl;
+      std::cerr << "but you have set N_worker_groups=1. You probably want a larger value." << std::endl;
+      std::cerr << bold_line << std::endl;
     }
   } else {
-    /* There is no point having >1 worker groups with these algorithms. */
+    // There is no point having >1 worker groups with these algorithms.
     mpi_partition.set_N_worker_groups(1);
   }  
 
