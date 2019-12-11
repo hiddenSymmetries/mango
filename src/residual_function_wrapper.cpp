@@ -13,6 +13,7 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   // in the "residuals" array of the mango::problem class because PETSc uses its own storage for the residuals.
 
   function_evaluations++;
+
   int failed_int;
   residual_function(&N_parameters, x, &N_terms, f, &failed_int, this);
   *failed = (failed_int != 0);

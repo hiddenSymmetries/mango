@@ -61,25 +61,3 @@ void mango::problem::write_least_squares_file_line(clock_t print_time, const dou
   write_function_evaluation_and_time(print_time);
   output_file << x_f_string << residuals_string << std::endl << std::flush;
 }
-
-
-void mango::problem::write_hopspack_line_to_file(std::string line, double objective_function) {
-  // This subroutine only ever is called on proc0_world.
-  // 'line' is almost all of the line of the output file, except that the global # of function evaluations (the first element of the line)
-  // is missing. This is because the line was generated on a proc >0, but only proc 0 knows the global # of function evaluations.
-
-  clock_t now = clock();
-
-  function_evaluations += 1; // This line is how proc 0 keeps track of the total number of function evaluations.
-
-  // This next line is how proc0_world keeps track of which function evaluation was the optimum.
-  if (function_evaluations == 1 || objective_function < best_objective_function) {
-    best_function_evaluation = function_evaluations;
-    best_objective_function = objective_function;
-    best_time = now;
-  }
-
-  // Now actually write the line of the file.
-  write_function_evaluation_and_time(now);
-  output_file << line << std::endl << std::flush;
-}

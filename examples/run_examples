@@ -69,6 +69,8 @@ def first_n_items(str,N):
 
 from tests.verify_mpi_independence import *
 from tests.regression_test import *
+from tests.verify_last_line_matches_internal_line import *
+
 for example in examples:
 
     print()
@@ -223,6 +225,7 @@ for example in examples:
                 summary_mpi_contents.append(algorithm_with_spaces + mpi_string + contents_line)
                 if j_procs==0:
                     summary_contents.append(algorithm_with_spaces+contents_line)
+                verify_last_line_matches_internal_line(output_filename)
             else:
                 # This run failed
                 summary_mpi_contents.append(algorithm_with_spaces + mpi_string + " FAILED\n")
