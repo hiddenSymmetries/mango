@@ -32,8 +32,9 @@ for k in range(1,len(sys.argv)):
         filename = candidate_files[j]
         if os.path.isfile(filename):
             filenames.append(filename)
-            if filename[:9] != "mango_out":
-                print("WARNING: Including file "+filename+" even though it does not begin with mango_out.")
+            basename = os.path.basename(filename)
+            if basename[:9] != "mango_out":
+                print("WARNING: Including file "+filename+" even though it does not begin with mango_out")
 
 print()
 print("Files that will be read and plotted:")

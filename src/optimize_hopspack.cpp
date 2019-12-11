@@ -45,12 +45,28 @@ void mango::problem::optimize_hopspack() {
     HOPSPACK::ParameterList*  cProblemParams = &(hopspack_parameters.getOrSetSublist ("Problem Definition"));
     cProblemParams->setParameter("Objective Type","Minimize");
     cProblemParams->setParameter("Number Unknowns", N_parameters);
-    HOPSPACK::Vector scaling(N_parameters, 1.0);
-    cProblemParams->setParameter("Scaling",scaling);
+
+    // If bound constraints are available, hopefully hopspack can automatically set the scaling. Otherwise just try a uniform scaling.
+    if (!bound_constraints_set) {
+      HOPSPACK::Vector scaling(N_parameters, 1.0);
+      cProblemParams->setParameter("Scaling",scaling);
+    }
+
     // Set the initial condition:
     HOPSPACK::Vector x0(N_parameters, 0.0);
     for (int j=0; j<N_parameters; j++) x0[j] = state_vector[j];
     cProblemParams->setParameter("Initial X",x0);
+
+    // Set bound constraints, if they are available:
+    if (bound_constraints_set) {
+      HOPSPACK::Vector hopspack_lower_bounds(N_parameters, 0.0);
+      HOPSPACK::Vector hopspack_upper_bounds(N_parameters, 0.0);
+      // Eventually I may want to replace large values with HOPSPACK::dne() ?
+      for (int j=0; j<N_parameters; j++) hopspack_lower_bounds[j] = lower_bounds[j];
+      for (int j=0; j<N_parameters; j++) hopspack_upper_bounds[j] = upper_bounds[j];
+      cProblemParams->setParameter("Lower Bounds",hopspack_lower_bounds);
+      cProblemParams->setParameter("Upper Bounds",hopspack_upper_bounds);
+    }
         
     HOPSPACK::ParameterList*  cMedParams = &(hopspack_parameters.getOrSetSublist ("Mediator"));
     //cout << "MJL Number Processors:" << cMedParams->getParameter("Number Processors",-17) << endl;
