@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
   myprob.mpi_init(MPI_COMM_WORLD);
   /* myprob.centered_differences = true; */
   myprob.max_function_evaluations = 2000;
+  myprob.print_residuals_in_output_file = true;
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {

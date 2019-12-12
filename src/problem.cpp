@@ -55,6 +55,7 @@ void mango::problem::defaults() {
   max_function_evaluations = 10000;
   best_function_evaluation = -1;
   bound_constraints_set = false;
+  print_residuals_in_output_file = true;
 }
 
 

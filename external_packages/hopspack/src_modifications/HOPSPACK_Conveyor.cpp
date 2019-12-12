@@ -252,7 +252,11 @@ void HOPSPACK::Conveyor::exchange
       bIsCurrentLoopIdle = false;
 
       // Process received point.
-      counter.incrementEvaluated(id, msg);
+      // <MJL> If mango's message is passed on to hopspack here, the code really slows down. So instead I'll send the empty string.
+      //counter.incrementEvaluated(id, msg);
+      string fake_message = "";
+      counter.incrementEvaluated(id, fake_message);
+      // </MJL>
       ptr = pendingList.pop(tag);
 
       if (ptr == NULL)
@@ -269,11 +273,7 @@ void HOPSPACK::Conveyor::exchange
           ptr->setEvalFC (f, cEqs, cIneqs, sMsg);
 
 	  mango_problem->write_hopspack_line_to_file(msg, f[0]);
-	  /*
-	  int rank;
-	  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	  cout << "Conveyor: proc " << rank << "received message: " << msg << endl;
-	  */
+
           if (Print::doPrint (Print::EVALUATED_POINTS))
           {
             cout << "Conveyor received evaluated point:" << endl;

@@ -30,13 +30,18 @@ void mango::problem::compose_x_f_string(std::string & file_string, const double*
 void mango::problem::compose_residuals_string(std::string & file_string, double* residuals) {
   // This subroutine formats (but does not write) the entries in the output file lines for the residuals in a least-squares problem.
 
-  std::ostringstream string_stream;
-  for (int j=0; j<N_terms; j++) {
-    string_stream << "," << std::setw(24) << std::setprecision(16) << std::scientific << residuals[j];
-  }
+  if (print_residuals_in_output_file) {
+    std::ostringstream string_stream;
+    for (int j=0; j<N_terms; j++) {
+      string_stream << "," << std::setw(24) << std::setprecision(16) << std::scientific << residuals[j];
+    }
 
-  // Finally, convert the stream to a std::string:
-  file_string = string_stream.str();
+    // Finally, convert the stream to a std::string:
+    file_string = string_stream.str();
+  } else {
+    // print_residuals_in_output_file = false
+    file_string = "";
+  }
 }
 
 

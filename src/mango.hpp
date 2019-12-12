@@ -233,6 +233,7 @@ namespace mango {
     int max_function_evaluations;
     MPI_Partition mpi_partition;
     int verbose;
+    bool print_residuals_in_output_file;
 
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); /* For least-squares problems */

@@ -49,8 +49,10 @@ void mango::problem::optimize_least_squares() {
       output_file << ",x(" << j+1 << ")";
     }
     output_file << ",objective_function";
-    for (j=0; j<N_terms; j++) {
-      output_file << ",F(" << j+1 << ")";
+    if (print_residuals_in_output_file) {
+      for (j=0; j<N_terms; j++) {
+	output_file << ",F(" << j+1 << ")";
+      }
     }
     output_file << std::endl << std::flush;
     
