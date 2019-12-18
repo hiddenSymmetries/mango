@@ -9,7 +9,7 @@ pwd
 
 mkdir catch2
 cd catch2
-wget https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp
+wget https://github.com/catchorg/Catch2/releases/download/v2.11.0/catch.hpp
 cd ..
 
 echo Done installing Catch2

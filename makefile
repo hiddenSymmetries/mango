@@ -1,4 +1,4 @@
-.PHONY: all clean examples test retest test_make
+.PHONY: all clean examples test test_make
 
 all: lib/libmango.a examples examples/packages_available
 #	cp obj/mango.mod* include
@@ -88,6 +88,7 @@ $(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp include/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 $(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp include/mango.hpp
+	@echo Hello 1
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
@@ -122,12 +123,8 @@ tests/unit_tests: $(TEST_OBJ_FILES) lib/libmango.a
 unit_tests: tests/unit_tests
 
 test: $(TARGET) unit_tests
-	tests/unit_tests
+	cd tests; ./run_mpi_unit_tests
 	@echo "Beginning functional tests." && cd examples && export MANGO_RETEST=no && ./run_examples
-
-retest: $(TARGET)
-	tests/unit_tests
-	@echo "Testing existing output files for examples without re-running then." && cd examples && export MANGO_RETEST=yes && ./run_examples
 
 # This next target is used by examples/run_examples to get MANGO_COMMAND_TO_SUBMIT_JOB when run_examples is run standalone.
 print_command_to_submit_job:
