@@ -64,10 +64,10 @@ export
 CXX = $(CC)
 
 # Automatically detect all the examples:
-F_SRC_FILES = $(wildcard src/*.F90)
-F_OBJ_FILES = $(patsubst src/%.F90, obj/%.f.o, $(F_SRC_FILES))
-CPP_SRC_FILES = $(wildcard src/*.cpp)
-CPP_OBJ_FILES = $(patsubst src/%.cpp, obj/%.cpp.o, $(CPP_SRC_FILES))
+F_SRC_FILES = $(wildcard src/api/*.F90)
+F_OBJ_FILES = $(patsubst src/api/%.F90, obj/%.f.o, $(F_SRC_FILES))
+CPP_SRC_FILES = $(wildcard src/api/*.cpp)
+CPP_OBJ_FILES = $(patsubst src/api/%.cpp, obj/%.cpp.o, $(CPP_SRC_FILES))
 HOPSPACK_CPP_OBJ_FILES = $(patsubst external_packages/hopspack/src/%.cpp, obj/%.cpp.o, $(HOPSPACK_CPP_SRC_FILES))
 HOPSPACK_C_OBJ_FILES   = $(patsubst external_packages/hopspack/src/%.c,   obj/%.c.o,   $(HOPSPACK_C_SRC_FILES))
 HOPSPACK_HEADERS = $(wildcard external_packages/hopspack/src/*.h) $(wildcard external_packages/hopspack/src/*.hpp)
@@ -78,15 +78,15 @@ include makefile.dependencies
 # https://www.gnu.org/savannah-checkouts/gnu/make/manual/html_node/Static-Usage.html
 # https://stackoverflow.com/questions/4320416/how-to-use-a-variable-list-as-a-target-in-a-makefile
 
-$(F_OBJ_FILES): obj/%.f.o: src/%.F90
+$(F_OBJ_FILES): obj/%.f.o: src/api/%.F90
 	$(FC) $(EXTRA_F_COMPILE_FLAGS) -c $< -o $@
 
-$(CPP_OBJ_FILES): obj/%.cpp.o: src/%.cpp include/mango.hpp
+$(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp include/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
 # Similarly, only the modified hopspack source files depend on mango.hpp, but it is easier to make the dependency apply to all hopspack files here.
-$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS) src/mango.hpp
+$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS) src/api/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPACK_HEADERS)
@@ -107,7 +107,7 @@ examples/packages_available:
 	@echo $(MANGO_AVAILABLE_PACKAGES) > examples/packages_available
 
 clean:
-	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ examples/packages_available
+	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ src/api/*~ examples/packages_available
 	$(MAKE) -C examples clean
 
 test: $(TARGET)

@@ -99,7 +99,7 @@ def find_markup(lines,str,comment):
 ##################################################################
 
 # Read in the file to preprocess
-filename = 'mango.hpp'
+filename = 'api/mango.hpp'
 try:
     f = open(filename)
 except:
@@ -164,7 +164,7 @@ f.close()
 ##################################################################
 
 # Read in the file to preprocess
-filename = 'optimize.cpp'
+filename = 'api/optimize.cpp'
 try:
     f = open(filename)
 except:
@@ -199,7 +199,7 @@ f.close()
 ##################################################################
 
 # Read in the file to preprocess
-filename = 'optimize_least_squares.cpp'
+filename = 'api/optimize_least_squares.cpp'
 try:
     f = open(filename)
 except:
@@ -243,7 +243,7 @@ f.close()
 ##################################################################
 
 # Read in the file to preprocess
-filename = 'optimize_nlopt.cpp'
+filename = 'api/optimize_nlopt.cpp'
 try:
     f = open(filename)
 except:
