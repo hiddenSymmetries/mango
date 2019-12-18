@@ -4,6 +4,7 @@ max_N_procs = 5
 
 import subprocess
 import sys
+import os
 
 #####################################################################
 # Get MANGO_COMMAND_TO_SUBMIT_JOB
