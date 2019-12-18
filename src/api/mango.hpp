@@ -168,7 +168,8 @@ namespace mango {
   // Items specific to an optimization problem
 
   class problem {
-  private:
+    // The non-public variables and methods should be protected rather than private, so they can be accessed by unit test fixtures.
+  protected:
     bool least_squares;
     algorithm_type algorithm;
     int N_parameters;

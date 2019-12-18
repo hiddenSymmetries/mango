@@ -15,6 +15,7 @@ which gfortran
 which mpiexec
 
 cd external_packages
+./install_catch2.sh
 ./install_nlopt.sh
 #./install_hopspack.sh
 cd ..

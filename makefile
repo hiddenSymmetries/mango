@@ -72,6 +72,9 @@ HOPSPACK_CPP_OBJ_FILES = $(patsubst external_packages/hopspack/src/%.cpp, obj/%.
 HOPSPACK_C_OBJ_FILES   = $(patsubst external_packages/hopspack/src/%.c,   obj/%.c.o,   $(HOPSPACK_C_SRC_FILES))
 HOPSPACK_HEADERS = $(wildcard external_packages/hopspack/src/*.h) $(wildcard external_packages/hopspack/src/*.hpp)
 
+TEST_SRC_FILES = $(wildcard src/api/tests/*.cpp)
+TEST_OBJ_FILES = $(patsubst src/api/tests/%.cpp, obj/%.cpp.o, $(TEST_SRC_FILES))
+
 include makefile.dependencies
 
 # For info about the "Static pattern rules" below, see e.g.
@@ -83,6 +86,9 @@ $(F_OBJ_FILES): obj/%.f.o: src/api/%.F90
 
 $(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp include/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
+
+$(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp include/mango.hpp
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
 # Similarly, only the modified hopspack source files depend on mango.hpp, but it is easier to make the dependency apply to all hopspack files here.
@@ -107,13 +113,20 @@ examples/packages_available:
 	@echo $(MANGO_AVAILABLE_PACKAGES) > examples/packages_available
 
 clean:
-	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ src/api/*~ examples/packages_available
+	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ src/api/*~ examples/packages_available tests/unit_tests
 	$(MAKE) -C examples clean
 
-test: $(TARGET)
+tests/unit_tests: $(TEST_OBJ_FILES) lib/libmango.a
+	$(CLINKER) -o $@ $^ $(EXTRA_C_LINK_FLAGS)
+# Also we have a unit_tests target without "tests/" in front so you don't have to type tests/unit_tests all the time.
+unit_tests: tests/unit_tests
+
+test: $(TARGET) unit_tests
+	tests/unit_tests
 	@echo "Beginning functional tests." && cd examples && export MANGO_RETEST=no && ./run_examples
 
 retest: $(TARGET)
+	tests/unit_tests
 	@echo "Testing existing output files for examples without re-running then." && cd examples && export MANGO_RETEST=yes && ./run_examples
 
 # This next target is used by examples/run_examples to get MANGO_COMMAND_TO_SUBMIT_JOB when run_examples is run standalone.
@@ -141,6 +154,8 @@ test_make:
 	@echo EXTRA_C_LINK_FLAGS is $(EXTRA_C_LINK_FLAGS)
 	@echo F_OBJ_FILES is $(F_OBJ_FILES)
 	@echo C_OBJ_FILES is $(C_OBJ_FILES)
+	@echo TEST_SRC_FILES is $(TEST_SRC_FILES)
+	@echo TEST_OBJ_FILES is $(TEST_OBJ_FILES)
 	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_CPP_SRC_FILES)
 	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_C_SRC_FILES)
 	@echo HOPSPACK_C_OBJ_FILES is $(HOPSPACK_CPP_OBJ_FILES)
