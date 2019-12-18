@@ -41,7 +41,7 @@ for N_procs in range(1, max_N_procs+1):
         all_succeeded = False
 
 if all_succeeded:
-    print("Unit tests passes for all values of N_procs.")
+    print("Unit tests pass for all values of N_procs.")
 else:
     print("!!! Unit tests did not all pass !!!")
     exit(1)

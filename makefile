@@ -88,7 +88,6 @@ $(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp include/mango.hpp
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 $(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp include/mango.hpp
-	@echo Hello 1
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
