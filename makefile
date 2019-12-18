@@ -123,7 +123,7 @@ tests/unit_tests: $(TEST_OBJ_FILES) lib/libmango.a
 unit_tests: tests/unit_tests
 
 test: $(TARGET) unit_tests
-	cd tests; ./run_mpi_unit_tests
+	cd tests && ./run_mpi_unit_tests
 	@echo "Beginning functional tests." && cd examples && export MANGO_RETEST=no && ./run_examples
 
 # This next target is used by examples/run_examples to get MANGO_COMMAND_TO_SUBMIT_JOB when run_examples is run standalone.
