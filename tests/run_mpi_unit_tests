@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
 
+# This script runs the executable "unit_tests" repeatedly, for various numbers of MPI processes.
+# The executable "unit_tests" is created by running "make unit_tests" from the main mango directory.
+
 max_N_procs = 5
 
 import subprocess
 import sys
 import os
+
+#####################################################################
+# Make sure unit_tests exists
+#####################################################################
+
+if not os.path.isfile("unit_tests"):
+    print("The executable `unit_tests' does not appear to be present in the mango/tests/ directory")
+    print("You need to run `make unit_tests' from the main MANGO directory to build the unit_tests executable.")
+    exit(1)
 
 #####################################################################
 # Get MANGO_COMMAND_TO_SUBMIT_JOB

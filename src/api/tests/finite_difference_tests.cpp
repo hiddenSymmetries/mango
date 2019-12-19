@@ -113,7 +113,8 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_gradient()","[probl
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Now test finite-difference Jacobian, for a least-squares problem.
+// Now consider a least-squares problem, and test both finite_difference_Jacobian() and
+// finite_difference_Jacobian_to_gradient().
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void residual_function_1(int* N_parameters, const double* x, int* N_terms, double* f, int* failed_int, mango::problem* problem) {
@@ -126,7 +127,7 @@ void residual_function_1(int* N_parameters, const double* x, int* N_terms, doubl
 }
 
 
-TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[problem][finite difference]") {
+TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and problem::finite_difference_Jacobian_to_gradient()","[problem][finite difference]") {
   // The Catch2 macros automatically call the mango::problem() constructor (the version with no arguments).
   N_parameters = 2;
   N_terms = 4;
@@ -139,6 +140,8 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[probl
   targets = new double[N_terms];
   sigmas = new double[N_terms];
   best_residual_function = new double[N_terms];
+  double* gradient = new double[N_parameters];
+  double base_case_objective_function;
   least_squares = true;
   residual_function = &residual_function_1;
   function_evaluations = 0;
@@ -156,7 +159,7 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[probl
     if (!output_file.is_open()) throw std::runtime_error("Error! Unable to open output file.");
   }
 
-  // Set the point about which we will compute the gradient:
+  // Set the point about which we will compute the derivatives:
   state_vector[0] = 1.2;
   state_vector[1] = 0.9;
 
@@ -167,9 +170,29 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[probl
   }
 
   finite_difference_step_size = 1.0e-7;
-  double correct_residuals[] = {3.607380846860443e-01, 9.805877804351946e-01, 2.665513944765978e+00, 7.245618119561541e+00};
 
-  SECTION("1-sided differences") {
+  // Here are all the reference values to compare against:
+  double correct_residuals[] = {3.607380846860443e-01, 9.805877804351946e-01, 2.665513944765978e+00, 7.245618119561541e+00};
+  double correct_d_residuals_d_x0_1sided[]   = { 8.657715439008840e-01,  2.353411054922816e+00,  6.397234502131255e+00,  1.738948636642590e+01};
+  double correct_d_residuals_d_x0_centered[] = { 8.657714037352271e-01,  2.353410674116319e+00,  6.397233469623842e+00,  1.738948351093228e+01};
+  double correct_d_residuals_d_x1_1sided[]   = {-8.872724499564555e-01, -2.411856577788640e+00, -6.556105911492693e+00, -1.782134355643450e+01};
+  double correct_d_residuals_d_x1_centered[] = {-8.872725151820582e-01, -2.411856754314101e+00, -6.556106388888594e+00, -1.782134486205678e+01};
+
+  // Based on the above data, compute what the objective function and gradient should be:
+  double temp;
+  double correct_objective_function = 0;
+  double correct_gradient_1sided[] = {0.0, 0.0};
+  double correct_gradient_centered[] = {0.0, 0.0};
+  for (int j=0; j<N_terms; j++) {
+    temp = (correct_residuals[j] - targets[j]) / sigmas[j];
+    correct_objective_function += temp * temp;
+    correct_gradient_1sided[0]   += 2 * (correct_residuals[j] - targets[j]) / (sigmas[j] * sigmas[j]) * correct_d_residuals_d_x0_1sided[j];
+    correct_gradient_1sided[1]   += 2 * (correct_residuals[j] - targets[j]) / (sigmas[j] * sigmas[j]) * correct_d_residuals_d_x1_1sided[j];
+    correct_gradient_centered[0] += 2 * (correct_residuals[j] - targets[j]) / (sigmas[j] * sigmas[j]) * correct_d_residuals_d_x0_centered[j];
+    correct_gradient_centered[1] += 2 * (correct_residuals[j] - targets[j]) / (sigmas[j] * sigmas[j]) * correct_d_residuals_d_x1_centered[j];
+  }
+
+  SECTION("1-sided differences, Jacobian") { // This section tests finite_difference_Jacobian()
     centered_differences = false;
 
     if (mpi_partition.get_proc0_world()) {
@@ -209,19 +232,19 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[probl
       CHECK(base_case_residuals[3] == Approx(correct_residuals[3]).epsilon(1e-14));
 
       // Order of Jacobian entries is [j_parameter*N_terms + j_term], so term is least significant, parameter is most significant.
-      CHECK(Jacobian[0] == Approx(8.657715439008840e-01).epsilon(1e-13));
-      CHECK(Jacobian[1] == Approx(2.353411054922816e+00).epsilon(1e-13));
-      CHECK(Jacobian[2] == Approx(6.397234502131255e+00).epsilon(1e-13));
-      CHECK(Jacobian[3] == Approx(1.738948636642590e+01).epsilon(1e-13));
+      CHECK(Jacobian[0] == Approx(correct_d_residuals_d_x0_1sided[0]).epsilon(1e-13));
+      CHECK(Jacobian[1] == Approx(correct_d_residuals_d_x0_1sided[1]).epsilon(1e-13));
+      CHECK(Jacobian[2] == Approx(correct_d_residuals_d_x0_1sided[2]).epsilon(1e-13));
+      CHECK(Jacobian[3] == Approx(correct_d_residuals_d_x0_1sided[3]).epsilon(1e-13));
 
-      CHECK(Jacobian[4] == Approx(-8.872724499564555e-01).epsilon(1e-13));
-      CHECK(Jacobian[5] == Approx(-2.411856577788640e+00).epsilon(1e-13));
-      CHECK(Jacobian[6] == Approx(-6.556105911492693e+00).epsilon(1e-13));
-      CHECK(Jacobian[7] == Approx(-1.782134355643450e+01).epsilon(1e-13));
+      CHECK(Jacobian[4] == Approx(correct_d_residuals_d_x1_1sided[0]).epsilon(1e-13));
+      CHECK(Jacobian[5] == Approx(correct_d_residuals_d_x1_1sided[1]).epsilon(1e-13));
+      CHECK(Jacobian[6] == Approx(correct_d_residuals_d_x1_1sided[2]).epsilon(1e-13));
+      CHECK(Jacobian[7] == Approx(correct_d_residuals_d_x1_1sided[3]).epsilon(1e-13));
       
     }
   }
-  SECTION("Centered differences") {
+  SECTION("Centered differences, Jacobian") { // This section tests finite_difference_Jacobian()
     centered_differences = true;
 
     if (mpi_partition.get_proc0_world()) {
@@ -261,16 +284,72 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[probl
       CHECK(base_case_residuals[3] == Approx(correct_residuals[3]).epsilon(1e-14));
 
       // Order of Jacobian entries is [j_parameter*N_terms + j_term], so term is least significant, parameter is most significant.
-      CHECK(Jacobian[0] == Approx(8.657714037352271e-01).epsilon(1e-13));
-      CHECK(Jacobian[1] == Approx(2.353410674116319e+00).epsilon(1e-13));
-      CHECK(Jacobian[2] == Approx(6.397233469623842e+00).epsilon(1e-13));
-      CHECK(Jacobian[3] == Approx(1.738948351093228e+01).epsilon(1e-13));
+      CHECK(Jacobian[0] == Approx(correct_d_residuals_d_x0_centered[0]).epsilon(1e-13));
+      CHECK(Jacobian[1] == Approx(correct_d_residuals_d_x0_centered[1]).epsilon(1e-13));
+      CHECK(Jacobian[2] == Approx(correct_d_residuals_d_x0_centered[2]).epsilon(1e-13));
+      CHECK(Jacobian[3] == Approx(correct_d_residuals_d_x0_centered[3]).epsilon(1e-13));
 
-      CHECK(Jacobian[4] == Approx(-8.872725151820582e-01).epsilon(1e-13));
-      CHECK(Jacobian[5] == Approx(-2.411856754314101e+00).epsilon(1e-13));
-      CHECK(Jacobian[6] == Approx(-6.556106388888594e+00).epsilon(1e-13));
-      CHECK(Jacobian[7] == Approx(-1.782134486205678e+01).epsilon(1e-13));
+      CHECK(Jacobian[4] == Approx(correct_d_residuals_d_x1_centered[0]).epsilon(1e-13));
+      CHECK(Jacobian[5] == Approx(correct_d_residuals_d_x1_centered[1]).epsilon(1e-13));
+      CHECK(Jacobian[6] == Approx(correct_d_residuals_d_x1_centered[2]).epsilon(1e-13));
+      CHECK(Jacobian[7] == Approx(correct_d_residuals_d_x1_centered[3]).epsilon(1e-13));
       
+    }
+  }
+  SECTION("1-sided differences, gradient") { // This section tests finite_difference_Jacobian_to_gradient()
+    centered_differences = false;
+
+    if (mpi_partition.get_proc0_world()) {
+      // Case of proc0_world
+      finite_difference_Jacobian_to_gradient(state_vector, &base_case_objective_function, gradient);
+      // Tell group leaders to exit.
+      int data = -1;
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+    } else {
+      // Case for group leaders:
+      if (mpi_partition.get_proc0_worker_groups()) {
+	group_leaders_least_squares_loop();
+      } else {
+	// Everybody else, i.e. workers. Nothing to do here.
+      }
+    }
+    
+    if (mpi_partition.get_proc0_world()) {
+      // Finally, see if the results are correct:
+      CHECK(function_evaluations == 3);
+      
+      CHECK(base_case_objective_function == Approx(correct_objective_function).epsilon(1e-14));
+
+      CHECK(gradient[0] == Approx(correct_gradient_1sided[0]).epsilon(1e-13));
+      CHECK(gradient[1] == Approx(correct_gradient_1sided[1]).epsilon(1e-13));
+    }
+  }
+  SECTION("Centered differences, gradient") { // This section tests finite_difference_Jacobian_to_gradient()
+    centered_differences = true;
+
+    if (mpi_partition.get_proc0_world()) {
+      // Case of proc0_world
+      finite_difference_Jacobian_to_gradient(state_vector, &base_case_objective_function, gradient);
+      // Tell group leaders to exit.
+      int data = -1;
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+    } else {
+      // Case for group leaders:
+      if (mpi_partition.get_proc0_worker_groups()) {
+	group_leaders_least_squares_loop();
+      } else {
+	// Everybody else, i.e. workers. Nothing to do here.
+      }
+    }
+    
+    if (mpi_partition.get_proc0_world()) {
+      // Finally, see if the results are correct:
+      CHECK(function_evaluations == 5);
+      
+      CHECK(base_case_objective_function == Approx(correct_objective_function).epsilon(1e-14));
+
+      CHECK(gradient[0] == Approx(correct_gradient_centered[0]).epsilon(1e-13));
+      CHECK(gradient[1] == Approx(correct_gradient_centered[1]).epsilon(1e-13));
     }
   }
 
@@ -281,6 +360,7 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian()","[probl
   delete[] sigmas;
   delete[] best_residual_function;
   delete[] base_case_residuals;
+  delete[] gradient;
   // best_state_vector and residuals will be deleted by destructor.
 }
 
