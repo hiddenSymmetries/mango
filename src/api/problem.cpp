@@ -3,6 +3,15 @@
 #include<stdexcept>
 #include "mango.hpp"
 
+// Constructor with no arguments, used only for unit testing of non-public methods.
+mango::problem::problem() {
+  defaults();
+  N_parameters = 1;
+  // We need to allocate best_state_vector; otherwise there will be an error when the destructor is called.
+  best_state_vector = new double[N_parameters];
+  least_squares = false;
+}
+
 // Constructor for non-least-squares problems
 mango::problem::problem(int N_parameters_in, double* state_vector_in, objective_function_type objective_function_in, int argc_in, char* argv_in[]) {
   defaults();

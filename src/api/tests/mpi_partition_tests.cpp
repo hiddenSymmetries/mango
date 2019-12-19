@@ -1,6 +1,16 @@
 #include "catch.hpp"
 #include "mango.hpp"
 
+// Should I be using 'Generators' instead of putting CHECK's inside loops?
+// https://www.reddit.com/r/cpp/comments/a6bdee/just_found_catch2_c_unit_test_framework_supports/
+
+/*
+TEST_CASE("MPI_Partition.set_custom(): Verify that an exception is thrown if input communicators supplied do not make sense.","[mpi_partition][mpi]") {
+  mango::MPI_Partition mp;
+  CHECK_THROWS(mp.set_custom(MPI_COMM_WORLD, MPI_COMM_WORLD, MPI_COMM_WORLD));
+}
+*/
+
 
 TEST_CASE("MPI_Partition: Verify that calling getters before initialization causes exceptions","[mpi_partition]") {
   mango::MPI_Partition mp;
@@ -52,8 +62,10 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);
 
-  for (int shift = 0; shift<5; shift++) {
-    for (int mode = 0; mode < 2; mode++) {
+  //for (int mode = 0; mode < 2; mode++) {
+  //for (int shift = 0; shift<5; shift++) {
+  auto mode = GENERATE(range(0,1));
+  auto shift = GENERATE(range(0,4));
       int N_worker_groups_requested;
       if (mode==0) {
 	N_worker_groups_requested = N_procs_world + shift;
@@ -64,6 +76,8 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
       mp.set_N_worker_groups(N_worker_groups_requested);
       mp.init(MPI_COMM_WORLD);
       
+      CAPTURE(rank_world, N_worker_groups_requested);
+
       CHECK(mp.get_N_worker_groups() == N_procs_world);
       
       CHECK(mp.get_rank_world() == rank_world);
@@ -76,8 +90,8 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
       
       CHECK(mp.get_proc0_world() == (rank_world==0));
       CHECK(mp.get_proc0_worker_groups());
-    }
-  }
+      //}
+      //}
 }
 
 
@@ -91,7 +105,9 @@ TEST_CASE("MPI_Partition.init(): Verify that for any choice of N_worker_groups, 
     mango::MPI_Partition mp;
     mp.set_N_worker_groups(N_worker_groups_requested);
     mp.init(MPI_COMM_WORLD);
-    
+
+    CAPTURE(rank_world, N_worker_groups_requested);
+
     CHECK(mp.get_N_worker_groups() >= 1);
     CHECK(mp.get_N_worker_groups() <= N_procs_world);
     
@@ -140,6 +156,7 @@ TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for th
   mango::MPI_Partition mp;
   mp.set_custom(MPI_COMM_WORLD, MPI_COMM_WORLD, MPI_COMM_SELF);
 
+  CAPTURE(rank_world);
   CHECK(mp.get_N_worker_groups() == N_procs_world);
       
   CHECK(mp.get_rank_world() == rank_world);
@@ -172,6 +189,7 @@ TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for th
   mango::MPI_Partition mp;
   mp.set_custom(MPI_COMM_WORLD, mpi_comm_proc0, MPI_COMM_WORLD);
 
+  CAPTURE(rank_world);
   CHECK(mp.get_N_worker_groups() == 1);
 
   CHECK(mp.get_rank_world() == rank_world);
@@ -186,24 +204,21 @@ TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for th
   CHECK(mp.get_proc0_worker_groups() == (rank_world==0));
 }
 
-/*
-TEST_CASE("MPI_Partition.set_custom(): Verify that an exception is thrown if input communicators supplied do not make sense.","[mpi_partition][mpi]") {
-  mango::MPI_Partition mp;
-  CHECK_THROWS(mp.set_custom(MPI_COMM_WORLD, MPI_COMM_WORLD, MPI_COMM_WORLD));
-}
-*/
 
 TEST_CASE("MPI_Partition.set_custom(): Verify that for any choice of N_worker_groups, if we generate communicators using MPI_Partition.init() and supply them as inputs to set_custom(), the results of set_custom() are identical to init().","[mpi_partition][mpi]") {
   int rank_world, N_procs_world;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);
+  //CAPTURE(N_procs_world,rank_world);
 
   for (int N_worker_groups_requested = 1; N_worker_groups_requested <= N_procs_world; N_worker_groups_requested++) {
+  //auto N_worker_groups_requested = GENERATE( range(1, 5) ); // Really we need to only go up to N_procs_world rather than 5, but if I try this with GENERATE_COPY in catch2, I get an abort signal.
     mango::MPI_Partition mp_init, mp_custom;
     mp_init.set_N_worker_groups(N_worker_groups_requested);
     mp_init.init(MPI_COMM_WORLD);
     mp_custom.set_custom(MPI_COMM_WORLD, mp_init.get_comm_group_leaders(), mp_init.get_comm_worker_groups());
-    
+
+    CAPTURE(rank_world);
     CHECK(mp_init.get_proc0_world() == mp_custom.get_proc0_world());
     CHECK(mp_init.get_proc0_worker_groups() == mp_custom.get_proc0_worker_groups());
 
@@ -218,5 +233,26 @@ TEST_CASE("MPI_Partition.set_custom(): Verify that for any choice of N_worker_gr
     CHECK(mp_init.get_worker_group() == mp_custom.get_worker_group());
     CHECK(mp_init.get_N_worker_groups() == mp_custom.get_N_worker_groups());
     CHECK(mp_init.get_N_worker_groups() == N_worker_groups_requested);
+    }
+}
+
+
+/*
+TEST_CASE("minimal example") {
+  int N;
+  MPI_Comm_size(MPI_COMM_WORLD, &N);
+  //  int N=4;
+  auto j = GENERATE_REF(range(1,N));
+  CHECK(j > 0);
+}
+*/
+
+/*
+TEST_CASE("minimal example 2") {
+  int N;
+  MPI_Comm_size(MPI_COMM_WORLD, &N);
+  for (int j = 1; j <= N; j++) {
+    CHECK(j > 0);
   }
 }
+*/

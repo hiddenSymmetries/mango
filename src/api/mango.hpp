@@ -192,6 +192,7 @@ namespace mango {
     clock_t start_time, best_time;
     double* residuals;
 
+    problem(); // This version of the constructor is used only for unit testing.
     void group_leaders_loop();
     void group_leaders_least_squares_loop();
     void optimize_least_squares();
