@@ -5,7 +5,7 @@
 // https://www.reddit.com/r/cpp/comments/a6bdee/just_found_catch2_c_unit_test_framework_supports/
 
 /*
-TEST_CASE("MPI_Partition.set_custom(): Verify that an exception is thrown if input communicators supplied do not make sense.","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.set_custom(): Verify that an exception is thrown if input communicators supplied do not make sense.","[mpi_partition]") {
   mango::MPI_Partition mp;
   CHECK_THROWS(mp.set_custom(MPI_COMM_WORLD, MPI_COMM_WORLD, MPI_COMM_WORLD));
 }
@@ -31,7 +31,7 @@ TEST_CASE("MPI_Partition: Verify that calling getters before initialization caus
 }
 
 
-TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when N_worker_groups=1.","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when N_worker_groups=1.","[mpi_partition]") {
   int rank_world, N_procs_world;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);
@@ -55,7 +55,7 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
 }
 
 
-TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when N_worker_groups=N_procs_world or more, or when N_worker_groups <= 0.","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when N_worker_groups=N_procs_world or more, or when N_worker_groups <= 0.","[mpi_partition]") {
   // When N_worker_groups is <= 0, MPI_Partition.init() should set N_worker_groups equal to the number of available processors.
 
   int rank_world, N_procs_world;
@@ -95,7 +95,7 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
 }
 
 
-TEST_CASE("MPI_Partition.init(): Verify that for any choice of N_worker_groups, parameters are within the expected ranges.","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.init(): Verify that for any choice of N_worker_groups, parameters are within the expected ranges.","[mpi_partition]") {
   int rank_world, N_procs_world;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);
@@ -148,7 +148,7 @@ TEST_CASE("MPI_Partition.init(): Verify that for any choice of N_worker_groups, 
 }
 
 
-TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for the case in which every proc is a group leader.","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for the case in which every proc is a group leader.","[mpi_partition]") {
   int rank_world, N_procs_world;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);
@@ -172,7 +172,7 @@ TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for th
 }
 
 
-TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for the case in which there is a single worker group.","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for the case in which there is a single worker group.","[mpi_partition]") {
   int rank_world, N_procs_world;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);
@@ -205,7 +205,7 @@ TEST_CASE("MPI_Partition.set_custom(): Verify that parameters are correct for th
 }
 
 
-TEST_CASE("MPI_Partition.set_custom(): Verify that for any choice of N_worker_groups, if we generate communicators using MPI_Partition.init() and supply them as inputs to set_custom(), the results of set_custom() are identical to init().","[mpi_partition][mpi]") {
+TEST_CASE("MPI_Partition.set_custom(): Verify that for any choice of N_worker_groups, if we generate communicators using MPI_Partition.init() and supply them as inputs to set_custom(), the results of set_custom() are identical to init().","[mpi_partition]") {
   int rank_world, N_procs_world;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
   MPI_Comm_size(MPI_COMM_WORLD, &N_procs_world);

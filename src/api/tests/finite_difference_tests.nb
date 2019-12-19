@@ -1,0 +1,233 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      7833,        224]
+NotebookOptionsPosition[      7019,        191]
+NotebookOutlinePosition[      7377,        207]
+CellTagsIndexPosition[      7334,        204]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["3D Finite difference gradient test", "Section",
+ CellChangeTimes->{{3.785761150290539*^9, 3.785761168248118*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"f", "=", 
+   RowBox[{"Exp", "[", 
+    RowBox[{
+     RowBox[{"x0", "*", "x0"}], "-", 
+     RowBox[{"Exp", "[", "x1", "]"}], "+", 
+     RowBox[{"Sin", "[", "x2", "]"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"subs", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"x0", "\[Rule]", "1.2"}], ",", 
+     RowBox[{"x1", "\[Rule]", "0.9"}], ",", 
+     RowBox[{"x2", "\[Rule]", 
+      RowBox[{"-", "0.4"}]}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"N", "[", 
+  RowBox[{
+   RowBox[{"f", "/.", "subs"}], ",", "16"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"D", "[", 
+   RowBox[{"f", ",", "x0"}], "]"}], "/.", "subs"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"D", "[", 
+   RowBox[{"f", ",", "x1"}], "]"}], "/.", "subs"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"D", "[", 
+   RowBox[{"f", ",", "x2"}], "]"}], "/.", "subs"}]}], "Input",
+ CellChangeTimes->{{3.7857565697319098`*^9, 3.7857566662211523`*^9}, {
+  3.785756732848364*^9, 3.7857567357278767`*^9}, {3.7857567730193653`*^9, 
+  3.785756800881858*^9}, {3.785757861401596*^9, 3.785757866055842*^9}, {
+  3.785761171410638*^9, 3.785761200091168*^9}}],
+
+Cell[BoxData["0.24438230564530627`"], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, 
+   3.785761200559144*^9}],
+
+Cell[BoxData["0.586517533548735`"], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, 
+   3.78576120056546*^9}],
+
+Cell[BoxData[
+ RowBox[{"-", "0.601083479276904`"}]], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, 
+   3.7857612005699253`*^9}],
+
+Cell[BoxData["0.22509100935438267`"], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, 
+   3.7857612005761747`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["2D Finite difference Jacobian test", "Section",
+ CellChangeTimes->{{3.785761150290539*^9, 3.785761165296508*^9}, {
+  3.785761302238312*^9, 3.78576130324422*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"f", "=", 
+  RowBox[{"Table", "[", 
+   RowBox[{
+    RowBox[{"Exp", "[", 
+     RowBox[{"j", "+", 
+      RowBox[{"x0", "*", "x0"}], "-", 
+      RowBox[{"Exp", "[", "x1", "]"}]}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"j", ",", "0", ",", "3"}], "}"}]}], 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"subs", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"x0", "\[Rule]", "1.2"}], ",", 
+     RowBox[{"x1", "\[Rule]", "0.9"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"N", "[", 
+  RowBox[{
+   RowBox[{"f", "/.", "subs"}], ",", "16"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"D", "[", 
+   RowBox[{"f", ",", "x0"}], "]"}], "/.", "subs"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"D", "[", 
+   RowBox[{"f", ",", "x1"}], "]"}], "/.", "subs"}]}], "Input",
+ CellChangeTimes->{{3.7857565697319098`*^9, 3.7857566662211523`*^9}, {
+  3.785756732848364*^9, 3.7857567357278767`*^9}, {3.7857567730193653`*^9, 
+  3.785756800881858*^9}, {3.785757861401596*^9, 3.785757866055842*^9}, {
+  3.785761305886663*^9, 3.785761338532016*^9}, {3.785767738904842*^9, 
+  3.785767748537815*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   SuperscriptBox["\[ExponentialE]", 
+    RowBox[{
+     RowBox[{"-", 
+      SuperscriptBox["\[ExponentialE]", "x1"]}], "+", 
+     SuperscriptBox["x0", "2"]}]], ",", 
+   SuperscriptBox["\[ExponentialE]", 
+    RowBox[{"1", "-", 
+     SuperscriptBox["\[ExponentialE]", "x1"], "+", 
+     SuperscriptBox["x0", "2"]}]], ",", 
+   SuperscriptBox["\[ExponentialE]", 
+    RowBox[{"2", "-", 
+     SuperscriptBox["\[ExponentialE]", "x1"], "+", 
+     SuperscriptBox["x0", "2"]}]], ",", 
+   SuperscriptBox["\[ExponentialE]", 
+    RowBox[{"3", "-", 
+     SuperscriptBox["\[ExponentialE]", "x1"], "+", 
+     SuperscriptBox["x0", "2"]}]]}], "}"}]], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, {
+   3.785761330393427*^9, 3.785761339051876*^9}, {3.785767740347065*^9, 
+   3.785767749218614*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0.36073808468604435`", ",", "0.9805877804351946`", ",", 
+   "2.6655139447659777`", ",", "7.245618119561544`"}], "}"}]], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, {
+   3.785761330393427*^9, 3.785761339051876*^9}, {3.785767740347065*^9, 
+   3.785767749224848*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0.8657714032465064`", ",", "2.353410673044467`", ",", "6.397233467438347`",
+    ",", "17.389483486947704`"}], "}"}]], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, {
+   3.785761330393427*^9, 3.785761339051876*^9}, {3.785767740347065*^9, 
+   3.7857677492277327`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", "0.8872725154065939`"}], ",", 
+   RowBox[{"-", "2.4118567555208923`"}], ",", 
+   RowBox[{"-", "6.5561063913786315`"}], ",", 
+   RowBox[{"-", "17.82134486912874`"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.785756614522434*^9, 3.785756667573279*^9}, 
+   3.785756737640566*^9, {3.785756781016348*^9, 3.785756801529313*^9}, {
+   3.785757866452627*^9, 3.7857578771100397`*^9}, 3.7857579098568897`*^9, {
+   3.785761330393427*^9, 3.785761339051876*^9}, {3.785767740347065*^9, 
+   3.785767749230547*^9}}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 613},
+WindowMargins->{{12, Automatic}, {Automatic, 24}},
+FrontEndVersion->"10.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (September 9, \
+2014)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 119, 1, 64, "Section"],
+Cell[CellGroupData[{
+Cell[724, 27, 1183, 31, 114, "Input"],
+Cell[1910, 60, 287, 4, 28, "Output"],
+Cell[2200, 66, 284, 4, 28, "Output"],
+Cell[2487, 72, 304, 5, 28, "Output"],
+Cell[2794, 79, 289, 4, 28, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3132, 89, 167, 2, 64, "Section"],
+Cell[CellGroupData[{
+Cell[3324, 95, 1134, 31, 97, "Input"],
+Cell[4461, 128, 995, 24, 42, "Output"],
+Cell[5459, 154, 486, 9, 28, "Output"],
+Cell[5948, 165, 486, 9, 28, "Output"],
+Cell[6437, 176, 554, 11, 62, "Output"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

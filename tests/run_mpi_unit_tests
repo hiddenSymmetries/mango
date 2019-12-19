@@ -19,7 +19,6 @@ except:
 if submitCommand == "":
     print('Running make to try to get MANGO_COMMAND_TO_SUBMIT_JOB')
     make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
-    print(make_results)
     # The 'decode' in the next line is needed to convert the byte sequence returned by subprocess into a regular python string.
     submitCommand = make_results.stdout.decode('utf-8').strip()
 
