@@ -138,9 +138,9 @@ else
 MANGO_HOST = osx
 
 MANGO_PETSC_AVAILABLE = T
-MANGO_HOPSPACK_AVAILABLE = T
+MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
-MANGO_GSL_AVAILABLE = F
+MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
 
 PETSC_DIR=/opt/local/lib/petsc
@@ -151,6 +151,7 @@ include ${PETSC_DIR}/lib/petsc/conf/variables
 #FC = mpif90
 #CLINKER = $(CC)
 #FLINKER = $(CC)
+# GSL is in /opt/local/include and /opt/local/lib
 EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
 EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
 EXTRA_C_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
@@ -164,6 +165,12 @@ ifeq ($(MANGO_NLOPT_AVAILABLE),T)
 EXTRA_C_COMPILE_FLAGS += -I/usr/local/include
 EXTRA_C_LINK_FLAGS += -lnlopt
 EXTRA_F_LINK_FLAGS += -lnlopt
+endif
+
+ifeq ($(MANGO_GSL_AVAILABLE),T)
+EXTRA_C_COMPILE_FLAGS += -I/opt/local/include
+EXTRA_C_LINK_FLAGS += -lgsl
+EXTRA_F_LINK_FLAGS += -lgsl
 endif
 
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
