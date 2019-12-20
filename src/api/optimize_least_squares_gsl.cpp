@@ -2,11 +2,14 @@
 #include <cassert>
 #include "mango.hpp"
 
+#ifdef MANGO_GSL_AVAILABLE
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multifit_nlinear.h>
+#endif
 
 void mango::problem::optimize_least_squares_gsl() {
+#ifdef MANGO_GSL_AVAILABLE
   if (verbose>0) std::cout << "Hello from optimize_least_squares_gsl" << std::endl;
 
   gsl_vector *gsl_residual = gsl_vector_alloc(N_terms);
@@ -24,8 +27,25 @@ void mango::problem::optimize_least_squares_gsl() {
   // Set initial condition
   for (int j=0; j<N_parameters; j++) gsl_vector_set(gsl_state_vector, j, state_vector[j]);
 
+  switch (algorithm) {
+  case GSL_LM:
+    gsl_optimizer_params.trs = gsl_multifit_nlinear_trs_lm;
+    break;
+  case GSL_DOGLEG:
+    gsl_optimizer_params.trs = gsl_multifit_nlinear_trs_dogleg;
+    break;
+  case GSL_DDOGLEG:
+    gsl_optimizer_params.trs = gsl_multifit_nlinear_trs_ddogleg;
+    break;
+  case GSL_SUBSPACE2D:
+    gsl_optimizer_params.trs = gsl_multifit_nlinear_trs_subspace2D;
+    break;
+  default:
+    throw std::runtime_error("Error! in optimize_least_squares_gsl.cpp switch! Should not get here!");
+  }
+
   // Set other optimizer parameters
-  gsl_optimizer_params.trs = gsl_multifit_nlinear_trs_lm;
+  gsl_optimizer_params.solver = gsl_multifit_nlinear_solver_svd; // This option is described in the documentation as the slowest but most robust for ill-conditioned problems. Since speed is not a major concern outside of the objective function, I'll opt for the extra robustness.
   const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
   const size_t max_iter = max_function_evaluations;
   const double xtol = 1.0e-8;
@@ -44,10 +64,14 @@ void mango::problem::optimize_least_squares_gsl() {
   gsl_vector_free(gsl_residual);
   gsl_vector_free(gsl_state_vector);
   if (verbose>0) std::cout << "Goodbye from optimize_least_squares_gsl" << std::endl;
+#else
+  throw std::runtime_error("Error! A GSL algorithm was requested, but Mango was compiled without GSL support.");
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+#ifdef MANGO_GSL_AVAILABLE
 
 int mango::problem::gsl_residual_function(const gsl_vector * x, void *params, gsl_vector * f) {
   mango::problem* this_problem = (mango::problem*) params;
@@ -99,6 +123,7 @@ int mango::problem::gsl_residual_function_and_Jacobian (const gsl_vector * x, vo
   for (int j_parameter = 0; j_parameter < N_parameters; j_parameter++) {
     for (int j_term = 0; j_term < N_terms; j_term++) {
       // row index is before column index in gsl_matrix_set
+      // row index = term, column index = parameter
       gsl_matrix_set(J, j_term, j_parameter, mango_Jacobian[j_parameter*N_terms+j_term] / this_problem->sigmas[j_term]);
     }
   }
@@ -108,3 +133,5 @@ int mango::problem::gsl_residual_function_and_Jacobian (const gsl_vector * x, vo
   if (this_problem->verbose > 0) std::cout << "Goodbye from gsl_residual_function_and_Jacobian" << std::endl << std::flush;
   return GSL_SUCCESS;
 }
+
+#endif

@@ -89,11 +89,11 @@ double mango::problem::optimize() {
   case PACKAGE_PETSC:
     optimize_petsc();
     break;
-  case PACKAGE_NLOPT:
-    optimize_nlopt();
-    break;
   case PACKAGE_HOPSPACK:
     optimize_hopspack();
+    break;
+  case PACKAGE_NLOPT:
+    optimize_nlopt();
     break;
     // </optimize_packages>
   default:

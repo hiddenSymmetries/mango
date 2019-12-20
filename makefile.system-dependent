@@ -101,7 +101,7 @@ MANGO_HOST = travis
 MANGO_PETSC_AVAILABLE = T
 MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
-MANGO_GSL_AVAILABLE = F
+MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
 
 # Locations of PETSc files as they will be located in travis's Ubuntu filesystem can be found at

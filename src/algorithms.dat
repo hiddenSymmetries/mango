@@ -34,3 +34,8 @@
     nlopt,                   ld_var2,             F,                T,        T,                          F,             T
 
  hopspack,                          ,             F,                F,        T,                          F,             F
+
+      gsl,                        lm,             T,                T,        T,                          F,             T
+      gsl,                    dogleg,             T,                T,        T,                          F,             T
+      gsl,                   ddogleg,             T,                T,        T,                          F,             T
+      gsl,                subspace2d,             T,                T,        T,                          F,             T
