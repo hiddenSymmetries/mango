@@ -125,6 +125,11 @@ EXTRA_C_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/external_packages/nlopt/nlopt-2.6.1
 EXTRA_F_LINK_FLAGS += -L ${TRAVIS_BUILD_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib -lnlopt
 endif
 
+ifeq ($(MANGO_GSL_AVAILABLE),T)
+EXTRA_C_LINK_FLAGS += -lgsl
+EXTRA_F_LINK_FLAGS += -lgsl
+endif
+
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
 MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS --mca btl_base_warn_component_unused 0 --mca orte_base_help_aggregate 0
 # In the above line, the "mca" flags suppress warning messages from MPI about "transport being slow", which is probably
