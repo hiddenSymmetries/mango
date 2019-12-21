@@ -23,7 +23,7 @@ void mango::problem::optimize_least_squares_gsl() {
   //gsl_optimizer.fvv = func_fvv;
   gsl_optimizer.n = N_terms;
   gsl_optimizer.p = N_parameters;
-  gsl_optimizer.params = this;
+  gsl_optimizer.params = (void*)this;
 
   // Set initial condition
   for (int j=0; j<N_parameters; j++) gsl_vector_set(gsl_state_vector, j, state_vector[j]);

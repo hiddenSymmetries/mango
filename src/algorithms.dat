@@ -39,3 +39,8 @@
       gsl,                    dogleg,             T,                T,        T,                          F,             T
       gsl,                   ddogleg,             T,                T,        T,                          F,             T
       gsl,                subspace2d,             T,                T,        T,                          F,             T
+
+      gsl,              conjugate_fr,             F,                T,        T,                          F,             T
+      gsl,              conjugate_pr,             F,                T,        T,                          F,             T
+      gsl,                      bfgs,             F,                T,        T,                          F,             T
+      gsl,                        nm,             F,                F,        F,                          F,             T

@@ -33,6 +33,10 @@ nlopt_ld_tnewton_restart
 nlopt_ld_tnewton
 nlopt_ld_var1
 nlopt_ld_var2
+gsl_bfgs
+gsl_conjugate_fr
+gsl_conjugate_pr
+gsl_nm
 gsl_lm
 gsl_dogleg
 gsl_ddogleg

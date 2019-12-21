@@ -64,8 +64,8 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
 
   //for (int mode = 0; mode < 2; mode++) {
   //for (int shift = 0; shift<5; shift++) {
-  auto mode = GENERATE(range(0,1));
-  auto shift = GENERATE(range(0,4));
+  auto mode = GENERATE(range(0,2)); // so mode = 0 or 1.
+  auto shift = GENERATE(range(0,5)); // so shift = 0, 1, 2, 3, or 4.
       int N_worker_groups_requested;
       if (mode==0) {
 	N_worker_groups_requested = N_procs_world + shift;
@@ -76,7 +76,7 @@ TEST_CASE("MPI_Partition.init(): Verify that all the properties make sense when 
       mp.set_N_worker_groups(N_worker_groups_requested);
       mp.init(MPI_COMM_WORLD);
       
-      CAPTURE(rank_world, N_worker_groups_requested);
+      CAPTURE(rank_world, N_worker_groups_requested, mode, shift);
 
       CHECK(mp.get_N_worker_groups() == N_procs_world);
       
