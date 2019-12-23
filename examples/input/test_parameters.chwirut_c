@@ -10,26 +10,10 @@
 petsc_pounders
 petsc_nm
 nlopt_ln_bobyqa
-nlopt_ln_praxis
 nlopt_ln_neldermead
-nlopt_ln_sbplx
-nlopt_ld_mma
-nlopt_ld_ccsaq
-nlopt_ld_slsqp
-nlopt_ld_lbfgs
-nlopt_ld_tnewton_precond_restart
 nlopt_ld_tnewton_precond
-nlopt_ld_tnewton_restart
-nlopt_ld_tnewton
-nlopt_ld_var1
-nlopt_ld_var2
 gsl_bfgs
-gsl_conjugate_fr
-gsl_conjugate_pr
 gsl_nm
 gsl_lm
-gsl_dogleg
-gsl_ddogleg
-gsl_subspace2d
 ! True optimum
 1.902781840647822E-01,   6.131400441424187E-03,   1.053090840839532E-02
