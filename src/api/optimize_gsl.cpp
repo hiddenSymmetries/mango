@@ -58,7 +58,7 @@ void mango::problem::optimize_gsl() {
       status = gsl_multimin_fdfminimizer_iterate(fdfminimizer); // Take a step.
       if (status) break;
       status = gsl_multimin_test_gradient (fdfminimizer->gradient, 1e-5); // Need to make this tolerance a variable
-    } while (status == GSL_CONTINUE && iterations < max_function_and_gradient_evaluations);
+    } while (status == GSL_CONTINUE && function_evaluations < max_function_evaluations);
 
     gsl_multimin_fdfminimizer_free(fdfminimizer);
 
@@ -96,7 +96,7 @@ void mango::problem::optimize_gsl() {
       if (status) break;
       size = gsl_multimin_fminimizer_size (fminimizer);
       status = gsl_multimin_test_size (size, 1e-6); // This tolerance should be changed into a variable.
-    } while (status == GSL_CONTINUE && iterations < max_function_evaluations);
+    } while (status == GSL_CONTINUE && function_evaluations < max_function_evaluations);
 
     gsl_vector_free(step_sizes);
     gsl_multimin_fminimizer_free(fminimizer);

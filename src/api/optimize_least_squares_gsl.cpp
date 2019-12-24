@@ -48,7 +48,7 @@ void mango::problem::optimize_least_squares_gsl() {
   // Set other optimizer parameters
   gsl_optimizer_params.solver = gsl_multifit_nlinear_solver_svd; // This option is described in the documentation as the slowest but most robust for ill-conditioned problems. Since speed is not a major concern outside of the objective function, I'll opt for the extra robustness.
   const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
-  const size_t max_iter = max_function_evaluations;
+  const size_t max_iter = (max_function_evaluations + max_function_and_gradient_evaluations) / 2;
   const double xtol = 1.0e-8;
   const double gtol = 1.0e-8;
   const double ftol = 1.0e-8;
