@@ -152,17 +152,33 @@ MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
 MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
+# This next parameter matters only if MANGO_PETSC_AVAILABLE == T
+MANGO_USE_MACPORTS_PETSC = F
 
-PETSC_DIR=/opt/local/lib/petsc
-include ${PETSC_DIR}/lib/petsc/conf/variables
+ifeq ($(MANGO_PETSC_AVAILABLE),T)
+  ifeq ($(MANGO_USE_MACPORTS_PETSC),T)
+    PETSC_DIR=/opt/local/lib/petsc
+    PETSC_ARCH=
+    include ${PETSC_DIR}/lib/petsc/conf/variables
+  else
+    PETSC_DIR=/Users/mattland/petsc/petsc-3.12.2
+    PETSC_ARCH=arch-darwin-c-debug
+    include ${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/petscvariables
+    CLINKER = $(CC)
+    FLINKER = $(CC)
+  endif
+else
+  CLINKER = $(CC)
+  FLINKER = $(CC)
+endif
+
+#include ${PETSC_DIR}/lib/petsc/conf/petscvariables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 
 #CC = mpicxx
 #FC = mpif90
-#CLINKER = $(CC)
-#FLINKER = $(CC)
 # GSL is in /opt/local/include and /opt/local/lib
-EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
+EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include -O0 -g
 EXTRA_F_COMPILE_FLAGS = -I${PETSC_DIR}/include -ffree-line-length-none -O0 -g
 EXTRA_C_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
 EXTRA_F_LINK_FLAGS = ${EXTRA_LINK_FLAGS}
@@ -179,8 +195,8 @@ endif
 
 ifeq ($(MANGO_GSL_AVAILABLE),T)
 EXTRA_C_COMPILE_FLAGS += -I/opt/local/include
-EXTRA_C_LINK_FLAGS += -lgsl
-EXTRA_F_LINK_FLAGS += -lgsl
+EXTRA_C_LINK_FLAGS += -L/opt/local/lib -lgsl
+EXTRA_F_LINK_FLAGS += -L/opt/local/lib -lgsl
 endif
 
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.

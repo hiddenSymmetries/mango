@@ -59,6 +59,7 @@ void mango::problem::optimize_least_squares_petsc() {
 #else
     TaoSetJacobianResidualRoutine(my_tao, petsc_Jacobian, petsc_Jacobian, &mango_petsc_Jacobian_function, (void*)this);
     TaoSetType(my_tao, TAOBRGN);
+    break;
 #endif
   default:
     std::cerr << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithms[algorithm].name << std::endl;
@@ -95,9 +96,9 @@ void mango::problem::optimize_least_squares_petsc() {
 PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, Vec f, void* user_context) {
 
   int j;
-  double* x_array;
+  const double* x_array;
   double* f_array;
-  VecGetArray(x, &x_array);
+  VecGetArrayRead(x, &x_array);
   VecGetArray(f, &f_array);
   
   mango::problem* this_problem = (mango::problem*) user_context;
@@ -138,7 +139,7 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
     std::cout << std::endl << std::flush;
   }
 
-  VecRestoreArray(x, &x_array);
+  VecRestoreArrayRead(x, &x_array);
   VecRestoreArray(f, &f_array);
 
   return(0);
@@ -149,9 +150,9 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
 
 PetscErrorCode mango::problem::mango_petsc_Jacobian_function(Tao my_tao, Vec x, Mat Jacobian, Mat preconditioner, void* user_context) {
   int j;
-  double* x_array;
+  const double* x_array;
   double* Jacobian_array;
-  VecGetArray(x, &x_array);
+  VecGetArrayRead(x, &x_array);
   MatDenseGetArray(Jacobian, &Jacobian_array);
   
   mango::problem* this_problem = (mango::problem*) user_context;
@@ -184,7 +185,7 @@ PetscErrorCode mango::problem::mango_petsc_Jacobian_function(Tao my_tao, Vec x, 
     }
   }
 
-  VecRestoreArray(x, &x_array);
+  VecRestoreArrayRead(x, &x_array);
   MatDenseRestoreArray(Jacobian, &Jacobian_array);
 
   return(0);
