@@ -10,6 +10,7 @@
 hopspack
 petsc_pounders
 petsc_nm
+petsc_brgn
 nlopt_gn_direct
 nlopt_ln_bobyqa
 nlopt_ln_neldermead

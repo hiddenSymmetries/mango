@@ -79,6 +79,8 @@ int mango::problem::gsl_residual_function(const gsl_vector * x, void *params, gs
 
   if (this_problem->verbose > 0) std::cout << "Hello from gsl_residual_function. f stride = " << f->stride << std::endl << std::flush;
 
+  assert(this_problem->mpi_partition.get_proc0_world()); // This subroutine should only ever be called by proc 0.
+
   // gsl vectors have a 'stride'. Only if the stride is 1 does the layout of a gsl vector correspond to a standard double array.
   // Curran pointed out that the stride for f may not be 1!
   // See https://github.com/PrincetonUniversity/STELLOPT/commit/5820c453283785ffd97e40aec261ca97f76e9071
@@ -104,11 +106,14 @@ int mango::problem::gsl_residual_function_and_Jacobian (const gsl_vector * x, vo
   mango::problem* this_problem = (mango::problem*) params;
   if (this_problem->verbose > 0) std::cout << "Hello from gsl_residual_function_and_Jacobian" << std::endl << std::flush;
 
+  assert(this_problem->mpi_partition.get_proc0_world()); // This subroutine should only ever be called by proc 0.
+
   // gsl vectors have a 'stride'. Only if the stride is 1 does the layout of a gsl vector correspond to a standard double array.
   // Curran pointed out that the stride for f may not be 1!
   // See https://github.com/PrincetonUniversity/STELLOPT/commit/5820c453283785ffd97e40aec261ca97f76e9071
   assert(x->stride == 1);
 
+  // For now, I'll allocate and de-allocate memory for the Jacobian on every call to this subroutine. It might be worth modifying things so this allocation is done only once.
   double* mango_Jacobian = new double[this_problem->N_parameters * this_problem->N_terms];
   this_problem->finite_difference_Jacobian(x->data, this_problem->residuals, mango_Jacobian);
 

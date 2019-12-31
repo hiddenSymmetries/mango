@@ -5,6 +5,7 @@
 # package,                      name, least_squares, uses_derivatives, parallel, requires_bound_constraints, deterministic
     petsc,                        nm,             F,                F,        F,                          F,             T
     petsc,                  pounders,             T,                F,        F,                          F,             F
+    petsc,                      brgn,             T,                T,        T,                          F,             T
 
     nlopt,                 gn_direct,             F,                F,        F,                          T,             T
     nlopt,               gn_direct_l,             F,                F,        F,                          T,             T
