@@ -15,7 +15,7 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   function_evaluations++;
 
   int failed_int;
-  residual_function(&N_parameters, x, &N_terms, f, &failed_int, this);
+  residual_function(&N_parameters, x, &N_terms, f, &failed_int, this, user_data);
   *failed = (failed_int != 0);
   clock_t now = clock();
 

@@ -13,7 +13,7 @@ void mango::problem::objective_function_wrapper(const double* x, double* f, bool
   clock_t now = clock();
 
   int failed_int;
-  objective_function(&N_parameters, x, f, &failed_int, this);
+  objective_function(&N_parameters, x, f, &failed_int, this, user_data);
   *failed = (failed_int != 0);
 
   if (verbose > 0) std::cout << " objective_function_wrapper: *failed=" << *failed << " at_least_one_success=" << at_least_one_success 

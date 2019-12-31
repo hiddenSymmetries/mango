@@ -174,4 +174,8 @@ extern "C" {
     This->verbose = *verbose;
   }
 
+  void mango_set_user_data(mango::problem *This, void* user_data) {
+    This->user_data = user_data;
+  }
+
 }

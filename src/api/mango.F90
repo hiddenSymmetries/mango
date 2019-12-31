@@ -191,6 +191,10 @@ module mango
        integer(C_int) :: verbose
        type(C_ptr), value :: this
      end subroutine C_mango_set_verbose
+     subroutine C_mango_set_user_data(this, user_data) bind(C,name="mango_set_user_data")
+       import
+       type(C_ptr), value :: this, user_data
+     end subroutine C_mango_set_verbose
   end interface
 
   public :: mango_problem
@@ -204,7 +208,7 @@ module mango
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
-       mango_set_verbose
+       mango_set_verbose, mango_set_user_data
   
 
   abstract interface

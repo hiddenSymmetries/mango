@@ -38,8 +38,8 @@ namespace mango {
 
   class problem;
 
-  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::problem*);
-  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::problem*);
+  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::problem*, void*);
+  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::problem*, void*);
 
   //////////////////////////////////////////////////////////////////////////////////////
   // Items related to algorithms:
@@ -267,6 +267,7 @@ namespace mango {
     MPI_Partition mpi_partition;
     int verbose;
     bool print_residuals_in_output_file;
+    void* user_data;
 
     problem(int, double*, objective_function_type, int, char**); /* For non-least-squares problems */
     problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); /* For least-squares problems */
