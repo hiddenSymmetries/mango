@@ -100,8 +100,8 @@ void mango::problem::optimize_petsc() {
 #ifdef MANGO_PETSC_AVAILABLE
 PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
 
-  double* x_array;
-  VecGetArray(x, &x_array);
+  const double* x_array;
+  VecGetArrayRead(x, &x_array);
   
   mango::problem* this_problem = (mango::problem*) user_context;
 
@@ -111,7 +111,7 @@ PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x,
 
   if (failed) f = (PetscReal)mango::NUMBER_FOR_FAILED;
 
-  VecRestoreArray(x, &x_array);
+  VecRestoreArrayRead(x, &x_array);
 
   *f_petsc = f;
 
