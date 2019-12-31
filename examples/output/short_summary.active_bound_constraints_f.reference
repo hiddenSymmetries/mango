@@ -4,7 +4,6 @@ N_parameters:
 2
 algorithm,last_function_evaluation,last_seconds,best_function_evaluation,best_seconds,x(1),x(2),objective_function,abs_tolerance_x,abs_tolerance_f
 petsc_pounders,                        13,  4.3583e-02,     8,  4.0680e-02,  2.0000000000000000e+00,  1.0000000000000000e+00,  2.0000000000000000e+00, 1.0e-4, 1.0e-4
-petsc_nm,                           FAILED
 petsc_brgn,                            18,  2.0004e-02,    18,  2.0004e-02,  2.0000000000000000e+00,  9.9995010249990435e-01,  2.0000000049795212e+00, 1.0e-4, 1.0e-4
 nlopt_gn_direct,                      500,  7.9000e-03,   465,  7.4510e-03,  2.0000056450292694e+00,  9.9998870994146083e-01,  2.0000112904728011e+00, 1.0e-4, 1.0e-4
 nlopt_gn_direct_l,                    500,  8.3160e-03,   483,  8.1070e-03,  2.0000002090751581e+00,  9.9999958184968296e-01,  2.0000004181508846e+00, 1.0e-4, 1.0e-4
@@ -31,11 +30,3 @@ nlopt_ld_tnewton,                      15,  5.4400e-04,    13,  5.2000e-04,  2.0
 nlopt_ld_var1,                         12,  4.9700e-04,    10,  4.7100e-04,  2.0000000000000000e+00,  1.0000000000000000e+00,  2.0000000000000000e+00, 1.0e-4, 1.0e-4
 nlopt_ld_var2,                         12,  5.9300e-04,    10,  5.6800e-04,  2.0000000000000000e+00,  1.0000000000000000e+00,  2.0000000000000000e+00, 1.0e-4, 1.0e-4
 hopspack,                              42,  4.1080e-03,     7,  1.9350e-03,  2.0000000000000000e+00,  1.0000000000000000e+00,  2.0000000000000000e+00, 1.0e-4, 1.0e-4
-gsl_lm,                             FAILED
-gsl_dogleg,                         FAILED
-gsl_ddogleg,                        FAILED
-gsl_subspace2d,                     FAILED
-gsl_conjugate_fr,                   FAILED
-gsl_conjugate_pr,                   FAILED
-gsl_bfgs,                           FAILED
-gsl_nm,                             FAILED
