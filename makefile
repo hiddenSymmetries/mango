@@ -1,4 +1,4 @@
-.PHONY: all clean examples test test_make
+.PHONY: all clean examples test test_make unit_tests
 
 all: lib/libmango.a examples examples/packages_available
 #	cp obj/mango.mod* include
