@@ -5,6 +5,8 @@
 
 print(__file__ + ": Using the database of algorithms to generate code in mango.hpp and other source files.")
 
+index_deterministic = 7
+
 # Read in the database of algorithms:
 database_filename = "algorithms.dat"
 try:
@@ -35,15 +37,20 @@ for line in lines:
     if stripline[0] == '!' or stripline[0] == '#' or stripline[0] == '%':
         continue
     splitline = stripline.split(',')
-    if len(splitline) != 7:
+    if len(splitline) != 8:
         print('Error! The following line of '+database_filename+' has the wrong number of entries:')
         print(line)
         exit(1)
-    for j in [2,3,4,5,6]:
+    for j in [2,3,4,5,6,7]:
         splitline[j] = TF_to_truefalse(splitline[j])
     # If the algorithm uses derivatives, ensure 'parallel' is true:
     if splitline[3] == 'true':
         splitline[4] = 'true'
+    # If an algorithm requires bound constraints, it must allow bound constraints
+    if splitline[5] == 'false' and splitline[6] == 'true':
+        print('Error! An algorithm requires bound constraints but does not allow bound constraints. Original line:')
+        print(line)
+        exit(1)
     database.append([s.strip() for s in splitline])
 #print(database)
 
@@ -121,12 +128,12 @@ lines = newlines + lines[end:]
 # Replace <database> .. </database>
 start, end = find_markup(lines,'database','//')
 newlines = lines[:start+1] + comment_line
-newlines += ['    //                             name,         package, least_squares, uses_derivatives, parallel, requires_bound_constraints\n']
+newlines += ['    // name,                            package,         least_squares, uses_derivatives, parallel, allows_bound_constraints, requires_bound_constraints\n']
 for j in range(len(database)):
     entry = database[j]
     name = ('"'+names[j]+'",').lower()
     package = 'PACKAGE_'+entry[0].upper()+','
-    str = '    {' + name.rjust(35) + package.rjust(17) + entry[2].rjust(14) + ',' + entry[3].rjust(17) + ',' + entry[4].rjust(9) + ',' + entry[5].rjust(20) + '}'
+    str = '    {' + name.ljust(35) + package.ljust(17) + (entry[2]+',').ljust(15) + (entry[3]+',').ljust(18) + (entry[4]+',').ljust(10) + (entry[5]+',').ljust(26) + entry[6].ljust(5) + '}'
     if j != len(database)-1:
         str += ','
     newlines.append(str+'\n')
@@ -293,7 +300,7 @@ start, end = find_markup(lines,'nondeterministic_algorithms','#')
 newlines = lines[:start+1] + comment_line
 newline = 'nondeterministic_algorithms = ['
 for j in range(len(database)):
-    if database[j][6] == 'false':
+    if database[j][index_deterministic] == 'false':
         newline += '"'+names[j]+'",'
 newline = newline[:-1] + ']\n'
 lines = newlines + [newline] + lines[end:]

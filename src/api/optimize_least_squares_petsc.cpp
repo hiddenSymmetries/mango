@@ -66,6 +66,25 @@ void mango::problem::optimize_least_squares_petsc() {
     throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 
+  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
+
+  Vec lower_bounds_vec, upper_bounds_vec;
+  if (bound_constraints_set) {
+    VecCreateSeq(PETSC_COMM_SELF, N_parameters, &lower_bounds_vec);
+    VecCreateSeq(PETSC_COMM_SELF, N_parameters, &upper_bounds_vec);
+
+    for (int j=0; j<N_parameters; j++) {
+      VecSetValue(lower_bounds_vec, j, lower_bounds[j], INSERT_VALUES);
+      VecSetValue(upper_bounds_vec, j, upper_bounds[j], INSERT_VALUES);
+    }
+    VecAssemblyBegin(lower_bounds_vec);
+    VecAssemblyBegin(upper_bounds_vec);
+    VecAssemblyEnd(lower_bounds_vec);
+    VecAssemblyEnd(upper_bounds_vec);
+
+    TaoSetVariableBounds(my_tao, lower_bounds_vec, upper_bounds_vec);
+  }
+
   // TaoSetTolerances(my_tao, 1e-30, 1e-30, 1e-30);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
