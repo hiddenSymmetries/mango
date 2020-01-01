@@ -1,9 +1,12 @@
+! This example demonstrates
+! * Passing a double to the objective/residual function using the user_data field.
+
 #define verbose_level 0
 
 program rosenbrock
 
   use mango
-  !use iso_c_binding
+  use iso_c_binding, only: c_loc
 
   implicit none
 
@@ -11,14 +14,13 @@ program rosenbrock
   
   integer :: ierr, N_procs, mpi_rank, data(1)
   logical :: proc0
-  !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
   double precision, dimension(2) :: state_vector = (/ 0.0d+0, 0.0d+0 /)
   double precision, dimension(2) :: targets      = (/ 1.0d+0, 0.0d+0 /)
   double precision, dimension(2) :: sigmas       = (/ 1.0d+0, 0.1d+0 /)
   double precision :: best_residual_function(2), best_objective_function
-  !external objective_function
-  !procedure(objective_function_interface), pointer :: objective_function
+
+  double precision, target :: my_data = 2.71828182845905d+0 ! "target" attribute is necessary since we will use my_data as an argument of c_loc.
 
   !---------------------------------------------
 
@@ -35,6 +37,8 @@ program rosenbrock
   call mango_set_output_filename(problem, "../output/mango_out.rosenbrock_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_max_function_evaluations(problem, 2000)
+
+  call mango_set_user_data(problem, c_loc(my_data))
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
@@ -62,19 +66,7 @@ program rosenbrock
 
 contains
 
-!subroutine objective_function(N, x, f)
-!  implicit none
-!  integer, intent(in) :: N
-!  double precision, intent(in) :: x(N)
-!  double precision, intent(out) :: f
-!
-!  print *,"Hi from fortran. N=",N," size(x)=",size(x)
-!  f = sum((x-2)*(x-2))
-!  print *,"In fortran, x=",x,", f=",f
-!
-!end subroutine objective_function
-
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_data)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_user_data)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters
@@ -83,9 +75,19 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_
   real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
-  type(C_ptr), value, intent(in) :: user_data
+  type(C_ptr), value, intent(in) :: void_user_data
+
+  double precision, pointer :: user_data
 
   if (verbose_level > 0) print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
+
+  ! Check that user data was passed correctly
+  call c_f_pointer(void_user_data, user_data) ! This line effectively casts (void*) to (double*)
+  if (abs(user_data - 2.71828182845905d+0) > 1d-13) then
+     print *,"Error passing user_data to the residual function. user_data=",user_data
+     stop
+  end if
+
   !f = (x(1) - 1) * (x(1) - 1) + 100 * (x(2) - x(1)*x(1)) * (x(2) - x(1)*x(1))
   f(1) = x(1)
   f(2) = x(2) - x(1) * x(1)

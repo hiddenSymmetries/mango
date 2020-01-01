@@ -1,10 +1,13 @@
+! This example demonstrates:
+! * Passing an integer to the objective/residual function using the user_data field.
+
 #define N_dim 3
 #define verbose_level 0
 
 program quadratic
 
   use mango
-  !use iso_c_binding
+  use iso_c_binding, only: c_loc
 
   implicit none
 
@@ -20,6 +23,7 @@ program quadratic
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: j
   double precision :: best_objective_function
+  integer, target :: my_data = 7
 
   !---------------------------------------------
 
@@ -41,6 +45,7 @@ program quadratic
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_centered_differences(problem, .true.)
   call mango_set_max_function_evaluations(problem, 2000)
+  call mango_set_user_data(problem, c_loc(my_data))
 
   lower_bounds = -5.0d+0
   upper_bounds =  5.0d+0
@@ -73,7 +78,7 @@ program quadratic
 contains
 
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_data)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_user_data)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters, N_terms
@@ -81,8 +86,16 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_
   real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
-  type(C_ptr), value, intent(in) :: user_data
+  type(C_ptr), value, intent(in) :: void_user_data
+
+  integer, pointer :: user_data
   integer :: j
+
+  call c_f_pointer(void_user_data, user_data) ! This line effectively casts (void*) to (int*).
+  if (user_data .ne. 7) then
+     print *, "Error passing user_data to the residual function. user_data=",user_data
+     stop
+  end if
 
   if (verbose_level > 0) then
      print *,"Hi from fortran. N=",N_parameters," size(x)=",size(x), ", size(f)=",size(f)

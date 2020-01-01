@@ -1,3 +1,4 @@
+// This example is based on the PETSc example src/tao/leastsquares/examples/tutorials/chwirut*
 // This example demonstrates several things:
 // * Passing a data structure to the objective/residual function through the user_data field.
 // * Distributing work among workers within each worker group.

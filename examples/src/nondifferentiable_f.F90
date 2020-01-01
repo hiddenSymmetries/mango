@@ -1,10 +1,22 @@
+! This example demonstrates several things:
+! * An objective function that cannot be written in least-squares form.
+! * Passing a derived data type to the objective/residual function using the user_data field.
+
 #define N_dim 3
 #define verbose_level 0
+
+module my_type_module
+  type my_type
+     integer :: i
+     double precision :: f
+  end type my_type
+end module my_type_module
 
 program nondifferentiable
 
   use mango
-  !use iso_c_binding
+  use iso_c_binding, only: c_loc
+  use my_type_module
 
   implicit none
 
@@ -19,12 +31,16 @@ program nondifferentiable
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
   integer :: dummy = 13
+  type(my_type), target :: my_data
 
   !---------------------------------------------
 
   if (verbose_level > 0) print *,"Hello world from nondifferentiable_f"
   !print *,"c_funloc(objective_function):",c_funloc(objective_function)
   call mpi_init(ierr)
+
+  my_data%i = 7
+  my_data%f = 2.71828182845905d+0
 
   if (verbose_level > 0) then
      print *,"Is foobar a valid algorithm? ", mango_does_algorithm_exist('foobar')
@@ -46,6 +62,8 @@ program nondifferentiable
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_centered_differences(problem, .true.)
   call mango_set_max_function_evaluations(problem, 2000)
+
+  call mango_set_user_data(problem, c_loc(my_data))
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
@@ -84,18 +102,29 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f, failed, problem, user_data)
+subroutine objective_function(N, x, f, failed, problem, void_user_data)
   use iso_c_binding
+  use my_type_module
   implicit none
   integer(C_int), intent(in) :: N
   real(C_double), intent(in) :: x(N)
   real(C_double), intent(out) :: f
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
-  type(C_ptr), value, intent(in) :: user_data
+  type(C_ptr), value, intent(in) :: void_user_data
   integer :: j
+  type(my_type), pointer :: user_data
 
   if (verbose_level > 0) print *,"Hi from fortran. N=",N," size(x)=",size(x)
+
+  ! Check that user_data was passed successfully
+  call c_f_pointer(void_user_data, user_data) ! This line effectively casts (void*) to (my_type*)
+  if ((user_data%i .ne. 7) .or. (abs(user_data%f - 2.71828182845905d+0) > 1.0d-13)) then
+     print *,"Error! user_data was not successfully passed to the objective function."
+     print *,"user_data%i = ",user_data%i
+     print *,"user_data%f = ",user_data%f
+     stop
+  end if
 
   f = 0
   do j = 1, N
