@@ -85,7 +85,7 @@ end subroutine do_work
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_data)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters
@@ -94,6 +94,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
+  type(C_ptr), value, intent(in) :: user_data
   integer :: data(1), ierr, j, start_index, stop_index, N_procs_worker_groups
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer :: mpi_comm_worker_groups

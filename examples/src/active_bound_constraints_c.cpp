@@ -13,9 +13,10 @@
 #include<cstring>
 #include<mpi.h>
 #include<stdlib.h>
+#include<cassert>
 #include "mango.hpp"
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
+void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
 
 void worker(mango::problem*);
 
@@ -48,6 +49,10 @@ int main(int argc, char *argv[]) {
 
   myprob.set_bound_constraints(lower_bounds, upper_bounds);
 
+  // Pass some data to the objective function
+  int data = 7;
+  myprob.user_data = &data;
+
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
@@ -74,9 +79,13 @@ int main(int argc, char *argv[]) {
 }
 
 
-void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem) {
+void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
   int j;
   if (verbose_level > 0) std::cout << "C residual function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << ", M=" << *M << std::endl;
+
+  // Verify that the user data was passed successfully.
+  int* user_data = (int*)void_user_data;
+  assert(*user_data == 7);
 
   // Mobilize the workers in the group with this group leader:
   int data[1];

@@ -4,9 +4,10 @@
 #include<iomanip>
 #include<mpi.h>
 #include<stdlib.h>
+#include<cassert>
 #include "mango.hpp"
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
+void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
 
 void worker(mango::problem*);
 
@@ -27,20 +28,24 @@ int main(int argc, char *argv[]) {
   double best_residual_function[2];
   mango::problem myprob(2, state_vector, 2, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
-  /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
+  //  myprob.set_algorithm(mango::PETSC_POUNDERS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
   myprob.verbose = verbose_level;
   myprob.read_input_file("../input/mango_in.rosenbrock_c");
   myprob.output_filename = "../output/mango_out.rosenbrock_c";
   myprob.mpi_init(MPI_COMM_WORLD);
-  /* myprob.centered_differences = true; */
+  // myprob.centered_differences = true;
   myprob.max_function_evaluations = 2000;
+
+  // Pass some data to the objective function
+  int data = 7;
+  myprob.user_data = &data;
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
 
-    /* Make workers stop */
+    // Make workers stop
     int data[1];
     data[0] = -1;
     MPI_Bcast(data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
@@ -62,10 +67,15 @@ int main(int argc, char *argv[]) {
 }
 
 
-void residual_function(int* N_parameters, const double* x, int* N_terms, double* f, int* failed, mango::problem* this_problem) {
+void residual_function(int* N_parameters, const double* x, int* N_terms, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
   int j;
   if (verbose_level > 0) std::cout << "C residual function called with N="<< *N_parameters << "\n";
-  /*   *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]); */
+
+  // Verify that the user data was passed successfully.
+  int* user_data = (int*)void_user_data;
+  assert(*user_data == 7);
+
+  //   *f = (x[0] - 1) * (x[0] - 1) + 100 * (x[1] - x[0]*x[0]) * (x[1] - x[0]*x[0]); 
   f[0] = x[0];
   f[1] = x[1] - x[0] * x[0];
   *failed = false;
@@ -83,7 +93,7 @@ void worker(mango::problem* myprob) {
       keep_going = false;
     } else {
       if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
-      /* For this problem, the workers don't actually do any work. */
+      // For this problem, the workers don't actually do any work.
     }
   }
 }

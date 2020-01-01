@@ -10,7 +10,7 @@
 // Test finite-difference gradient, for a non-least-squares problem.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void objective_function_1(int* N_parameters, const double* x, double* f, int* failed_int, mango::problem* problem) {
+void objective_function_1(int* N_parameters, const double* x, double* f, int* failed_int, mango::problem* problem, void* user_data) {
   assert(*N_parameters == 3);
   *f = exp(x[0] * x[0] - exp(x[1]) + sin(x[2])); // A 3-D model function, for testing.
   *failed_int = false;
@@ -117,7 +117,7 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_gradient()","[probl
 // finite_difference_Jacobian_to_gradient().
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void residual_function_1(int* N_parameters, const double* x, int* N_terms, double* f, int* failed_int, mango::problem* problem) {
+void residual_function_1(int* N_parameters, const double* x, int* N_terms, double* f, int* failed_int, mango::problem* problem, void* user_data) {
   assert(*N_parameters == 2);
   assert(*N_terms == 4);
   for (int j = 0; j < *N_terms; j++) {

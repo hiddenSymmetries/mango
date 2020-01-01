@@ -6,9 +6,10 @@
 #include<cstring>
 #include<mpi.h>
 #include<stdlib.h>
+#include<cassert>
 #include "mango.hpp"
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
+void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
 
 void worker(mango::problem*);
 
@@ -24,7 +25,7 @@ int main(int argc, char *argv[]) {
   }
 
   double state_vector[N_dims];
-  memset(state_vector, 0, N_dims*sizeof(double)); /* Initial condition = 0. */
+  memset(state_vector, 0, N_dims*sizeof(double)); // Initial condition = 0.
 
   double sigmas[N_dims];
   double targets[N_dims];
@@ -48,6 +49,10 @@ int main(int argc, char *argv[]) {
   myprob.centered_differences = true; 
   myprob.max_function_evaluations = 2000;
 
+  // Pass some data to the objective function
+  int data = 7;
+  myprob.user_data = &data;
+
   double lower_bounds[N_dims];
   double upper_bounds[N_dims];
   for (int j=0; j<N_dims; j++) {
@@ -61,7 +66,7 @@ int main(int argc, char *argv[]) {
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
 
-    /* Make workers stop */
+    // Make workers stop
     int data[1];
     data[0] = -1;
     MPI_Bcast(data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
@@ -83,11 +88,15 @@ int main(int argc, char *argv[]) {
 }
 
 
-void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem) {
+void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
   int j;
   if (verbose_level > 0) std::cout << "C residual function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << ", M=" << *M << "\n";
 
-  /* Mobilize the workers in the group with this group leader: */
+  // Verify that the user data was passed successfully.
+  int* user_data = (int*)void_user_data;
+  assert(*user_data == 7);
+
+  // Mobilize the workers in the group with this group leader:
   int data[1];
   data[0] = this_problem->mpi_partition.get_worker_group();
   MPI_Bcast(data, 1, MPI_INT, 0, this_problem->mpi_partition.get_comm_worker_groups());
@@ -124,7 +133,7 @@ void worker(mango::problem* myprob) {
       keep_going = false;
     } else {
       if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
-      /* For this problem, the workers don't actually do any work. */
+      // For this problem, the workers don't actually do any work.
     }
   }
 }

@@ -84,7 +84,7 @@ contains
 !
 !end subroutine objective_function
 
-subroutine objective_function(N, x, f, failed, problem)
+subroutine objective_function(N, x, f, failed, problem, user_data)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N
@@ -92,6 +92,7 @@ subroutine objective_function(N, x, f, failed, problem)
   real(C_double), intent(out) :: f
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
+  type(C_ptr), value, intent(in) :: user_data
   integer :: j
 
   if (verbose_level > 0) print *,"Hi from fortran. N=",N," size(x)=",size(x)

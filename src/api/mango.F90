@@ -191,10 +191,15 @@ module mango
        integer(C_int) :: verbose
        type(C_ptr), value :: this
      end subroutine C_mango_set_verbose
+     subroutine C_mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file_int) bind(C,name="mango_set_print_residuals_in_output_file")
+       import
+       type(C_ptr), value :: this
+       integer(C_int) :: print_residuals_in_output_file_int
+     end subroutine C_mango_set_print_residuals_in_output_file
      subroutine C_mango_set_user_data(this, user_data) bind(C,name="mango_set_user_data")
        import
        type(C_ptr), value :: this, user_data
-     end subroutine C_mango_set_verbose
+     end subroutine C_mango_set_user_data
   end interface
 
   public :: mango_problem
@@ -208,19 +213,20 @@ module mango
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
-       mango_set_verbose, mango_set_user_data
+       mango_set_verbose, mango_set_print_residuals_in_output_file, mango_set_user_data
   
 
   abstract interface
-  subroutine objective_function_interface(N_parameters, state_vector, f, failed, this)
+  subroutine objective_function_interface(N_parameters, state_vector, f, failed, this, user_data)
     import
     integer(C_int), intent(in) :: N_parameters
     real(C_double), intent(in) :: state_vector(N_parameters)
     real(C_double), intent(out) :: f
     integer(C_int), intent(out) :: failed
     type(mango_problem), value, intent(in) :: this
+    type(C_ptr), value, intent(in) :: user_data
   end subroutine objective_function_interface
-  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this)
+  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this, user_data)
     import
     integer(C_int), intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(N_parameters)
@@ -228,6 +234,7 @@ module mango
     real(C_double), intent(out) :: f(N_terms)
     integer(C_int), intent(out) :: failed
     type(mango_problem), value, intent(in) :: this
+    type(C_ptr), value, intent(in) :: user_data
   end subroutine residual_function_interface
   end interface
 
@@ -498,5 +505,20 @@ contains
     integer, intent(in) :: verbose
     call C_mango_set_verbose(this%object, verbose)
   end subroutine mango_set_verbose
+
+  subroutine mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file)
+    type(mango_problem), intent(in) :: this
+    logical, intent(in) :: print_residuals_in_output_file
+    integer(C_int) :: logical_to_int
+    logical_to_int = 0
+    if (print_residuals_in_output_file) logical_to_int = 1
+    call C_mango_set_print_residuals_in_output_file(this%object, logical_to_int)
+  end subroutine mango_set_print_residuals_in_output_file
+
+  subroutine mango_set_user_data(this, user_data)
+    type(mango_problem), intent(in) :: this
+    type(C_ptr), intent(in) :: user_data
+    call C_mango_set_user_data(this%object, user_data)
+  end subroutine mango_set_user_data
 
 end module mango

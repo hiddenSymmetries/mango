@@ -74,7 +74,7 @@ contains
 !
 !end subroutine objective_function
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_data)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters
@@ -83,6 +83,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem)
   real(C_double), intent(out) :: f(N_terms)
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
+  type(C_ptr), value, intent(in) :: user_data
 
   if (verbose_level > 0) print *,"Hi from fortran. N_parameters=",N_parameters," size(x)=",size(x)
   !f = (x(1) - 1) * (x(1) - 1) + 100 * (x(2) - x(1)*x(1)) * (x(2) - x(1)*x(1))

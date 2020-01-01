@@ -254,7 +254,7 @@ namespace mango {
     /*void objective_function_wrapper(const double*, double*, bool*); */
     void objective_function_wrapper(const double*, double*, bool*); 
     void residual_function_wrapper(const double*, double*, bool*); 
-    static void least_squares_to_single_objective(int*, const double*, double*, int*, mango::problem*);
+    static void least_squares_to_single_objective(int*, const double*, double*, int*, mango::problem*, void*);
     void finite_difference_gradient(const double*, double*, double*);
     void finite_difference_Jacobian(const double*, double*, double*);
     void finite_difference_Jacobian_to_gradient(const double*, double*, double*);

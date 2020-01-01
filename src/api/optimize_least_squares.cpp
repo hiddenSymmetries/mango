@@ -132,7 +132,7 @@ void mango::problem::optimize_least_squares() {
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
-void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem) {
+void mango::problem::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::problem* this_problem, void* user_data) {
   // Note that this function is static, so "this" does not exist, and hence we must use "this_problem" instead.
 
   // Note that this subroutine sets the 'residuals' array of the mango::problem class.

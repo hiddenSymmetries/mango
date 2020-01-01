@@ -174,6 +174,16 @@ extern "C" {
     This->verbose = *verbose;
   }
 
+  void mango_set_print_residuals_in_output_file(mango::problem *This, int* print_residuals_in_output_file_int) {
+    if (*print_residuals_in_output_file_int==1) {
+      This->print_residuals_in_output_file = true;
+    } else if (*print_residuals_in_output_file_int==0) {
+      This->print_residuals_in_output_file = false;
+    } else {
+      throw std::runtime_error("Error in interface.cpp mango_set_print_residuals_in_output_file");
+    }
+  }
+
   void mango_set_user_data(mango::problem *This, void* user_data) {
     This->user_data = user_data;
   }

@@ -1,3 +1,7 @@
+// This example demonstrates several things:
+// * Passing a data structure to the objective/residual function through the user_data field.
+// * Distributing work among workers within each worker group.
+
 #define verbose_level 0
 
 #include<iostream>
@@ -10,18 +14,20 @@
 
 #define N_terms 214
 
-double y[N_terms];
-double t[N_terms];
+typedef struct {
+  double y;
+  double t;
+} datapoint;
 
-void init_data();
+void init_data(datapoint*);
 
 void partition_work(int, int, int*, int*);
 
-void do_work(int, double*, double*, int, int);
+void do_work(int, double*, double*, int, int, datapoint*);
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*);
+void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
 
-void worker(mango::problem*);
+void worker(mango::problem*, datapoint*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -34,7 +40,9 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  init_data();
+  datapoint yt_data[N_terms];
+
+  init_data(yt_data);
 
   double state_vector[3] = {0.15, 0.008, 0.01};
   double targets[N_terms];
@@ -46,26 +54,26 @@ int main(int argc, char *argv[]) {
   }
   mango::problem myprob(3, state_vector, N_terms, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
-  /*  myprob.set_algorithm(mango::PETSC_POUNDERS); */
+  //  myprob.set_algorithm(mango::PETSC_POUNDERS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
   myprob.verbose = verbose_level;
   myprob.read_input_file("../input/mango_in.chwirut_c");
   myprob.output_filename = "../output/mango_out.chwirut_c";
   myprob.mpi_init(MPI_COMM_WORLD);
-  /* myprob.centered_differences = true; */
+  // myprob.centered_differences = true;
   myprob.max_function_evaluations = 2000;
   myprob.print_residuals_in_output_file = true;
+  myprob.user_data = yt_data; // This passes the (y,t) data to the residual function
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
 
-    /* Make workers stop */
-    int data[1];
-    data[0] = -1;
-    MPI_Bcast(data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
+    // Make workers stop
+    int data = -1;
+    MPI_Bcast(&data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
   } else {
-    worker(&myprob);
+    worker(&myprob, yt_data);
   }
 
   if (myprob.mpi_partition.get_proc0_world() && (verbose_level > 0)) {
@@ -84,18 +92,20 @@ int main(int argc, char *argv[]) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void do_work(int N_parameters, double* x, double* f, int start_index, int stop_index) {
+void do_work(int N_parameters, double* x, double* f, int start_index, int stop_index, datapoint* data) {
   for (int j=start_index; j <= stop_index; j++) {
-    f[j] = y[j] - std::exp(-x[0] * t[j]) / (x[1] + x[2] * t[j]);
+    f[j] = data[j].y - std::exp(-x[0] * data[j].t) / (x[1] + x[2] * data[j].t);
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void residual_function(int* N_parameters, const double* x, int* N_terms_copy, double* f, int* failed, mango::problem* this_problem) {
+void residual_function(int* N_parameters, const double* x, int* N_terms_copy, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
   int j, start_index, stop_index;
   if (verbose_level > 0) std::cout << "C residual function called with N="<< *N_parameters << "\n";
+
+  datapoint* yt_data = (datapoint*)void_user_data;
 
   MPI_Status mpi_status;
   MPI_Comm comm_worker_groups = this_problem->mpi_partition.get_comm_worker_groups();
@@ -113,7 +123,7 @@ void residual_function(int* N_parameters, const double* x, int* N_terms_copy, do
   for (j=0; j < N_procs_worker_groups; j++) {
     partition_work(j, N_procs_worker_groups, &start_index, &stop_index);
     if (j==0) {
-      do_work(*N_parameters, (double*)x, f, start_index, stop_index);
+      do_work(*N_parameters, (double*)x, f, start_index, stop_index, yt_data);
     } else {
       MPI_Recv(&f[start_index], stop_index - start_index + 1, MPI_DOUBLE, j, j, comm_worker_groups, &mpi_status);
     }
@@ -125,7 +135,7 @@ void residual_function(int* N_parameters, const double* x, int* N_terms_copy, do
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void worker(mango::problem* myprob) {
+void worker(mango::problem* myprob, datapoint* yt_data) {
   bool keep_going = true;
   int data[1];
 
@@ -150,7 +160,7 @@ void worker(mango::problem* myprob) {
       // Get the state vector
       MPI_Bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups);
 	
-      do_work(N_parameters, x, f, start_index, stop_index);
+      do_work(N_parameters, x, f, start_index, stop_index, yt_data);
 
       // Send my terms of the residual back to the master proc.
       MPI_Send(&f[start_index], stop_index - start_index + 1, MPI_DOUBLE, 0, mpi_rank_worker_groups, mpi_comm_worker_groups);
@@ -162,223 +172,223 @@ void worker(mango::problem* myprob) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void init_data() {
+void init_data(datapoint* data) {
   int i = 0;
-
-  y[i] =   92.9000;   t[i++] =  0.5000;
-  y[i] =    78.7000;  t[i++] =   0.6250;
-  y[i] =    64.2000;  t[i++] =   0.7500;
-  y[i] =    64.9000;  t[i++] =   0.8750;
-  y[i] =    57.1000;  t[i++] =   1.0000;
-  y[i] =    43.3000;  t[i++] =   1.2500;
-  y[i] =    31.1000;   t[i++] =  1.7500;
-  y[i] =    23.6000;   t[i++] =  2.2500;
-  y[i] =    31.0500;   t[i++] =  1.7500;
-  y[i] =    23.7750;   t[i++] =  2.2500;
-  y[i] =    17.7375;   t[i++] =  2.7500;
-  y[i] =    13.8000;   t[i++] =  3.2500;
-  y[i] =    11.5875;   t[i++] =  3.7500;
-  y[i] =     9.4125;   t[i++] =  4.2500;
-  y[i] =     7.7250;   t[i++] =  4.7500;
-  y[i] =     7.3500;   t[i++] =  5.2500;
-  y[i] =     8.0250;   t[i++] =  5.7500;
-  y[i] =    90.6000;   t[i++] =  0.5000;
-  y[i] =    76.9000;   t[i++] =  0.6250;
-  y[i] =    71.6000;   t[i++] = 0.7500;
-  y[i] =    63.6000;   t[i++] =  0.8750;
-  y[i] =    54.0000;   t[i++] =  1.0000;
-  y[i] =    39.2000;   t[i++] =  1.2500;
-  y[i] =    29.3000;   t[i++] = 1.7500;
-  y[i] =    21.4000;   t[i++] =  2.2500;
-  y[i] =    29.1750;   t[i++] =  1.7500;
-  y[i] =    22.1250;   t[i++] =  2.2500;
-  y[i] =    17.5125;   t[i++] =  2.7500;
-  y[i] =    14.2500;   t[i++] =  3.2500;
-  y[i] =     9.4500;   t[i++] =  3.7500;
-  y[i] =     9.1500;   t[i++] =  4.2500;
-  y[i] =     7.9125;   t[i++] =  4.7500;
-  y[i] =     8.4750;   t[i++] =  5.2500;
-  y[i] =     6.1125;   t[i++] =  5.7500;
-  y[i] =    80.0000;   t[i++] =  0.5000;
-  y[i] =    79.0000;   t[i++] =  0.6250;
-  y[i] =    63.8000;   t[i++] =  0.7500;
-  y[i] =    57.2000;   t[i++] =  0.8750;
-  y[i] =    53.2000;   t[i++] =  1.0000;
-  y[i] =   42.5000;   t[i++] =  1.2500;
-  y[i] =   26.8000;   t[i++] =  1.7500;
-  y[i] =    20.4000;   t[i++] =  2.2500;
-  y[i] =    26.8500;  t[i++] =   1.7500;
-  y[i] =    21.0000;  t[i++] =   2.2500;
-  y[i] =    16.4625;  t[i++] =   2.7500;
-  y[i] =    12.5250;  t[i++] =   3.2500;
-  y[i] =    10.5375;  t[i++] =   3.7500;
-  y[i] =     8.5875;  t[i++] =   4.2500;
-  y[i] =     7.1250;  t[i++] =   4.7500;
-  y[i] =     6.1125;  t[i++] =   5.2500;
-  y[i] =     5.9625;  t[i++] =   5.7500;
-  y[i] =    74.1000;  t[i++] =   0.5000;
-  y[i] =    67.3000;  t[i++] =   0.6250;
-  y[i] =    60.8000;  t[i++] =   0.7500;
-  y[i] =    55.5000;  t[i++] =   0.8750;
-  y[i] =    50.3000;  t[i++] =   1.0000;
-  y[i] =    41.0000;  t[i++] =   1.2500;
-  y[i] =    29.4000;  t[i++] =   1.7500;
-  y[i] =    20.4000;  t[i++] =   2.2500;
-  y[i] =    29.3625;  t[i++] =   1.7500;
-  y[i] =    21.1500;  t[i++] =   2.2500;
-  y[i] =    16.7625;  t[i++] =   2.7500;
-  y[i] =    13.2000;  t[i++] =   3.2500;
-  y[i] =    10.8750;  t[i++] =   3.7500;
-  y[i] =     8.1750;  t[i++] =   4.2500;
-  y[i] =     7.3500;  t[i++] =   4.7500;
-  y[i] =     5.9625;  t[i++] =  5.2500;
-  y[i] =     5.6250;  t[i++] =   5.7500;
-  y[i] =    81.5000;  t[i++] =    .5000;
-  y[i] =    62.4000;  t[i++] =    .7500;
-  y[i] =    32.5000;  t[i++] =   1.5000;
-  y[i] =    12.4100;  t[i++] =   3.0000;
-  y[i] =    13.1200;  t[i++] =   3.0000;
-  y[i] =    15.5600;  t[i++] =   3.0000;
-  y[i] =     5.6300;  t[i++] =   6.0000;
-  y[i] =    78.0000;   t[i++] =   .5000;
-  y[i] =    59.9000;  t[i++] =    .7500;
-  y[i] =    33.2000;  t[i++] =   1.5000;
-  y[i] =    13.8400;  t[i++] =   3.0000;
-  y[i] =    12.7500;  t[i++] =   3.0000;
-  y[i] =    14.6200;  t[i++] =   3.0000;
-  y[i] =     3.9400;  t[i++] =   6.0000;
-  y[i] =    76.8000;  t[i++] =    .5000;
-  y[i] =    61.0000;  t[i++] =    .7500;
-  y[i] =    32.9000;  t[i++] =   1.5000;
-  y[i] =   13.8700;   t[i++] = 3.0000;
-  y[i] =    11.8100;  t[i++] =   3.0000;
-  y[i] =    13.3100;  t[i++] =   3.0000;
-  y[i] =     5.4400;  t[i++] =   6.0000;
-  y[i] =    78.0000;  t[i++] =    .5000;
-  y[i] =    63.5000;  t[i++] =    .7500;
-  y[i] =    33.8000;  t[i++] =   1.5000;
-  y[i] =    12.5600;  t[i++] =   3.0000;
-  y[i] =     5.6300;  t[i++] =   6.0000;
-  y[i] =    12.7500;  t[i++] =   3.0000;
-  y[i] =    13.1200;  t[i++] =   3.0000;
-  y[i] =     5.4400;  t[i++] =   6.0000;
-  y[i] =    76.8000;  t[i++] =    .5000;
-  y[i] =    60.0000;  t[i++] =    .7500;
-  y[i] =    47.8000;  t[i++] =   1.0000;
-  y[i] =    32.0000;  t[i++] =   1.5000;
-  y[i] =    22.2000;  t[i++] =   2.0000;
-  y[i] =    22.5700;  t[i++] =   2.0000;
-  y[i] =    18.8200;  t[i++] =   2.5000;
-  y[i] =    13.9500;  t[i++] =   3.0000;
-  y[i] =    11.2500;  t[i++] =   4.0000;
-  y[i] =     9.0000;  t[i++] =   5.0000;
-  y[i] =     6.6700;  t[i++] =   6.0000;
-  y[i] =    75.8000;  t[i++] =    .5000;
-  y[i] =    62.0000;  t[i++] =    .7500;
-  y[i] =    48.8000;  t[i++] =   1.0000;
-  y[i] =    35.2000;  t[i++] =   1.5000;
-  y[i] =    20.0000;  t[i++] =   2.0000;
-  y[i] =    20.3200;  t[i++] =   2.0000;
-  y[i] =    19.3100;  t[i++] =   2.5000;
-  y[i] =    12.7500;  t[i++] =   3.0000;
-  y[i] =    10.4200;  t[i++] =   4.0000;
-  y[i] =     7.3100;  t[i++] =   5.0000;
-  y[i] =     7.4200;  t[i++] =   6.0000;
-  y[i] =    70.5000;  t[i++] =    .5000;
-  y[i] =    59.5000;  t[i++] =    .7500;
-  y[i] =    48.5000;  t[i++] =   1.0000;
-  y[i] =    35.8000;  t[i++] =   1.5000;
-  y[i] =    21.0000;  t[i++] =   2.0000;
-  y[i] =    21.6700;  t[i++] =   2.0000;
-  y[i] =    21.0000;  t[i++] =   2.5000;
-  y[i] =    15.6400;  t[i++] =   3.0000;
-  y[i] =     8.1700;  t[i++] =   4.0000;
-  y[i] =     8.5500;  t[i++] =   5.0000;
-  y[i] =    10.1200;  t[i++] =   6.0000;
-  y[i] =    78.0000;  t[i++] =    .5000;
-  y[i] =    66.0000;  t[i++] =    .6250;
-  y[i] =    62.0000;  t[i++] =    .7500;
-  y[i] =    58.0000;  t[i++] =    .8750;
-  y[i] =    47.7000;  t[i++] =   1.0000;
-  y[i] =    37.8000;  t[i++] =   1.2500;
-  y[i] =    20.2000;  t[i++] =   2.2500;
-  y[i] =    21.0700;  t[i++] =   2.2500;
-  y[i] =    13.8700;  t[i++] =   2.7500;
-  y[i] =     9.6700;  t[i++] =   3.2500;
-  y[i] =     7.7600;  t[i++] =   3.7500;
-  y[i] =    5.4400;   t[i++] =  4.2500;
-  y[i] =    4.8700;   t[i++] =  4.7500;
-  y[i] =     4.0100;  t[i++] =   5.2500;
-  y[i] =     3.7500;  t[i++] =   5.7500;
-  y[i] =    24.1900;  t[i++] =   3.0000;
-  y[i] =    25.7600;  t[i++] =   3.0000;
-  y[i] =    18.0700;  t[i++] =   3.0000;
-  y[i] =    11.8100;  t[i++] =   3.0000;
-  y[i] =    12.0700;  t[i++] =   3.0000;
-  y[i] =    16.1200;  t[i++] =   3.0000;
-  y[i] =    70.8000;  t[i++] =    .5000;
-  y[i] =    54.7000;  t[i++] =    .7500;
-  y[i] =    48.0000;  t[i++] =   1.0000;
-  y[i] =    39.8000;  t[i++] =   1.5000;
-  y[i] =    29.8000;  t[i++] =   2.0000;
-  y[i] =    23.7000;  t[i++] =   2.5000;
-  y[i] =    29.6200;  t[i++] =   2.0000;
-  y[i] =    23.8100;  t[i++] =   2.5000;
-  y[i] =    17.7000;  t[i++] =   3.0000;
-  y[i] =    11.5500;  t[i++] =   4.0000;
-  y[i] =    12.0700;  t[i++] =   5.0000;
-  y[i] =     8.7400;  t[i++] =   6.0000;
-  y[i] =    80.7000;  t[i++] =    .5000;
-  y[i] =    61.3000;  t[i++] =    .7500;
-  y[i] =    47.5000;  t[i++] =   1.0000;
-   y[i] =   29.0000;  t[i++] =   1.5000;
-   y[i] =   24.0000;  t[i++] =   2.0000;
-  y[i] =    17.7000;  t[i++] =   2.5000;
-  y[i] =    24.5600;  t[i++] =   2.0000;
-  y[i] =    18.6700;  t[i++] =   2.5000;
-   y[i] =   16.2400;  t[i++] =   3.0000;
-  y[i] =     8.7400;  t[i++] =   4.0000;
-  y[i] =     7.8700;  t[i++] =   5.0000;
-  y[i] =     8.5100;  t[i++] =   6.0000;
-  y[i] =    66.7000;  t[i++] =    .5000;
-  y[i] =    59.2000;  t[i++] =    .7500;
-  y[i] =    40.8000;  t[i++] =   1.0000;
-  y[i] =    30.7000;  t[i++] =   1.5000;
-  y[i] =    25.7000;  t[i++] =   2.0000;
-  y[i] =    16.3000;  t[i++] =   2.5000;
-  y[i] =    25.9900;  t[i++] =   2.0000;
-  y[i] =    16.9500;  t[i++] =   2.5000;
-  y[i] =    13.3500;  t[i++] =   3.0000;
-  y[i] =     8.6200;  t[i++] =   4.0000;
-  y[i] =     7.2000;  t[i++] =   5.0000;
-  y[i] =     6.6400;  t[i++] =   6.0000;
-  y[i] =    13.6900;  t[i++] =   3.0000;
-  y[i] =    81.0000;  t[i++] =    .5000;
-  y[i] =    64.5000;  t[i++] =    .7500;
-  y[i] =    35.5000;  t[i++] =   1.5000;
-   y[i] =   13.3100;  t[i++] =   3.0000;
-  y[i] =     4.8700;  t[i++] =   6.0000;
-  y[i] =    12.9400;  t[i++] =   3.0000;
-  y[i] =     5.0600;  t[i++] =   6.0000;
-  y[i] =    15.1900;  t[i++] =   3.0000;
-  y[i] =    14.6200;  t[i++] =   3.0000;
-  y[i] =    15.6400;  t[i++] =   3.0000;
-  y[i] =    25.5000;  t[i++] =   1.7500;
-  y[i] =    25.9500;  t[i++] =   1.7500;
-  y[i] =    81.7000;  t[i++] =    .5000;
-  y[i] =    61.6000;  t[i++] =    .7500;
-  y[i] =    29.8000;  t[i++] =   1.7500;
-  y[i] =    29.8100;  t[i++] =   1.7500;
-  y[i] =    17.1700;  t[i++] =   2.7500;
-  y[i] =    10.3900;  t[i++] =   3.7500;
-  y[i] =    28.4000;  t[i++] =   1.7500;
-  y[i] =    28.6900;  t[i++] =   1.7500;
-  y[i] =    81.3000;  t[i++] =    .5000;
-  y[i] =    60.9000;  t[i++] =    .7500;
-  y[i] =    16.6500;  t[i++] =   2.7500;
-  y[i] =    10.0500;  t[i++] =   3.7500;
-  y[i] =    28.9000;  t[i++] =   1.7500;
-  y[i] =    28.9500;  t[i++] =   1.7500;
+ 
+  data[i].y =   92.9000;   data[i++].t =  0.5000;
+  data[i].y =    78.7000;  data[i++].t =   0.6250;
+  data[i].y =    64.2000;  data[i++].t =   0.7500;
+  data[i].y =    64.9000;  data[i++].t =   0.8750;
+  data[i].y =    57.1000;  data[i++].t =   1.0000;
+  data[i].y =    43.3000;  data[i++].t =   1.2500;
+  data[i].y =    31.1000;   data[i++].t =  1.7500;
+  data[i].y =    23.6000;   data[i++].t =  2.2500;
+  data[i].y =    31.0500;   data[i++].t =  1.7500;
+  data[i].y =    23.7750;   data[i++].t =  2.2500;
+  data[i].y =    17.7375;   data[i++].t =  2.7500;
+  data[i].y =    13.8000;   data[i++].t =  3.2500;
+  data[i].y =    11.5875;   data[i++].t =  3.7500;
+  data[i].y =     9.4125;   data[i++].t =  4.2500;
+  data[i].y =     7.7250;   data[i++].t =  4.7500;
+  data[i].y =     7.3500;   data[i++].t =  5.2500;
+  data[i].y =     8.0250;   data[i++].t =  5.7500;
+  data[i].y =    90.6000;   data[i++].t =  0.5000;
+  data[i].y =    76.9000;   data[i++].t =  0.6250;
+  data[i].y =    71.6000;   data[i++].t = 0.7500;
+  data[i].y =    63.6000;   data[i++].t =  0.8750;
+  data[i].y =    54.0000;   data[i++].t =  1.0000;
+  data[i].y =    39.2000;   data[i++].t =  1.2500;
+  data[i].y =    29.3000;   data[i++].t = 1.7500;
+  data[i].y =    21.4000;   data[i++].t =  2.2500;
+  data[i].y =    29.1750;   data[i++].t =  1.7500;
+  data[i].y =    22.1250;   data[i++].t =  2.2500;
+  data[i].y =    17.5125;   data[i++].t =  2.7500;
+  data[i].y =    14.2500;   data[i++].t =  3.2500;
+  data[i].y =     9.4500;   data[i++].t =  3.7500;
+  data[i].y =     9.1500;   data[i++].t =  4.2500;
+  data[i].y =     7.9125;   data[i++].t =  4.7500;
+  data[i].y =     8.4750;   data[i++].t =  5.2500;
+  data[i].y =     6.1125;   data[i++].t =  5.7500;
+  data[i].y =    80.0000;   data[i++].t =  0.5000;
+  data[i].y =    79.0000;   data[i++].t =  0.6250;
+  data[i].y =    63.8000;   data[i++].t =  0.7500;
+  data[i].y =    57.2000;   data[i++].t =  0.8750;
+  data[i].y =    53.2000;   data[i++].t =  1.0000;
+  data[i].y =   42.5000;   data[i++].t =  1.2500;
+  data[i].y =   26.8000;   data[i++].t =  1.7500;
+  data[i].y =    20.4000;   data[i++].t =  2.2500;
+  data[i].y =    26.8500;  data[i++].t =   1.7500;
+  data[i].y =    21.0000;  data[i++].t =   2.2500;
+  data[i].y =    16.4625;  data[i++].t =   2.7500;
+  data[i].y =    12.5250;  data[i++].t =   3.2500;
+  data[i].y =    10.5375;  data[i++].t =   3.7500;
+  data[i].y =     8.5875;  data[i++].t =   4.2500;
+  data[i].y =     7.1250;  data[i++].t =   4.7500;
+  data[i].y =     6.1125;  data[i++].t =   5.2500;
+  data[i].y =     5.9625;  data[i++].t =   5.7500;
+  data[i].y =    74.1000;  data[i++].t =   0.5000;
+  data[i].y =    67.3000;  data[i++].t =   0.6250;
+  data[i].y =    60.8000;  data[i++].t =   0.7500;
+  data[i].y =    55.5000;  data[i++].t =   0.8750;
+  data[i].y =    50.3000;  data[i++].t =   1.0000;
+  data[i].y =    41.0000;  data[i++].t =   1.2500;
+  data[i].y =    29.4000;  data[i++].t =   1.7500;
+  data[i].y =    20.4000;  data[i++].t =   2.2500;
+  data[i].y =    29.3625;  data[i++].t =   1.7500;
+  data[i].y =    21.1500;  data[i++].t =   2.2500;
+  data[i].y =    16.7625;  data[i++].t =   2.7500;
+  data[i].y =    13.2000;  data[i++].t =   3.2500;
+  data[i].y =    10.8750;  data[i++].t =   3.7500;
+  data[i].y =     8.1750;  data[i++].t =   4.2500;
+  data[i].y =     7.3500;  data[i++].t =   4.7500;
+  data[i].y =     5.9625;  data[i++].t =  5.2500;
+  data[i].y =     5.6250;  data[i++].t =   5.7500;
+  data[i].y =    81.5000;  data[i++].t =    .5000;
+  data[i].y =    62.4000;  data[i++].t =    .7500;
+  data[i].y =    32.5000;  data[i++].t =   1.5000;
+  data[i].y =    12.4100;  data[i++].t =   3.0000;
+  data[i].y =    13.1200;  data[i++].t =   3.0000;
+  data[i].y =    15.5600;  data[i++].t =   3.0000;
+  data[i].y =     5.6300;  data[i++].t =   6.0000;
+  data[i].y =    78.0000;   data[i++].t =   .5000;
+  data[i].y =    59.9000;  data[i++].t =    .7500;
+  data[i].y =    33.2000;  data[i++].t =   1.5000;
+  data[i].y =    13.8400;  data[i++].t =   3.0000;
+  data[i].y =    12.7500;  data[i++].t =   3.0000;
+  data[i].y =    14.6200;  data[i++].t =   3.0000;
+  data[i].y =     3.9400;  data[i++].t =   6.0000;
+  data[i].y =    76.8000;  data[i++].t =    .5000;
+  data[i].y =    61.0000;  data[i++].t =    .7500;
+  data[i].y =    32.9000;  data[i++].t =   1.5000;
+  data[i].y =   13.8700;   data[i++].t = 3.0000;
+  data[i].y =    11.8100;  data[i++].t =   3.0000;
+  data[i].y =    13.3100;  data[i++].t =   3.0000;
+  data[i].y =     5.4400;  data[i++].t =   6.0000;
+  data[i].y =    78.0000;  data[i++].t =    .5000;
+  data[i].y =    63.5000;  data[i++].t =    .7500;
+  data[i].y =    33.8000;  data[i++].t =   1.5000;
+  data[i].y =    12.5600;  data[i++].t =   3.0000;
+  data[i].y =     5.6300;  data[i++].t =   6.0000;
+  data[i].y =    12.7500;  data[i++].t =   3.0000;
+  data[i].y =    13.1200;  data[i++].t =   3.0000;
+  data[i].y =     5.4400;  data[i++].t =   6.0000;
+  data[i].y =    76.8000;  data[i++].t =    .5000;
+  data[i].y =    60.0000;  data[i++].t =    .7500;
+  data[i].y =    47.8000;  data[i++].t =   1.0000;
+  data[i].y =    32.0000;  data[i++].t =   1.5000;
+  data[i].y =    22.2000;  data[i++].t =   2.0000;
+  data[i].y =    22.5700;  data[i++].t =   2.0000;
+  data[i].y =    18.8200;  data[i++].t =   2.5000;
+  data[i].y =    13.9500;  data[i++].t =   3.0000;
+  data[i].y =    11.2500;  data[i++].t =   4.0000;
+  data[i].y =     9.0000;  data[i++].t =   5.0000;
+  data[i].y =     6.6700;  data[i++].t =   6.0000;
+  data[i].y =    75.8000;  data[i++].t =    .5000;
+  data[i].y =    62.0000;  data[i++].t =    .7500;
+  data[i].y =    48.8000;  data[i++].t =   1.0000;
+  data[i].y =    35.2000;  data[i++].t =   1.5000;
+  data[i].y =    20.0000;  data[i++].t =   2.0000;
+  data[i].y =    20.3200;  data[i++].t =   2.0000;
+  data[i].y =    19.3100;  data[i++].t =   2.5000;
+  data[i].y =    12.7500;  data[i++].t =   3.0000;
+  data[i].y =    10.4200;  data[i++].t =   4.0000;
+  data[i].y =     7.3100;  data[i++].t =   5.0000;
+  data[i].y =     7.4200;  data[i++].t =   6.0000;
+  data[i].y =    70.5000;  data[i++].t =    .5000;
+  data[i].y =    59.5000;  data[i++].t =    .7500;
+  data[i].y =    48.5000;  data[i++].t =   1.0000;
+  data[i].y =    35.8000;  data[i++].t =   1.5000;
+  data[i].y =    21.0000;  data[i++].t =   2.0000;
+  data[i].y =    21.6700;  data[i++].t =   2.0000;
+  data[i].y =    21.0000;  data[i++].t =   2.5000;
+  data[i].y =    15.6400;  data[i++].t =   3.0000;
+  data[i].y =     8.1700;  data[i++].t =   4.0000;
+  data[i].y =     8.5500;  data[i++].t =   5.0000;
+  data[i].y =    10.1200;  data[i++].t =   6.0000;
+  data[i].y =    78.0000;  data[i++].t =    .5000;
+  data[i].y =    66.0000;  data[i++].t =    .6250;
+  data[i].y =    62.0000;  data[i++].t =    .7500;
+  data[i].y =    58.0000;  data[i++].t =    .8750;
+  data[i].y =    47.7000;  data[i++].t =   1.0000;
+  data[i].y =    37.8000;  data[i++].t =   1.2500;
+  data[i].y =    20.2000;  data[i++].t =   2.2500;
+  data[i].y =    21.0700;  data[i++].t =   2.2500;
+  data[i].y =    13.8700;  data[i++].t =   2.7500;
+  data[i].y =     9.6700;  data[i++].t =   3.2500;
+  data[i].y =     7.7600;  data[i++].t =   3.7500;
+  data[i].y =    5.4400;   data[i++].t =  4.2500;
+  data[i].y =    4.8700;   data[i++].t =  4.7500;
+  data[i].y =     4.0100;  data[i++].t =   5.2500;
+  data[i].y =     3.7500;  data[i++].t =   5.7500;
+  data[i].y =    24.1900;  data[i++].t =   3.0000;
+  data[i].y =    25.7600;  data[i++].t =   3.0000;
+  data[i].y =    18.0700;  data[i++].t =   3.0000;
+  data[i].y =    11.8100;  data[i++].t =   3.0000;
+  data[i].y =    12.0700;  data[i++].t =   3.0000;
+  data[i].y =    16.1200;  data[i++].t =   3.0000;
+  data[i].y =    70.8000;  data[i++].t =    .5000;
+  data[i].y =    54.7000;  data[i++].t =    .7500;
+  data[i].y =    48.0000;  data[i++].t =   1.0000;
+  data[i].y =    39.8000;  data[i++].t =   1.5000;
+  data[i].y =    29.8000;  data[i++].t =   2.0000;
+  data[i].y =    23.7000;  data[i++].t =   2.5000;
+  data[i].y =    29.6200;  data[i++].t =   2.0000;
+  data[i].y =    23.8100;  data[i++].t =   2.5000;
+  data[i].y =    17.7000;  data[i++].t =   3.0000;
+  data[i].y =    11.5500;  data[i++].t =   4.0000;
+  data[i].y =    12.0700;  data[i++].t =   5.0000;
+  data[i].y =     8.7400;  data[i++].t =   6.0000;
+  data[i].y =    80.7000;  data[i++].t =    .5000;
+  data[i].y =    61.3000;  data[i++].t =    .7500;
+  data[i].y =    47.5000;  data[i++].t =   1.0000;
+   data[i].y =   29.0000;  data[i++].t =   1.5000;
+   data[i].y =   24.0000;  data[i++].t =   2.0000;
+  data[i].y =    17.7000;  data[i++].t =   2.5000;
+  data[i].y =    24.5600;  data[i++].t =   2.0000;
+  data[i].y =    18.6700;  data[i++].t =   2.5000;
+   data[i].y =   16.2400;  data[i++].t =   3.0000;
+  data[i].y =     8.7400;  data[i++].t =   4.0000;
+  data[i].y =     7.8700;  data[i++].t =   5.0000;
+  data[i].y =     8.5100;  data[i++].t =   6.0000;
+  data[i].y =    66.7000;  data[i++].t =    .5000;
+  data[i].y =    59.2000;  data[i++].t =    .7500;
+  data[i].y =    40.8000;  data[i++].t =   1.0000;
+  data[i].y =    30.7000;  data[i++].t =   1.5000;
+  data[i].y =    25.7000;  data[i++].t =   2.0000;
+  data[i].y =    16.3000;  data[i++].t =   2.5000;
+  data[i].y =    25.9900;  data[i++].t =   2.0000;
+  data[i].y =    16.9500;  data[i++].t =   2.5000;
+  data[i].y =    13.3500;  data[i++].t =   3.0000;
+  data[i].y =     8.6200;  data[i++].t =   4.0000;
+  data[i].y =     7.2000;  data[i++].t =   5.0000;
+  data[i].y =     6.6400;  data[i++].t =   6.0000;
+  data[i].y =    13.6900;  data[i++].t =   3.0000;
+  data[i].y =    81.0000;  data[i++].t =    .5000;
+  data[i].y =    64.5000;  data[i++].t =    .7500;
+  data[i].y =    35.5000;  data[i++].t =   1.5000;
+   data[i].y =   13.3100;  data[i++].t =   3.0000;
+  data[i].y =     4.8700;  data[i++].t =   6.0000;
+  data[i].y =    12.9400;  data[i++].t =   3.0000;
+  data[i].y =     5.0600;  data[i++].t =   6.0000;
+  data[i].y =    15.1900;  data[i++].t =   3.0000;
+  data[i].y =    14.6200;  data[i++].t =   3.0000;
+  data[i].y =    15.6400;  data[i++].t =   3.0000;
+  data[i].y =    25.5000;  data[i++].t =   1.7500;
+  data[i].y =    25.9500;  data[i++].t =   1.7500;
+  data[i].y =    81.7000;  data[i++].t =    .5000;
+  data[i].y =    61.6000;  data[i++].t =    .7500;
+  data[i].y =    29.8000;  data[i++].t =   1.7500;
+  data[i].y =    29.8100;  data[i++].t =   1.7500;
+  data[i].y =    17.1700;  data[i++].t =   2.7500;
+  data[i].y =    10.3900;  data[i++].t =   3.7500;
+  data[i].y =    28.4000;  data[i++].t =   1.7500;
+  data[i].y =    28.6900;  data[i++].t =   1.7500;
+  data[i].y =    81.3000;  data[i++].t =    .5000;
+  data[i].y =    60.9000;  data[i++].t =    .7500;
+  data[i].y =    16.6500;  data[i++].t =   2.7500;
+  data[i].y =    10.0500;  data[i++].t =   3.7500;
+  data[i].y =    28.9000;  data[i++].t =   1.7500;
+  data[i].y =    28.9500;  data[i++].t =   1.7500;
 
   if (i != N_terms) throw std::runtime_error("Number of data values does not equal N_terms!");
 }
