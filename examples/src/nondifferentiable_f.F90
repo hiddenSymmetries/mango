@@ -22,7 +22,7 @@ program nondifferentiable
 
   include 'mpif.h'
   
-  integer :: ierr, N_procs, mpi_rank, data(1)
+  integer :: ierr, N_procs, mpi_rank
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
@@ -67,11 +67,7 @@ program nondifferentiable
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
-
-     ! Make workers stop
-     data = -1
-     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
-     if (ierr .ne. 0) print *,"Error A on proc0!"
+     call mango_stop_workers(problem)
   else
      call worker(problem)
   end if
@@ -117,6 +113,8 @@ subroutine objective_function(N, x, f, failed, problem, void_user_data)
 
   if (verbose_level > 0) print *,"Hi from fortran. N=",N," size(x)=",size(x)
 
+  call mango_mobilize_workers(problem)
+  
   ! Check that user_data was passed successfully
   call c_f_pointer(void_user_data, user_data) ! This line effectively casts (void*) to (my_type*)
   if ((user_data%i .ne. 7) .or. (abs(user_data%f - 2.71828182845905d+0) > 1.0d-13)) then
@@ -149,16 +147,10 @@ subroutine worker(problem)
   include 'mpif.h'
 
   type(mango_problem) :: problem
-  integer :: ierr, data(1)
 
-  do
-     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
-     if (data(1) < 0) then
-        if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
-        exit
-     else
-        if (verbose_level > 0) print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
-     end if
+  do while (mango_continue_worker_loop(problem))
+     if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," could do some work here."
   end do
+  if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
 
 end subroutine worker

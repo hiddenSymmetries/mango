@@ -44,11 +44,7 @@ int main(int argc, char *argv[]) {
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
-
-    // Make workers stop
-    int data[1];
-    data[0] = -1;
-    MPI_Bcast(data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
+    myprob.mpi_partition.stop_workers();
   } else {
     worker(&myprob);
   }
@@ -71,6 +67,9 @@ void residual_function(int* N_parameters, const double* x, int* N_terms, double*
   int j;
   if (verbose_level > 0) std::cout << "C residual function called with N="<< *N_parameters << "\n";
 
+  // Mobilize the workers in the group with this group leader:
+  this_problem->mpi_partition.mobilize_workers();
+
   // Verify that the user data was passed successfully.
   int* user_data = (int*)void_user_data;
   assert(*user_data == 7);
@@ -83,17 +82,9 @@ void residual_function(int* N_parameters, const double* x, int* N_terms, double*
 
 
 void worker(mango::problem* myprob) {
-  bool keep_going = true;
-  int data[1];
-
-  while (keep_going) {
-    MPI_Bcast(data, 1, MPI_INT, 0, myprob->mpi_partition.get_comm_worker_groups());
-    if (data[0] < 0) {
-      if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
-      keep_going = false;
-    } else {
-      if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is doing calculation " << data[0] << "\n";
-      // For this problem, the workers don't actually do any work.
-    }
+  while (myprob->mpi_partition.continue_worker_loop()) {
+    // For this problem, the workers don't actually do any work.
+    if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " could do some work here." << std::endl;
   }
+  if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting." << std::endl;
 }

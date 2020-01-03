@@ -17,7 +17,7 @@ program active_bound_constraints
 
   include 'mpif.h'
   
-  integer :: ierr, N_procs, mpi_rank, data(1)
+  integer :: ierr, N_procs, mpi_rank
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
@@ -45,11 +45,7 @@ program active_bound_constraints
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
-
-     ! Make workers stop
-     data = -1
-     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
-     if (ierr .ne. 0) print *,"Error A on proc0!"
+     call mango_stop_workers(problem)
   else
      call worker(problem)
   end if
@@ -89,6 +85,8 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_
      print *,"This line too:",mango_get_mpi_rank_world(problem)
   end if
 
+  call mango_mobilize_workers(problem)
+
   f(1) = x(1) - x(2)
   f(2) = x(2)
 
@@ -110,16 +108,10 @@ subroutine worker(problem)
   include 'mpif.h'
 
   type(mango_problem) :: problem
-  integer :: ierr, data(1)
 
-  do
-     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
-     if (data(1) < 0) then
-        if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
-        exit
-     else
-        if (verbose_level > 0) print "(a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is doing calculation",data(1)
-     end if
+  do while (mango_continue_worker_loop(problem))
+     if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," could do some work here."
   end do
+  if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
 
 end subroutine worker

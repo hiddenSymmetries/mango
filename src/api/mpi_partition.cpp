@@ -90,3 +90,24 @@ void mango::MPI_Partition::set_N_worker_groups(int N_worker_groups_in) {
   N_worker_groups = N_worker_groups_in;
 }
 
+void mango::MPI_Partition::stop_workers() {
+  // This method should only be called from group leaders.
+  if (!proc0_worker_groups) throw std::runtime_error("mango::MPI_Partition::stop_workers() should only be called from group leaders.");
+  int data = -1; // Any negative value will do here.
+  MPI_Bcast(&data, 1, MPI_INT, 0, comm_worker_groups);
+}
+
+void mango::MPI_Partition::mobilize_workers() {
+  // This method should only be called from group leaders.
+  if (!proc0_worker_groups) throw std::runtime_error("mango::MPI_Partition::mobilize_workers() should only be called from group leaders.");
+  int data = 1; // Any nonnegative value will do here.
+  MPI_Bcast(&data, 1, MPI_INT, 0, comm_worker_groups);
+}
+
+bool mango::MPI_Partition::continue_worker_loop() {
+  // This method should NOT be called from group leaders.
+  if (proc0_worker_groups) throw std::runtime_error("mango::MPI_Partition::continue_worker_loop() should not be called from group leaders.");
+  int data;
+  MPI_Bcast(&data, 1, MPI_INT, 0, comm_worker_groups);
+  return (data >= 0);
+}

@@ -12,7 +12,7 @@ program chwirut
 
   include 'mpif.h'
   
-  integer :: ierr, N_procs, mpi_rank, data(1)
+  integer :: ierr, N_procs, mpi_rank
   logical :: proc0
   type(mango_problem) :: problem
   integer, parameter :: N_terms = 214
@@ -39,14 +39,11 @@ program chwirut
   call mango_set_output_filename(problem, "../output/mango_out.chwirut_f")
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_max_function_evaluations(problem, 2000)
+  call mango_set_print_residuals_in_output_file(problem, .false.)
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
-
-     ! Make workers stop
-     data = -1
-     call mpi_bcast(data,1,MPI_INTEGER,0,mango_get_mpi_comm_worker_groups(problem),ierr)
-     if (ierr .ne. 0) print *,"Error A on proc0!"
+     call mango_stop_workers(problem)
   else
      call worker(problem)
   end if
@@ -95,7 +92,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_
   integer(C_int), intent(out) :: failed
   type(mango_problem), value, intent(in) :: problem
   type(C_ptr), value, intent(in) :: user_data
-  integer :: data(1), ierr, j, start_index, stop_index, N_procs_worker_groups
+  integer :: ierr, j, start_index, stop_index, N_procs_worker_groups
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer :: mpi_comm_worker_groups
 
@@ -104,9 +101,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_
   mpi_comm_worker_groups = mango_get_mpi_comm_worker_groups(problem)
 
   ! Mobilize the workers in the group with this group leader:
-  data = 1 ! Any nonnegative value will do here.
-  call mpi_bcast(data,1,MPI_INTEGER,0,mpi_comm_worker_groups,ierr)
-  if (ierr .ne. 0) print *,"Error on proc0 in residual_function!"
+  call mango_mobilize_workers(problem)
 
   ! Send the state vector to all the other procs:
   call mpi_bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups, ierr)
@@ -138,7 +133,7 @@ subroutine worker(problem)
   include 'mpif.h'
 
   type(mango_problem) :: problem
-  integer :: ierr, data(1)
+  integer :: ierr
   double precision, allocatable :: f(:), x(:)
   integer :: start_index, stop_index, N_terms, mpi_rank_worker_groups, N_parameters
   integer :: mpi_comm_worker_groups
@@ -151,25 +146,19 @@ subroutine worker(problem)
   allocate(x(N_parameters))
   call partition_work(N_terms, mpi_rank_worker_groups, mango_get_N_procs_worker_groups(problem), start_index, stop_index)
 
-  do ! Loop until the master proc tells us to quit.
-     ! Wait until we receive a message to do something.
-     call mpi_bcast(data,1,MPI_INTEGER,0,mpi_comm_worker_groups,ierr)
-     if (data(1) < 0) then
-        if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
-        exit
-     else
-        if (verbose_level > 0) print "(a,i4,a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is processing indices",start_index," to",stop_index
+  do while (mango_continue_worker_loop(problem))
+     if (verbose_level > 0) print "(a,i4,a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is processing indices",start_index," to",stop_index
 
-        ! Get the state vector
-        call mpi_bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups, ierr)
+     ! Get the state vector
+     call mpi_bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups, ierr)
        
-        call do_work(N_parameters, x, N_terms, f, start_index, stop_index)
+     call do_work(N_parameters, x, N_terms, f, start_index, stop_index)
 
-        ! Send my terms of the residual back to the master proc.
-        call mpi_send(f(start_index:stop_index), stop_index - start_index + 1, MPI_DOUBLE, 0,mpi_rank_worker_groups,mpi_comm_worker_groups,ierr)
-       end if
+     ! Send my terms of the residual back to the master proc.
+     call mpi_send(f(start_index:stop_index), stop_index - start_index + 1, MPI_DOUBLE, 0,mpi_rank_worker_groups,mpi_comm_worker_groups,ierr)
   end do
 
+  if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."
   deallocate(f,x)
 
 end subroutine worker

@@ -63,16 +63,13 @@ int main(int argc, char *argv[]) {
   myprob.mpi_init(MPI_COMM_WORLD);
   // myprob.centered_differences = true;
   myprob.max_function_evaluations = 2000;
-  myprob.print_residuals_in_output_file = true;
+  myprob.print_residuals_in_output_file = false;
   myprob.user_data = yt_data; // This passes the (y,t) data to the residual function
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
     best_objective_function = myprob.optimize();
-
-    // Make workers stop
-    int data = -1;
-    MPI_Bcast(&data, 1, MPI_INT, 0, myprob.mpi_partition.get_comm_worker_groups());
+    myprob.mpi_partition.stop_workers();
   } else {
     worker(&myprob, yt_data);
   }
@@ -113,8 +110,7 @@ void residual_function(int* N_parameters, const double* x, int* N_terms_copy, do
   int N_procs_worker_groups = this_problem->mpi_partition.get_N_procs_worker_groups();
 
   // Mobilize the workers in the group with this group leader:
-  int data = 1; // Any nonnegative value will do here.
-  MPI_Bcast(&data, 1, MPI_INT, 0, comm_worker_groups);
+  this_problem->mpi_partition.mobilize_workers();
 
   // Send the state vector to all the other procs:
   int N = *N_parameters;
@@ -137,9 +133,6 @@ void residual_function(int* N_parameters, const double* x, int* N_terms_copy, do
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void worker(mango::problem* myprob, datapoint* yt_data) {
-  bool keep_going = true;
-  int data[1];
-
   MPI_Comm mpi_comm_worker_groups = myprob->mpi_partition.get_comm_worker_groups();
   int N_parameters = myprob->get_N_parameters();
   int mpi_rank_worker_groups = myprob->mpi_partition.get_rank_worker_groups();
@@ -150,23 +143,18 @@ void worker(mango::problem* myprob, datapoint* yt_data) {
 
   partition_work(mpi_rank_worker_groups, myprob->mpi_partition.get_N_procs_worker_groups(), &start_index, &stop_index);
 
-  while (keep_going) {
-    MPI_Bcast(data, 1, MPI_INT, 0, mpi_comm_worker_groups);
-    if (data[0] < 0) {
-      if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
-      keep_going = false;
-    } else {
-      if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is processing indices " << start_index << " to " << stop_index << "\n";
+  while (myprob->mpi_partition.continue_worker_loop()) {
+    if (verbose_level > 0) std::cout<< "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is processing indices " << start_index << " to " << stop_index << "\n";
 
-      // Get the state vector
-      MPI_Bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups);
+    // Get the state vector
+    MPI_Bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups);
 	
-      do_work(N_parameters, x, f, start_index, stop_index, yt_data);
+    do_work(N_parameters, x, f, start_index, stop_index, yt_data);
 
-      // Send my terms of the residual back to the master proc.
-      MPI_Send(&f[start_index], stop_index - start_index + 1, MPI_DOUBLE, 0, mpi_rank_worker_groups, mpi_comm_worker_groups);
-    }
+    // Send my terms of the residual back to the master proc.
+    MPI_Send(&f[start_index], stop_index - start_index + 1, MPI_DOUBLE, 0, mpi_rank_worker_groups, mpi_comm_worker_groups);
   }
+  if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " is exiting.\n";
 }
 
 

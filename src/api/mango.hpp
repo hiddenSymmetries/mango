@@ -187,6 +187,10 @@ namespace mango {
     int get_worker_group();
     int get_N_worker_groups();
     void set_N_worker_groups(int);
+
+    void stop_workers();
+    void mobilize_workers();
+    bool continue_worker_loop();
   };
 
   //////////////////////////////////////////////////////////////////////////////////////

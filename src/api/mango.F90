@@ -200,6 +200,19 @@ module mango
        import
        type(C_ptr), value :: this, user_data
      end subroutine C_mango_set_user_data
+     subroutine C_mango_stop_workers(this) bind(C,name="mango_stop_workers")
+       import
+       type(C_ptr), value :: this
+     end subroutine C_mango_stop_workers
+     subroutine C_mango_mobilize_workers(this) bind(C,name="mango_mobilize_workers")
+       import
+       type(C_ptr), value :: this
+     end subroutine C_mango_mobilize_workers
+     function C_mango_continue_worker_loop(this) result(N) bind(C,name="mango_continue_worker_loop")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_continue_worker_loop
   end interface
 
   public :: mango_problem
@@ -213,7 +226,8 @@ module mango
        mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
-       mango_set_verbose, mango_set_print_residuals_in_output_file, mango_set_user_data
+       mango_set_verbose, mango_set_print_residuals_in_output_file, mango_set_user_data, &
+       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop
   
 
   abstract interface
@@ -520,5 +534,28 @@ contains
     type(C_ptr), intent(in) :: user_data
     call C_mango_set_user_data(this%object, user_data)
   end subroutine mango_set_user_data
+
+  subroutine mango_stop_workers(this)
+    type(mango_problem), intent(in) :: this
+    call C_mango_stop_workers(this%object)
+  end subroutine mango_stop_workers
+
+  subroutine mango_mobilize_workers(this)
+    type(mango_problem), intent(in) :: this
+    call C_mango_mobilize_workers(this%object)
+  end subroutine mango_mobilize_workers
+
+  logical function mango_continue_worker_loop(this)
+    type(mango_problem), intent(in) :: this
+    integer :: result
+    result = C_mango_continue_worker_loop(this%object)
+    if (result == 0) then
+       mango_continue_worker_loop = .false.
+    elseif (result == 1) then
+       mango_continue_worker_loop = .true.
+    else
+       stop "Error in mango_continue_worker_loop"
+    end if
+  end function mango_continue_worker_loop
 
 end module mango

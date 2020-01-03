@@ -188,4 +188,16 @@ extern "C" {
     This->user_data = user_data;
   }
 
+  void mango_stop_workers(mango::problem *This) {
+    This->mpi_partition.stop_workers();
+  }
+
+  void mango_mobilize_workers(mango::problem *This) {
+    This->mpi_partition.mobilize_workers();
+  }
+
+  int mango_continue_worker_loop(mango::problem *This) {
+    int return_bool = This->mpi_partition.continue_worker_loop();
+    return (return_bool ? 1 : 0);
+  }
 }
