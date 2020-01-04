@@ -93,7 +93,8 @@ for k in range(len(filenames)):
         min_objective_function = np.nanmin(objective_function)
         # np.nanmin is a minimum excluding any nans.
     else:
-        min_objective_function = np.nanmin((min_objective_function, np.nanmin(objective_function)))
+        if len(objective_function) > 0: # Failed runs have len(objective_function)=0, causing np.nanmin to fail
+            min_objective_function = np.nanmin((min_objective_function, np.nanmin(objective_function)))
 
     # In the next 2 lines, we drop the last elements because these represent a repeat of the optimal point.
     files_function_evaluations.append(function_evaluations[:-1])

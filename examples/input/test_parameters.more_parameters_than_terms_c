@@ -1,0 +1,41 @@
+! N_procs, N_worker_groups:
+1,1
+! algorithms:
+petsc_pounders
+petsc_nm
+petsc_brgn
+nlopt_gn_direct
+nlopt_gn_direct_l
+nlopt_gn_direct_l_rand
+nlopt_gn_direct_noscal
+nlopt_gn_direct_l_noscal
+nlopt_gn_direct_l_rand_noscal
+nlopt_gn_orig_direct
+nlopt_gn_orig_direct_l
+nlopt_gn_crs2_lm
+nlopt_ln_cobyla
+nlopt_ln_bobyqa
+nlopt_ln_praxis
+nlopt_ln_neldermead
+nlopt_ln_sbplx
+nlopt_ld_mma
+nlopt_ld_ccsaq
+nlopt_ld_slsqp
+nlopt_ld_lbfgs
+nlopt_ld_tnewton_precond_restart
+nlopt_ld_tnewton_precond
+nlopt_ld_tnewton_restart
+nlopt_ld_tnewton
+nlopt_ld_var1
+nlopt_ld_var2
+hopspack
+gsl_lm
+gsl_dogleg
+gsl_ddogleg
+gsl_subspace2d
+gsl_conjugate_fr
+gsl_conjugate_pr
+gsl_bfgs
+gsl_nm
+! True location(s) of optimum:
+-0.5, -0.5, 0.25
