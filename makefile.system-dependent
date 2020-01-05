@@ -94,6 +94,9 @@ endif
 #EXTRA_C_COMPILE_FLAGS += -I/usr/local/include
 #EXTRA_F_COMPILE_FLAGS += -I/usr/local/include
 
+# catch2 requires the -std=c++11 flag
+EXTRA_C_COMPILE_FLAGS += -std=c++11
+
 MANGO_COMMAND_TO_SUBMIT_JOB = srun -n NUM_PROCS
 
 #####################################################################
