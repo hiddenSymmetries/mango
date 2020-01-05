@@ -165,6 +165,7 @@ namespace mango {
 
     void verify_initialized();
     void print();
+    void write_line(std::ofstream&, int, std::string[], int[]);
 
   public:
     int verbose;
@@ -187,6 +188,7 @@ namespace mango {
     int get_worker_group();
     int get_N_worker_groups();
     void set_N_worker_groups(int);
+    void write(std::string);
 
     void stop_workers();
     void mobilize_workers();

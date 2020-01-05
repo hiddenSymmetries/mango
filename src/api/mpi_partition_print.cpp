@@ -1,5 +1,6 @@
-#include<iostream>
-#include<mpi.h>
+#include <iostream>
+#include <iomanip>
+#include <mpi.h>
 #include "mango.hpp"
 
 void mango::MPI_Partition::print() {
@@ -24,4 +25,54 @@ void mango::MPI_Partition::print() {
     MPI_Send(proc_assignments_string, buffer_length, MPI_CHAR, 0, tag, comm_world);
   }
 
+}
+
+
+void mango::MPI_Partition::write(std::string filename) {
+  const int N_data_items = 8;
+  std::string columns[N_data_items] = {"rank_world","N_procs_world","worker_group","N_worker_groups","rank_worker_groups","N_procs_worker_groups","rank_group_leaders","N_procs_group_leaders"};
+  int            data[N_data_items] = { rank_world , N_procs_world , worker_group , N_worker_groups , rank_worker_groups , N_procs_worker_groups , rank_group_leaders , N_procs_group_leaders };
+
+  std::ofstream output_file;
+  int j;
+
+  if (proc0_world) {
+    // Open the file
+    output_file.open(filename.c_str());
+    if (!output_file.is_open()) {
+      std::cerr << "MPI_Partition output file: " << filename << std::endl;
+      throw std::runtime_error("Error! Unable to open MPI_Partition output file.");
+    }
+    
+    // Write the header line
+    output_file << columns[0];
+    for (j=1; j<N_data_items; j++) output_file << ", " << columns[j];
+    output_file << std::endl;
+  }
+
+  MPI_Status status;
+  int tag;
+  MPI_Barrier(comm_world);
+  // Each processor sends their data to proc0_world, and proc0_world writes the result to the file in order.
+  if (proc0_world) {
+    write_line(output_file, N_data_items, columns, data);
+    for (tag = 1; tag < N_procs_world; tag++) {
+      MPI_Recv(data, N_data_items, MPI_INT, tag, tag, comm_world, &status);
+      write_line(output_file, N_data_items, columns, data);
+    }
+  } else {
+    tag = rank_world;
+    MPI_Send(data, N_data_items, MPI_INT, 0, tag, comm_world);
+  }
+
+
+  if (proc0_world) output_file.close();
+}
+
+
+void mango::MPI_Partition::write_line(std::ofstream& output_file, int N_data_items, std::string columns[], int data[]) {
+  // This subroutine writes one line of the mango_mpi output file.
+  output_file << std::setw(columns[0].length()) << data[0];
+  for (int j=1; j<N_data_items; j++)  output_file << ", " << std::setw(columns[j].length()) << data[j];
+  output_file << std::endl;
 }

@@ -1,4 +1,9 @@
-// f = [z - x^2 - y^2)]^2 + [(x + y + z - (-1)]^2
+// The purpose of this example is to test the behavior of least-squares algorithms
+// when the number of parameters exceeds the number of least-squares terms. Some algorithms
+// like those in GSL fail in this case.
+//
+// Objective function: f = [z - x^2 - y^2)]^2 + [(x + y + z - (-1)]^2
+//
 // The first term is minimized for points on the graph z = x^2 + y^2.
 // The second term is minimized for points on the plane x + y + z = -1.
 // Since this graph and plane do not intersect, the optimum of the total f is >0.
