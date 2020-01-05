@@ -17,6 +17,7 @@ program active_bound_constraints
 
   include 'mpif.h'
   
+  character(len=*), parameter :: extension = "active_bound_constraints_f"
   integer :: ierr, N_procs, mpi_rank
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
@@ -37,8 +38,8 @@ program active_bound_constraints
   call mango_problem_create_least_squares(problem,N_dim,state_vector,N_dim,targets,sigmas,best_residual_function,residual_function)
   if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   call mango_set_verbose(problem, verbose_level)
-  call mango_read_input_file(problem, "../input/mango_in.active_bound_constraints_f")
-  call mango_set_output_filename(problem, "../output/mango_out.active_bound_constraints_f")
+  call mango_read_input_file(problem, "../input/mango_in." // extension)
+  call mango_set_output_filename(problem, "../output/mango_out." // extension)
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_max_function_evaluations(problem, 500)
   call mango_set_bound_constraints(problem, lower_bounds, upper_bounds)

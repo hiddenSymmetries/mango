@@ -32,7 +32,7 @@ double mango::problem::optimize() {
   if (algorithms[algorithm].requires_bound_constraints && (!bound_constraints_set)) 
     throw std::runtime_error("Error! A MANGO algorithm was chosen that requires bound constraints, but bound constraints were not set.");
 
-  if (bound_constraints_set && (!algorithms[algorithm].allows_bound_constraints)) {
+  if (bound_constraints_set && (!algorithms[algorithm].allows_bound_constraints) && mpi_partition.get_proc0_world()) {
 #define star_line "*******************************************************************************************************"
     std::cerr << star_line << std::endl;
     std::cerr << "WARNING! Bound constraints were set, but an algorithm was chosen that does not allow bound constraints." << std::endl;

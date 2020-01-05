@@ -12,7 +12,8 @@ program quadratic
   implicit none
 
   include 'mpif.h'
-  
+
+  character(len=*), parameter :: extension = "quadratic_f"
   integer :: ierr, N_procs, mpi_rank
   logical :: proc0
   !type(mango_least_squares_problem) :: problem
@@ -40,9 +41,10 @@ program quadratic
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
   call mango_set_verbose(problem, verbose_level)
-  call mango_read_input_file(problem, "../input/mango_in.quadratic_f")
-  call mango_set_output_filename(problem, "../output/mango_out.quadratic_f")
+  call mango_read_input_file(problem, "../input/mango_in." // extension)
+  call mango_set_output_filename(problem, "../output/mango_out." // extension)
   call mango_mpi_init(problem, MPI_COMM_WORLD)
+  call mango_mpi_partition_write(problem, "../output/mango_mpi." // extension)
   call mango_set_centered_differences(problem, .true.)
   call mango_set_max_function_evaluations(problem, 2000)
   call mango_set_user_data(problem, c_loc(my_data))

@@ -55,12 +55,14 @@ int main(int argc, char *argv[]) {
   }
   mango::problem myprob(3, state_vector, N_terms, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
+  std::string extension = "chwirut_c";
   //  myprob.set_algorithm(mango::PETSC_POUNDERS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
   myprob.verbose = verbose_level;
-  myprob.read_input_file("../input/mango_in.chwirut_c");
-  myprob.output_filename = "../output/mango_out.chwirut_c";
+  myprob.read_input_file("../input/mango_in." + extension);
+  myprob.output_filename = "../output/mango_out." + extension;
   myprob.mpi_init(MPI_COMM_WORLD);
+  myprob.mpi_partition.write("../output/mango_mpi." + extension);
   // myprob.centered_differences = true;
   myprob.max_function_evaluations = 2000;
   myprob.print_residuals_in_output_file = false;

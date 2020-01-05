@@ -213,6 +213,11 @@ module mango
        integer(C_int) :: N
        type(C_ptr), value :: this
      end function C_mango_continue_worker_loop
+     subroutine C_mango_mpi_partition_write(this, filename) bind(C,name="mango_mpi_partition_write")
+       import
+       type(C_ptr), value :: this
+       character(C_char) :: filename(mango_interface_string_length)
+     end subroutine C_mango_mpi_partition_write
   end interface
 
   public :: mango_problem
@@ -227,7 +232,7 @@ module mango
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
        mango_set_verbose, mango_set_print_residuals_in_output_file, mango_set_user_data, &
-       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop
+       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write
   
 
   abstract interface
@@ -557,5 +562,19 @@ contains
        stop "Error in mango_continue_worker_loop"
     end if
   end function mango_continue_worker_loop
+
+  subroutine mango_mpi_partition_write(this,filename)
+    ! Passing strings between fortran and C is fraught, so I opted to pass fixed-size character arrays instead.
+    type(mango_problem), intent(in) :: this
+    character(len=*), intent(in) :: filename
+    character(C_char) :: filename_padded(mango_interface_string_length)
+    integer :: j
+    filename_padded = char(0);
+    if (len(filename) > mango_interface_string_length-1) stop "String is too long!" ! -1 because C expects strings to be terminated with char(0);
+    do j = 1, len(filename)
+       filename_padded(j) = filename(j:j)
+    end do
+    call C_mango_mpi_partition_write(this%object, filename_padded)
+  end subroutine mango_mpi_partition_write
 
 end module mango

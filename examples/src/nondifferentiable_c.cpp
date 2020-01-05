@@ -30,10 +30,12 @@ int main(int argc, char *argv[]) {
 
   mango::problem myprob(N_dims, state_vector, &objective_function, argc, argv);
 
+  std::string extension = "nondifferentiable_c";
   myprob.verbose = verbose_level;
-  myprob.read_input_file("../input/mango_in.nondifferentiable_c");
-  myprob.output_filename = "../output/mango_out.nondifferentiable_c";
+  myprob.read_input_file("../input/mango_in." + extension);
+  myprob.output_filename = "../output/mango_out." + extension;
   myprob.mpi_init(MPI_COMM_WORLD);
+  myprob.mpi_partition.write("../output/mango_mpi." + extension);
   myprob.centered_differences = true;
   myprob.max_function_evaluations = 2000;
 

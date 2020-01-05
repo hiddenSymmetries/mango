@@ -200,4 +200,9 @@ extern "C" {
     int return_bool = This->mpi_partition.continue_worker_loop();
     return (return_bool ? 1 : 0);
   }
+
+  void mango_mpi_partition_write(mango::problem *This, char filename[mango_interface_string_length]) {
+    This->mpi_partition.write(filename);
+  }
+
 }

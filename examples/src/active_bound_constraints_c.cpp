@@ -23,7 +23,7 @@ void worker(mango::problem*);
 int main(int argc, char *argv[]) {
   int ierr;
 
-  if (verbose_level > 0) std::cout << "Hello world from quadratic_c." << std::endl;
+  if (verbose_level > 0) std::cout << "Hello world from active_bound_constraints_c." << std::endl;
 
   ierr = MPI_Init(&argc, &argv);
   if (ierr != 0) {
@@ -38,9 +38,10 @@ int main(int argc, char *argv[]) {
   double best_residual_function[N_dims];
   mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
+  std::string extension = "active_bound_constraints_c";
   myprob.verbose = verbose_level;
-  myprob.read_input_file("../input/mango_in.active_bound_constraints_c");
-  myprob.output_filename = "../output/mango_out.active_bound_constraints_c";
+  myprob.read_input_file("../input/mango_in." + extension);
+  myprob.output_filename = "../output/mango_out." + extension;
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.max_function_evaluations = 500;
 

@@ -42,10 +42,12 @@ int main(int argc, char *argv[]) {
   double best_residual_function[N_dims];
   mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
+  std::string extension = "quadratic_c";
   myprob.verbose = verbose_level;
-  myprob.read_input_file("../input/mango_in.quadratic_c");
-  myprob.output_filename = "../output/mango_out.quadratic_c";
+  myprob.read_input_file("../input/mango_in." + extension);
+  myprob.output_filename = "../output/mango_out." + extension;
   myprob.mpi_init(MPI_COMM_WORLD);
+  myprob.mpi_partition.write("../output/mango_mpi." + extension);
   myprob.centered_differences = true; 
   myprob.max_function_evaluations = 2000;
 
