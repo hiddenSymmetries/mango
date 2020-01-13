@@ -1,13 +1,14 @@
-#include<iostream>
-#include<stdexcept>
+#include <iostream>
+#include <stdexcept>
 #include "mango.hpp"
+#include "mango_petsc.hpp"
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
 #endif
 
 static  char help[]="";
 
-void mango::problem::optimize_petsc() {
+void mango::Package_petsc::optimize() {
 #ifdef MANGO_PETSC_AVAILABLE
 
   // The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
@@ -15,7 +16,7 @@ void mango::problem::optimize_petsc() {
 
   int ierr;
   ierr = PetscInitialize(&argc,&argv,(char *)0,help);
-  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::problem::optimize_petsc().");
+  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::Package_petsc::optimize().");
   ierr = PetscInitializeFortran();
 
   Tao my_tao;
@@ -98,7 +99,7 @@ void mango::problem::optimize_petsc() {
 //////////////////////////////////////////////////////////////////////////////////
 
 #ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
+PetscErrorCode mango::Package_petsc::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
 
   const double* x_array;
   VecGetArrayRead(x, &x_array);

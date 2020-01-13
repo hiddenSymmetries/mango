@@ -63,7 +63,7 @@ export
 
 CXX = $(CC)
 
-# Automatically detect all the examples:
+# Automatically detect all the source files
 F_SRC_FILES = $(wildcard src/api/*.F90)
 F_OBJ_FILES = $(patsubst src/api/%.F90, obj/%.f.o, $(F_SRC_FILES))
 CPP_SRC_FILES = $(wildcard src/api/*.cpp)
@@ -71,6 +71,7 @@ CPP_OBJ_FILES = $(patsubst src/api/%.cpp, obj/%.cpp.o, $(CPP_SRC_FILES))
 HOPSPACK_CPP_OBJ_FILES = $(patsubst external_packages/hopspack/src/%.cpp, obj/%.cpp.o, $(HOPSPACK_CPP_SRC_FILES))
 HOPSPACK_C_OBJ_FILES   = $(patsubst external_packages/hopspack/src/%.c,   obj/%.c.o,   $(HOPSPACK_C_SRC_FILES))
 HOPSPACK_HEADERS = $(wildcard external_packages/hopspack/src/*.h) $(wildcard external_packages/hopspack/src/*.hpp)
+HEADER_FILES = $(wildcard src/api/*.hpp)
 
 TEST_SRC_FILES = $(wildcard src/api/tests/*.cpp)
 TEST_OBJ_FILES = $(patsubst src/api/tests/%.cpp, obj/%.cpp.o, $(TEST_SRC_FILES))
@@ -81,18 +82,19 @@ include makefile.dependencies
 # https://www.gnu.org/savannah-checkouts/gnu/make/manual/html_node/Static-Usage.html
 # https://stackoverflow.com/questions/4320416/how-to-use-a-variable-list-as-a-target-in-a-makefile
 
+# For now, I'll make all the .o files depend on _all_ the .hpp files. This causes some unnecessary recompiling when .hpp files change, but it eliminates the need for a detailed list of dependencies.
 $(F_OBJ_FILES): obj/%.f.o: src/api/%.F90
 	$(FC) $(EXTRA_F_COMPILE_FLAGS) -c $< -o $@
 
-$(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp include/mango.hpp
+$(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp $(HEADER_FILES)
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
-$(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp include/mango.hpp
+$(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp $(HEADER_FILES)
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
 # Similarly, only the modified hopspack source files depend on mango.hpp, but it is easier to make the dependency apply to all hopspack files here.
-$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS) src/api/mango.hpp
+$(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS) $(HEADER_FILES)
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPACK_HEADERS)
@@ -150,6 +152,7 @@ test_make:
 	@echo EXTRA_C_LINK_FLAGS is $(EXTRA_C_LINK_FLAGS)
 	@echo F_OBJ_FILES is $(F_OBJ_FILES)
 	@echo C_OBJ_FILES is $(C_OBJ_FILES)
+	@echo HEADER_FILES is $(HEADER_FILES)
 	@echo TEST_SRC_FILES is $(TEST_SRC_FILES)
 	@echo TEST_OBJ_FILES is $(TEST_OBJ_FILES)
 	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_CPP_SRC_FILES)

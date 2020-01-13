@@ -1,12 +1,12 @@
 #define N_dims 3
 #define verbose_level 0
 
-#include<iostream>
-#include<iomanip>
-#include<cstring>
-#include<mpi.h>
-#include<stdlib.h>
-#include<cassert>
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <mpi.h>
+#include <stdlib.h>
+#include <cassert>
 #include "mango.hpp"
 
 void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
@@ -40,20 +40,20 @@ int main(int argc, char *argv[]) {
   }
 
   double best_residual_function[N_dims];
-  mango::problem myprob(N_dims, state_vector, N_dims, targets, sigmas, best_residual_function, &residual_function, argc, argv);
+  mango::Least_squares_problem myprob(N_dims, state_vector, N_dims, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
   std::string extension = "quadratic_c";
-  myprob.verbose = verbose_level;
+  myprob.set_verbose(verbose_level);
   myprob.read_input_file("../input/mango_in." + extension);
   myprob.output_filename = "../output/mango_out." + extension;
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.mpi_partition.write("../output/mango_mpi." + extension);
-  myprob.centered_differences = true; 
-  myprob.max_function_evaluations = 2000;
+  myprob.set_centered_differences(true); 
+  myprob.set_max_function_evaluations(2000);
 
   // Pass some data to the objective function
   int data = 7;
-  myprob.user_data = &data;
+  myprob.set_user_data(&data);
 
   double lower_bounds[N_dims];
   double upper_bounds[N_dims];
@@ -117,7 +117,7 @@ void residual_function(int* N, const double* x, int* M, double* f, int* failed, 
 }
 
 
-void worker(mango::problem* myprob) {
+void worker(mango::Least_squares_problem* myprob) {
   while (myprob->mpi_partition.continue_worker_loop()) {
     // For this problem, the workers don't actually do any work.
     if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " could do some work here." << std::endl;
