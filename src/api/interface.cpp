@@ -193,7 +193,7 @@ extern "C" {
   */
 
   void mango_set_user_data(mango::Problem *This, void* user_data) {
-    This->user_data = user_data;
+    This->set_user_data(user_data);
   }
 
   void mango_stop_workers(mango::Problem *This) {

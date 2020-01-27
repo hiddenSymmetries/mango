@@ -42,7 +42,7 @@ void mango::Package_petsc::optimize(Problem_data* problem_data) {
   switch (problem_data->algorithm) {
   case PETSC_NM:
     TaoSetType(my_tao, TAONM);
-    TaoSetObjectiveRoutine(my_tao, &mango_petsc_objective_function, (void*)this);
+    TaoSetObjectiveRoutine(my_tao, &mango_petsc_objective_function, (void*)problem_data);
     break;
   case PETSC_POUNDERS:
     throw std::runtime_error("Should not get here! For the petsc_pounders algorithm, mango_optimize_least_squares_petsc should be called instead of mango_optimize_petsc.");

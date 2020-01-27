@@ -6,7 +6,7 @@
 
 // Constructor for non-least-squares problems
 mango::Problem::Problem(int N_parameters_in, double* state_vector_in, objective_function_type objective_function_in, int argc_in, char* argv_in[]) {
-  data = new Problem_data(N_parameters_in);
+  data = new Problem_data(this,N_parameters_in);
   data->argc = argc_in;
   data->argv = argv_in;
   data->N_parameters = N_parameters_in;
@@ -17,7 +17,7 @@ mango::Problem::Problem(int N_parameters_in, double* state_vector_in, objective_
 // Destructor
 mango::Problem::~Problem() {
   if (data->verbose > 0) std::cout << "Mango problem is being destroyed." << std::endl;
-  delete[] data;
+  delete data;
 }
 
 int mango::Problem::get_N_parameters() {

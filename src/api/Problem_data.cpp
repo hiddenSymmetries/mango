@@ -3,7 +3,7 @@
 #include "Problem_data.hpp"
 
 // Constructor
-mango::Problem_data::Problem_data(int N_parameters_in) {
+mango::Problem_data::Problem_data(Problem* problem_in, int N_parameters_in) {
   if (N_parameters_in < 1) throw std::runtime_error("Error in mango::Problem_data::Problem_data(int). N_parameters must be at least 1.");
   N_parameters = N_parameters_in;
   best_state_vector = new double[N_parameters_in];
@@ -24,6 +24,7 @@ mango::Problem_data::Problem_data(int N_parameters_in) {
   bound_constraints_set = false;
   package = NULL;
   user_data = NULL;
+  problem = problem_in;
 }
 
 // Destructor

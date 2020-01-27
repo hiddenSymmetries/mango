@@ -177,8 +177,9 @@ namespace mango {
   //////////////////////////////////////////////////////////////////////////////////////
   // Items specific to an optimization problem
 
-  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::MPI_Partition*, void*);
-  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::MPI_Partition*, void*);
+  class Problem;
+  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::Problem*, void*);
+  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::Problem*, void*);
 
   class Problem_data;
   class Problem {
@@ -188,7 +189,6 @@ namespace mango {
 
   public:
     MPI_Partition mpi_partition;
-    void* user_data;
 
     Problem(int, double*, objective_function_type, int, char**); // For non-least-squares problems
     ~Problem();

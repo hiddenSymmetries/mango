@@ -11,7 +11,7 @@ namespace mango {
   class Package {
   public:
     virtual void optimize(Problem_data*) = 0;
-    virtual void optimize_least_squares(Problem_data*, Least_squares_data*) = 0;
+    //virtual void optimize_least_squares(Problem_data*, Least_squares_data*) = 0;
   };
 }
 

@@ -12,7 +12,7 @@ namespace mango {
 
   public:
     void optimize(Problem_data*);
-    void optimize_least_squares(Problem_data*, Least_squares_data*);
+    //void optimize_least_squares(Problem_data*, Least_squares_data*);
   };
 }
 

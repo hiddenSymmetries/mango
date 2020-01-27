@@ -10,7 +10,7 @@
 #include <cassert>
 #include "mango.hpp"
 
-void objective_function(int*, const double*, double*, int*, mango::MPI_Partition*, void*);
+void objective_function(int*, const double*, double*, int*, mango::Problem*, void*);
 
 void worker(mango::MPI_Partition*);
 
@@ -63,16 +63,16 @@ int main(int argc, char *argv[]) {
 }
 
 
-void objective_function(int* N, const double* x, double* f, int* failed, mango::MPI_Partition* mpi_partition, void* void_user_data) {
+void objective_function(int* N, const double* x, double* f, int* failed, mango::Problem* problem, void* void_user_data) {
   int j;
-  if (verbose_level > 0) std::cout << "C objective function called on proc " << mpi_partition->get_rank_world() << " with N="<< *N << "\n";
+  if (verbose_level > 0) std::cout << "C objective function called on proc " << problem->mpi_partition.get_rank_world() << " with N="<< *N << "\n";
 
   // Verify that the user data was passed successfully.
   int* user_data = (int*)void_user_data;
   assert(*user_data == 7);
 
   // Mobilize the workers in the group with this group leader:
-  mpi_partition->mobilize_workers();
+  problem->mpi_partition.mobilize_workers();
 
   *f = 0;
   for (int j=1; j <= *N; j++) {

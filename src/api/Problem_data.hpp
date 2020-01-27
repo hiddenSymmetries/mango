@@ -65,8 +65,9 @@ namespace mango {
     int verbose;
     void* user_data;
     MPI_Partition* mpi_partition;
+    Problem* problem;
 
-    Problem_data(int);
+    Problem_data(Problem*, int);
     ~Problem_data();
 
     double optimize(MPI_Partition*);

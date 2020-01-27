@@ -25,8 +25,8 @@ mango::Least_squares_problem::Least_squares_problem(int N_parameters_in, double*
 // Destructor
 mango::Least_squares_problem::~Least_squares_problem() {
   if (data->verbose > 0) std::cout << "Mango least squares problem is being destroyed." << std::endl;
-  delete[] data;
-  delete[] least_squares_data;
+  delete data;
+  delete least_squares_data;
 }
 
 void mango::Least_squares_problem::set_print_residuals_in_output_file(bool new_bool) {

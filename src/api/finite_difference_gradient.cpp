@@ -85,7 +85,7 @@ void mango::Problem_data::finite_difference_gradient(const double* state_vector,
   int failed_int;
   for(j_evaluation=0; j_evaluation < N_evaluations; j_evaluation++) {
     if ((j_evaluation % N_worker_groups) == mpi_rank_group_leaders) {
-      objective_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &f, &failed_int, mpi_partition, user_data);
+      objective_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &f, &failed_int, problem, user_data);
       objective_functions[j_evaluation] = f;
     }
   }

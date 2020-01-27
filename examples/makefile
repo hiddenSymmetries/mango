@@ -1,5 +1,6 @@
 # Automatically detect all the examples:
 #F_SRC_FILES = $(wildcard src/*.F90)
+F_SRC_FILES= src/nondifferentiable_f.F90
 F_OBJ_FILES = $(patsubst src/%.F90, obj/%.f.o, $(F_SRC_FILES))
 F_BIN_FILES = $(patsubst src/%.F90, bin/%, $(F_SRC_FILES))
 #C_SRC_FILES = $(wildcard src/*.cpp)
