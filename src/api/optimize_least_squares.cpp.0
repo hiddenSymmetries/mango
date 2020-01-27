@@ -2,10 +2,14 @@
 #include <cstring>
 #include <stdexcept>
 #include "mango.hpp"
+#include "Problem_data.hpp"
+#include "Least_squares_data.hpp"
 
-void mango::problem::optimize_least_squares() {
+void mango::Least_squares_data::optimize(Problem_data* data) {
+  init_optimization();
+
   int j;
-  bool proc0_world = mpi_partition.get_proc0_world();
+  bool proc0_world = data->mpi_partition.get_proc0_world();
 
   // I need to think about this next bit. Do all group leaders need a copy of sigmas and targets?
   // For hopspack, they do, because the residuals are combined into the total objective function on each group leader.

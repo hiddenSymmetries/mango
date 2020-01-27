@@ -39,5 +39,5 @@ int mango::Least_squares_problem::get_N_terms() {
 
 double mango::Least_squares_problem::optimize() {
   // Delegate this work to Least_squares_data so we don't need to put "least_squares_data->" in front of everything.
-  return least_squares_data->optimize();
+  return least_squares_data->optimize(data);
 }

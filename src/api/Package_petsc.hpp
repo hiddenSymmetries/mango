@@ -8,8 +8,9 @@
 namespace mango {
 
   class Problem_data;
+  class Least_squares_data;
 
-  class Package_petsc :: public Package {
+  class Package_petsc : public Package {
   private:
 #ifdef MANGO_PETSC_AVAILABLE
     static PetscErrorCode mango_petsc_objective_function(Tao, Vec, PetscReal*, void*);
@@ -19,7 +20,7 @@ namespace mango {
 
   public:
     void optimize(Problem_data*);
-    void optimize_least_squares(Problem_data*);
+    void optimize_least_squares(Problem_data*, Least_squares_data*);
   };
 }
 

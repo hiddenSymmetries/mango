@@ -2,6 +2,7 @@
 #include <string>
 #include <stdexcept>
 #include "mango.hpp"
+#include "Problem_data.hpp"
 
 void mango::Problem::set_algorithm(algorithm_type algorithm_in) {
   if (algorithm_in < 0) throw std::runtime_error("Error in mango::Problem::set_algorithm. Algorithm cannot be negative.");
@@ -15,7 +16,7 @@ void mango::Problem::set_algorithm(algorithm_type algorithm_in) {
 ///////////////////////////////////////////////////////////////////////////
 
 void mango::Problem::set_algorithm(std::string str) {
-  int algorithm;
+  algorithm_type algorithm;
   bool found_match = get_algorithm(str, &algorithm);
   if (!found_match) {
     std::cerr << "Error in mango::Problem::set_algorithm. The following algorithm name was requested but not found: " << str << std::endl;

@@ -76,7 +76,7 @@ void mango::Problem::mpi_init(MPI_Comm mpi_comm_world) {
 
   mpi_partition.verbose = data->verbose;
 
-  if (algorithms[algorithm].parallel) {
+  if (algorithms[data->algorithm].parallel) {
     int mpi_rank_world, N_procs_world;
     MPI_Comm_size(mpi_comm_world, &N_procs_world);
     MPI_Comm_rank(mpi_comm_world, &mpi_rank_world);
@@ -98,5 +98,5 @@ void mango::Problem::mpi_init(MPI_Comm mpi_comm_world) {
 
 double mango::Problem::optimize() {
   // Delegate this work to Problem_data so we don't need to put "data->" in front of all the variables.
-  return data->optimize();
+  return data->optimize(&mpi_partition);
 }

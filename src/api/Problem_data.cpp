@@ -4,7 +4,7 @@
 
 // Constructor
 mango::Problem_data::Problem_data(int N_parameters_in) {
-  if (N_parameters_in < 1) throw std::runtime_error("Error in mango::Problem_data::Problem_data(int). N_parameters must be at least 1.")
+  if (N_parameters_in < 1) throw std::runtime_error("Error in mango::Problem_data::Problem_data(int). N_parameters must be at least 1.");
   N_parameters = N_parameters_in;
   best_state_vector = new double[N_parameters_in];
 
@@ -12,7 +12,6 @@ mango::Problem_data::Problem_data(int N_parameters_in) {
   verbose = 0;
   objective_function = NULL;
   function_evaluations = 0;
-  output_file = NULL;
   argc = 1;
   argv = NULL;
   state_vector = NULL;
@@ -28,6 +27,6 @@ mango::Problem_data::Problem_data(int N_parameters_in) {
 }
 
 // Destructor
-mango::problem::~problem() {
+mango::Problem_data::~Problem_data() {
   delete[] best_state_vector;
 }

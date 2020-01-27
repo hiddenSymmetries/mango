@@ -19,12 +19,6 @@ namespace mango {
 
   const double NUMBER_FOR_FAILED = 1.0e+12;
 
-  class Problem; // Declare Problem and Least_squares_problem since we will need them as arguments in the following lines:
-  class Least_squares_problem;
-
-  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::Problem*, void*);
-  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::Least_squares_problem*, void*);
-
   //////////////////////////////////////////////////////////////////////////////////////
   // Items related to algorithms:
 
@@ -183,6 +177,9 @@ namespace mango {
   //////////////////////////////////////////////////////////////////////////////////////
   // Items specific to an optimization problem
 
+  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::MPI_Partition*, void*);
+  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::MPI_Partition*, void*);
+
   class Problem_data;
   class Problem {
   private:
@@ -232,7 +229,7 @@ namespace mango {
     double optimize();
     int get_N_terms();
     void set_print_residuals_in_output_file(bool);
-  }
+  };
 }
 
 #endif

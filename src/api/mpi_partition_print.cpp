@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <fstream>
 #include <mpi.h>
 #include "mango.hpp"
 

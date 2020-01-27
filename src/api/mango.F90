@@ -1,5 +1,6 @@
 module mango
 
+!  The value in the next line must match the corresponding value in mango.F90
 #define mango_interface_string_length 256
 
   ! Modeled after
