@@ -194,3 +194,7 @@ double mango::Package_nlopt::nlopt_objective_function(unsigned n, const double* 
   return f;
 }
 
+
+void mango::Package_nlopt::optimize_least_squares(Problem_data* problem_data, Least_squares_data* least_squares_data) {
+  throw std::runtime_error("Error! mango somehow got to Package_nlopt::optimize_least_squares. This should never happen.");
+}

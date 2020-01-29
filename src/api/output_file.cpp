@@ -5,6 +5,7 @@
 #include <ctime>
 #include "mango.hpp"
 #include "Problem_data.hpp"
+#include "Least_squares_data.hpp"
 
 void mango::Problem_data::write_function_evaluation_and_time(clock_t print_time) {
   // This subroutine formats and writes only the first 2 entries in the output file lines: the # of function evaluations and the time.
@@ -26,8 +27,8 @@ void mango::Problem_data::compose_x_f_string(std::string & file_string, const do
   file_string = string_stream.str();
 }
 
-/*
-void mango::Problem_data::compose_residuals_string(std::string & file_string, double* residuals) {
+
+void mango::Least_squares_data::compose_residuals_string(std::string & file_string, double* residuals) {
   // This subroutine formats (but does not write) the entries in the output file lines for the residuals in a least-squares problem.
 
   if (print_residuals_in_output_file) {
@@ -43,7 +44,7 @@ void mango::Problem_data::compose_residuals_string(std::string & file_string, do
     file_string = "";
   }
 }
-*/
+
 
 void mango::Problem_data::write_file_line(clock_t print_time, const double* x, double f) {
   // This subroutine writes a line in the output file for non-least-squares problems.
@@ -53,9 +54,9 @@ void mango::Problem_data::write_file_line(clock_t print_time, const double* x, d
   output_file << file_string << std::endl << std::flush;
 }
 
-/*
-void mango::Problem_data::write_least_squares_file_line(clock_t print_time, const double* x, double f, double* residuals) {
-  // This subroutine assumes the total objective function f has been computed from the residuals using mango::Problem_data::residuals_to_single_objective.
+
+void mango::Least_squares_data::write_least_squares_file_line(clock_t print_time, const double* x, double f, double* residuals) {
+  // This subroutine assumes the total objective function f has been computed from the residuals using mango::Least_squares_data::residuals_to_single_objective.
 
   // Prepare the parts of the output file line:
   std::string x_f_string, residuals_string;
@@ -64,6 +65,6 @@ void mango::Problem_data::write_least_squares_file_line(clock_t print_time, cons
 
   // Now actually write the line of the output file.
   write_function_evaluation_and_time(print_time);
-  output_file << x_f_string << residuals_string << std::endl << std::flush;
+  problem_data->output_file << x_f_string << residuals_string << std::endl << std::flush;
 }
-*/
+

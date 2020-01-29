@@ -183,7 +183,7 @@ namespace mango {
 
   class Problem_data;
   class Problem {
-  private:
+  protected:
     // Many implementation details are hidden in the Problem_data class, so users see only the interface provided by Problem.
     Problem_data* data;
 

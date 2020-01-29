@@ -14,7 +14,6 @@ namespace mango {
     // This class contains the ugly implementation details of the interface for Problem specified in mango.hpp.
 
   private:
-    void init_optimization();
     void group_leaders_loop();
     void load_algorithm_properties();
     void set_package();
@@ -71,6 +70,7 @@ namespace mango {
     ~Problem_data();
 
     double optimize(MPI_Partition*);
+    void init_optimization();
     void objective_function_wrapper(const double*, double*, bool*); 
     void finite_difference_gradient(const double*, double*, double*);
   };

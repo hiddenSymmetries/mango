@@ -1,10 +1,10 @@
-#include<iostream>
-#include<iomanip>
-#include<cstring>
-#include<ctime>
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <ctime>
 #include "mango.hpp"
 
-void mango::problem::residual_function_wrapper(const double* x, double* f, bool* failed) {
+void mango::Least_squares_data::residual_function_wrapper(const double* x, double* f, bool* failed) {
   // This subroutine is used to call the residual function when N_worker_groups = 1 (i.e. parallelization only within the objective function evaluation),
   // or for algorithms like hopspack that allow concurrent evaluations of the objective function but not using finite difference Jacobians.
   // This subroutine is not used for finite difference Jacobians.
@@ -12,17 +12,17 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
   // I chose to make this subroutine take a parameter f[] to store the residuals rather than always storing them
   // in the "residuals" array of the mango::problem class because PETSc uses its own storage for the residuals.
 
-  function_evaluations++;
+  problem_data->function_evaluations++;
 
   int failed_int;
-  residual_function(&N_parameters, x, &N_terms, f, &failed_int, this, user_data);
+  residual_function(&(problem_data->N_parameters), x, &N_terms, f, &failed_int, this, original_user_data);
   *failed = (failed_int != 0);
   clock_t now = clock();
 
-  if (verbose > 0) {
+  if (problem_data->verbose > 0) {
     std::cout << "Hello from residual_function_wrapper. Here comes x:" << std::endl;
     int j;
-    for (j=0; j < N_parameters; j++) {
+    for (j=0; j < problem_data->N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x[j];
     }
     std::cout << std::endl;
@@ -37,13 +37,13 @@ void mango::problem::residual_function_wrapper(const double* x, double* f, bool*
     write_least_squares_file_line(now, x, objective_value, f);
   }
 
-  if (! *failed && (!at_least_one_success || objective_value < best_objective_function)) {
-    at_least_one_success = true;
-    best_objective_function = objective_value;
-    best_function_evaluation = function_evaluations;
-    memcpy(best_state_vector, x, N_parameters * sizeof(double));
+  if (! *failed && (!at_least_one_success || objective_value < problem_data->best_objective_function)) {
+    problem_data->at_least_one_success = true;
+    problem_data->best_objective_function = objective_value;
+    problem_data->best_function_evaluation = problem_data->function_evaluations;
+    memcpy(problem_data->best_state_vector, x, problem_data->N_parameters * sizeof(double));
     memcpy(best_residual_function, f, N_terms * sizeof(double));
-    best_time = now;
+    problem_data->best_time = now;
   }
 
 }

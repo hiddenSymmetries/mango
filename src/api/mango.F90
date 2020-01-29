@@ -36,14 +36,13 @@ module mango
        real(C_double) :: state_vector
        type(C_funptr), value :: objective_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
      end function C_mango_problem_create
-! 20200127 Reinstate this eventually
-!     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function) result(this) bind(C,name="mango_problem_create_least_squares")
-!       import
-!       integer(C_int) :: N_parameters, N_terms
-!       type(C_ptr) :: this
-!       real(C_double) :: state_vector, targets, sigmas, best_residual_function
-!       type(C_funptr), value :: residual_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
-!     end function C_mango_problem_create_least_squares
+     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function) result(this) bind(C,name="mango_problem_create_least_squares")
+       import
+       integer(C_int) :: N_parameters, N_terms
+       type(C_ptr) :: this
+       real(C_double) :: state_vector, targets, sigmas, best_residual_function
+       type(C_funptr), value :: residual_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
+     end function C_mango_problem_create_least_squares
      subroutine C_mango_problem_destroy (this) bind(C,name="mango_problem_destroy")
        import
        type(C_ptr), value :: this
@@ -143,12 +142,11 @@ module mango
        integer(C_int) :: N
        type(C_ptr), value :: this
      end function C_mango_get_N_parameters
-! 20200127 Reinstate this eventually
-!     function C_mango_get_N_terms(this) result(N) bind(C,name="mango_get_N_terms")
-!       import
-!       integer(C_int) :: N
-!       type(C_ptr), value :: this
-!     end function C_mango_get_N_terms
+     function C_mango_get_N_terms(this) result(N) bind(C,name="mango_get_N_terms")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_get_N_terms
      function C_mango_get_worker_group(this) result(N) bind(C,name="mango_get_worker_group")
        import
        integer(C_int) :: N
@@ -194,12 +192,11 @@ module mango
        integer(C_int) :: verbose
        type(C_ptr), value :: this
      end subroutine C_mango_set_verbose
-! 20200127 Reinstate this eventually
-!     subroutine C_mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file_int) bind(C,name="mango_set_print_residuals_in_output_file")
-!       import
-!       type(C_ptr), value :: this
-!       integer(C_int) :: print_residuals_in_output_file_int
-!     end subroutine C_mango_set_print_residuals_in_output_file
+     subroutine C_mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file_int) bind(C,name="mango_set_print_residuals_in_output_file")
+       import
+       type(C_ptr), value :: this
+       integer(C_int) :: print_residuals_in_output_file_int
+     end subroutine C_mango_set_print_residuals_in_output_file
      subroutine C_mango_set_user_data(this, user_data) bind(C,name="mango_set_user_data")
        import
        type(C_ptr), value :: this, user_data
@@ -225,7 +222,7 @@ module mango
   end interface
 
   public :: mango_problem
-  public :: mango_problem_create, & !mango_problem_create_least_squares, 
+  public :: mango_problem_create, mango_problem_create_least_squares, &
        mango_problem_destroy, &
        mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
        mango_mpi_init, mango_mpi_partition_set_custom, mango_optimize, &
@@ -233,11 +230,11 @@ module mango
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
        mango_get_proc0_world, mango_get_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
-       mango_get_N_parameters, & !mango_get_N_terms, 
+       mango_get_N_parameters, mango_get_N_terms, &
        mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
-       mango_set_verbose, & !mango_set_print_residuals_in_output_file, 
+       mango_set_verbose, mango_set_print_residuals_in_output_file, &
        mango_set_user_data, &
        mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write
   
@@ -311,14 +308,13 @@ contains
     !print *,"Done calling objective fn from mango.F90. f=",f
   end subroutine mango_problem_create
 
-! 20200127 Reinstate this soon
-!  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
-!    type(mango_problem), intent(out) :: this
-!    integer, intent(in) :: N_parameters, N_terms
-!    real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:), best_residual_function(:)
-!    procedure(residual_function_interface) :: residual_function
-!    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
-!  end subroutine mango_problem_create_least_squares
+  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
+    type(mango_problem), intent(out) :: this
+    integer, intent(in) :: N_parameters, N_terms
+    real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:), best_residual_function(:)
+    procedure(residual_function_interface) :: residual_function
+    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
+  end subroutine mango_problem_create_least_squares
 
   subroutine mango_problem_destroy(this)
     type(mango_problem), intent(inout) :: this
@@ -467,10 +463,10 @@ contains
     mango_get_N_parameters = C_mango_get_N_parameters(this%object)
   end function mango_get_N_parameters
 
-!  integer function mango_get_N_terms(this)
-!    type(mango_problem), intent(in) :: this
-!    mango_get_N_terms = C_mango_get_N_terms(this%object)
-!  end function mango_get_N_terms
+  integer function mango_get_N_terms(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_terms = C_mango_get_N_terms(this%object)
+  end function mango_get_N_terms
 
   integer function mango_get_worker_group(this)
     type(mango_problem), intent(in) :: this
@@ -533,15 +529,14 @@ contains
     call C_mango_set_verbose(this%object, verbose)
   end subroutine mango_set_verbose
 
-! 20200127
-!  subroutine mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file)
-!    type(mango_problem), intent(in) :: this
-!    logical, intent(in) :: print_residuals_in_output_file
-!    integer(C_int) :: logical_to_int
-!    logical_to_int = 0
-!    if (print_residuals_in_output_file) logical_to_int = 1
-!    call C_mango_set_print_residuals_in_output_file(this%object, logical_to_int)
-!  end subroutine mango_set_print_residuals_in_output_file
+  subroutine mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file)
+    type(mango_problem), intent(in) :: this
+    logical, intent(in) :: print_residuals_in_output_file
+    integer(C_int) :: logical_to_int
+    logical_to_int = 0
+    if (print_residuals_in_output_file) logical_to_int = 1
+    call C_mango_set_print_residuals_in_output_file(this%object, logical_to_int)
+  end subroutine mango_set_print_residuals_in_output_file
 
   subroutine mango_set_user_data(this, user_data)
     type(mango_problem), intent(in) :: this
