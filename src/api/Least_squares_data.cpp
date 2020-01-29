@@ -2,6 +2,7 @@
 #include "mango.hpp"
 #include "Problem_data.hpp"
 #include "Least_squares_data.hpp"
+#include "Recorder_least_squares.hpp"
 
 // Constructor
 mango::Least_squares_data::Least_squares_data(Problem_data* problem_data_in, int N_terms_in) {
@@ -17,6 +18,8 @@ mango::Least_squares_data::Least_squares_data(Problem_data* problem_data_in, int
   print_residuals_in_output_file = true;
   problem_data = problem_data_in;
   problem_data->objective_function = &least_squares_to_single_objective;
+
+  problem_data->recorder = new Recorder_least_squares(problem_data, this);
 }
 
 // Destructor

@@ -42,13 +42,13 @@ void mango::Package_petsc::optimize_least_squares(Problem_data* problem_data, Le
   VecGetArray(tao_state_vec, &temp_array);
   memcpy(temp_array, problem_data->state_vector, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
-  if (verbose > 0) {
+  if (problem_data->verbose > 0) {
     std::cout << "Here comes petsc vec for initial condition:" << std::endl;
     VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
   }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  if (verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
+  if (problem_data->verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
 
 #if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 10))
   TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)least_squares_data);
@@ -56,7 +56,7 @@ void mango::Package_petsc::optimize_least_squares(Problem_data* problem_data, Le
   TaoSetResidualRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)least_squares_data);
 #endif
 
-  switch (algorithm) {
+  switch (problem_data->algorithm) {
   case PETSC_POUNDERS:
     TaoSetType(my_tao, TAOPOUNDERS);
     break;
@@ -69,14 +69,14 @@ void mango::Package_petsc::optimize_least_squares(Problem_data* problem_data, Le
     break;
 #endif
   default:
-    std::cerr << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithms[algorithm].name << std::endl;
+    std::cerr << "Should not get here! algorithm = " << problem_data->algorithm << " i.e. " << algorithms[problem_data->algorithm].name << std::endl;
     throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 
-  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
+  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) problem_data->max_function_and_gradient_evaluations);
 
   Vec lower_bounds_vec, upper_bounds_vec;
-  if (bound_constraints_set) {
+  if (problem_data->bound_constraints_set) {
     VecCreateSeq(PETSC_COMM_SELF, N_parameters, &lower_bounds_vec);
     VecCreateSeq(PETSC_COMM_SELF, N_parameters, &upper_bounds_vec);
 
@@ -95,7 +95,7 @@ void mango::Package_petsc::optimize_least_squares(Problem_data* problem_data, Le
   // TaoSetTolerances(my_tao, 1e-30, 1e-30, 1e-30);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
-  if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  if (problem_data->verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
   //TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
   // Copy PETSc solution to the mango state vector.
@@ -149,7 +149,7 @@ PetscErrorCode mango::Package_petsc::mango_petsc_residual_function(Tao my_tao, V
   }
 
   // PETSc's definition of the residual function does not include sigmas or targets, so shift and scale the mango residuals appropriately:
-  for (j=0; j<least_squares_data->get_N_terms(); j++) {
+  for (j=0; j<least_squares_data->N_terms; j++) {
     f_array[j] = (f_array[j] - least_squares_data->targets[j]) / least_squares_data->sigmas[j];
     if (failed) f_array[j] = mango::NUMBER_FOR_FAILED;
   }
@@ -193,7 +193,7 @@ PetscErrorCode mango::Package_petsc::mango_petsc_Jacobian_function(Tao my_tao, V
 
   if (problem_data->verbose > 0) {
     std::cout << "mango_petsc_Jacobian_function before sigma shift. state_vector:";
-    for (j=0; j < N_parameters(); j++) {
+    for (j=0; j < N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
     }
     std::cout << std::endl << std::flush;

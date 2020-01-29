@@ -6,7 +6,9 @@
 #include "Problem_data.hpp"
 #include "Least_squares_data.hpp"
 
-double mango::Least_squares_data::optimize() {
+double mango::Least_squares_data::optimize(MPI_Partition* mpi_partition_in) {
+
+  problem_data->mpi_partition = mpi_partition_in;
   problem_data->init_optimization();
 
   int j;
@@ -46,6 +48,8 @@ double mango::Least_squares_data::optimize() {
   }
 
   if (proc0_world) {
+
+    /*
     // Open output file
     problem_data->output_file.open(problem_data->output_filename.c_str());
     if (!problem_data->output_file.is_open()) {
@@ -64,7 +68,8 @@ double mango::Least_squares_data::optimize() {
       }
     }
     problem_data->output_file << std::endl << std::flush;
-    
+    */
+
     /* Sanity test */
     /* if (!least_squares_algorithm) {
        std::cout << "Error in optimize_least_squares(). Should not get here!\n";
@@ -94,6 +99,8 @@ double mango::Least_squares_data::optimize() {
 
   memcpy(problem_data->state_vector, problem_data->best_state_vector, problem_data->N_parameters * sizeof(double)); // Make sure we leave state_vector equal to the best state vector seen.
 
+  problem_data->recorder->finalize();
+  /*
   // Copy the line corresponding to the optimum to the bottom of the output file.
   int function_evaluations_temp= problem_data->function_evaluations;
   problem_data->function_evaluations = problem_data->best_function_evaluation;
@@ -101,6 +108,7 @@ double mango::Least_squares_data::optimize() {
   problem_data->function_evaluations = function_evaluations_temp;
 
   problem_data->output_file.close();
+  */
 
   if (problem_data->verbose > 0) {
     std::cout << "Here comes the optimal state_vector from optimize_least_squares.cpp: " << problem_data->state_vector[0];
@@ -143,6 +151,7 @@ void mango::Least_squares_data::least_squares_to_single_objective(int* N, const 
     *f += term*term;
   }
 
+  least_squares_data->current_residuals = least_squares_data->residuals;
   //delete[] residuals;
 }
 

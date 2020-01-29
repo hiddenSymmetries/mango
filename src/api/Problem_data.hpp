@@ -3,10 +3,10 @@
 
 #include <mpi.h>
 #include <string>
-#include <fstream>
 #include <ctime>
 #include "mango.hpp"
 #include "Package.hpp"
+#include "Recorder.hpp"
 
 namespace mango {
 
@@ -17,9 +17,6 @@ namespace mango {
     void group_leaders_loop();
     void load_algorithm_properties();
     void set_package();
-    void write_function_evaluation_and_time(clock_t);
-    void compose_x_f_string(std::string&, const double*, double);
-    void write_file_line(clock_t, const double*, double);
     // 20200127 Temporarily commenting out the next 2 lines, until I get least-squares problems working.
     //void compose_residuals_string(std::string&, double*);
     //void write_least_squares_file_line(clock_t, const double*, double, double*);
@@ -43,7 +40,6 @@ namespace mango {
     int N_parameters;
     objective_function_type objective_function;
     int function_evaluations;
-    std::ofstream output_file;
     int argc;
     char** argv;
     int max_function_and_gradient_evaluations;
@@ -65,6 +61,7 @@ namespace mango {
     void* user_data;
     MPI_Partition* mpi_partition;
     Problem* problem;
+    Recorder* recorder;
 
     Problem_data(Problem*, int);
     ~Problem_data();
@@ -72,7 +69,11 @@ namespace mango {
     double optimize(MPI_Partition*);
     void init_optimization();
     void objective_function_wrapper(const double*, double*, bool*); 
+    bool record_function_evaluation(const double*, double, bool);
     void finite_difference_gradient(const double*, double*, double*);
+    void compose_x_f_string(std::string&, const double*, double);
+    void write_file_line(clock_t, const double*, double);
+    void write_function_evaluation_and_time(clock_t);
   };
 
 }

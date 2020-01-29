@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include "mango.hpp"
 #include "Problem_data.hpp"
+#include "Recorder_standard.hpp"
 
 // Constructor
 mango::Problem_data::Problem_data(Problem* problem_in, int N_parameters_in) {
@@ -25,6 +26,7 @@ mango::Problem_data::Problem_data(Problem* problem_in, int N_parameters_in) {
   package = NULL;
   user_data = NULL;
   problem = problem_in;
+  recorder = new Recorder_standard(this);
 }
 
 // Destructor

@@ -99,17 +99,24 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
   // Record the results in order in the output file. At the same time, check for any best-yet values of the
   // objective function.
   double total_objective_function;
-  bool failed;
+  bool failed = false;
   clock_t now;
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
+      //current_residuals = &residual_functions[j_evaluation*N_terms];
+      //total_objective_function = residuals_to_single_objective(current_residuals);
+      record_function_evaluation(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms], failed);
+      /*
       problem_data->function_evaluations += 1;
       now = clock();
-      total_objective_function = residuals_to_single_objective(&residual_functions[j_evaluation*N_terms]);
-      write_least_squares_file_line(now, &state_vectors[j_evaluation*N_parameters], total_objective_function, &residual_functions[j_evaluation*N_terms]);
+      current_residuals = &residual_functions[j_evaluation*N_terms];
+      total_objective_function = residuals_to_single_objective(current_residuals);
+      problem_data->recorder->record_function_evaluation(problem_data->function_evaluations, now, &state_vectors[j_evaluation*N_parameters], total_objective_function);
+      //write_least_squares_file_line(now, &state_vectors[j_evaluation*N_parameters], total_objective_function, &residual_functions[j_evaluation*N_terms]);
 
       failed = false;
       if (!failed && (!problem_data->at_least_one_success || total_objective_function < problem_data->best_objective_function)) {
+	// This next stuff is duplicated in residual_function_wrapper. There should be a more elegant solution.
         problem_data->at_least_one_success = true;
         problem_data->best_objective_function = total_objective_function;
         problem_data->best_function_evaluation = problem_data->function_evaluations;
@@ -117,6 +124,7 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
         memcpy(best_residual_function, &residual_functions[j_evaluation*N_terms], N_terms * sizeof(double));
 	problem_data->best_time = now;
       }
+      */
     }
   }
   

@@ -1,5 +1,5 @@
 #define N_dims 3
-#define verbose_level 0
+#define verbose_level 1
 
 #include <iostream>
 #include <iomanip>
@@ -9,9 +9,9 @@
 #include <cassert>
 #include "mango.hpp"
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
+void residual_function(int*, const double*, int*, double*, int*, mango::Problem*, void*);
 
-void worker(mango::problem*);
+void worker(mango::Least_squares_problem*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   std::string extension = "quadratic_c";
   myprob.set_verbose(verbose_level);
   myprob.read_input_file("../input/mango_in." + extension);
-  myprob.output_filename = "../output/mango_out." + extension;
+  myprob.set_output_filename("../output/mango_out." + extension);
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.mpi_partition.write("../output/mango_mpi." + extension);
   myprob.set_centered_differences(true); 
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
+void residual_function(int* N, const double* x, int* M, double* f, int* failed, mango::Problem* this_problem, void* void_user_data) {
   int j;
   if (verbose_level > 0) std::cout << "C residual function called on proc " << this_problem->mpi_partition.get_rank_world() << " with N="<< *N << ", M=" << *M << "\n";
 

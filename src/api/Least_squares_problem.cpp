@@ -31,7 +31,7 @@ mango::Least_squares_problem::Least_squares_problem(int N_parameters_in, double*
 // Destructor
 mango::Least_squares_problem::~Least_squares_problem() {
   if (data->verbose > 0) std::cout << "Mango least squares problem is being destroyed." << std::endl;
-  delete data;
+  //delete data; // This is handled by the destructor of the parent class (Problem).
   delete least_squares_data;
 }
 
@@ -45,5 +45,5 @@ int mango::Least_squares_problem::get_N_terms() {
 
 double mango::Least_squares_problem::optimize() {
   // Delegate this work to Least_squares_data so we don't need to put "least_squares_data->" in front of everything.
-  return least_squares_data->optimize();
+  return least_squares_data->optimize(&mpi_partition);
 }

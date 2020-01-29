@@ -12,9 +12,11 @@ double mango::Problem_data::optimize(MPI_Partition* mpi_partition_in) {
   // It carries out the part of the optimization that is not specific to any one package.
 
   mpi_partition = mpi_partition_in;
+  bool proc0_world = mpi_partition->get_proc0_world();
+  if (proc0_world && verbose > 0) std::cout << "Hello world from optimize()" << std::endl;
+
   init_optimization();
 
-  bool proc0_world = mpi_partition->get_proc0_world();
   if (algorithms[algorithm].uses_derivatives && !proc0_world) {
     // All group leaders that are not proc0_world do group_leaders_loop(), then return.
     group_leaders_loop();
@@ -24,23 +26,6 @@ double mango::Problem_data::optimize(MPI_Partition* mpi_partition_in) {
   // proc0_world always continues past this point.
   // For finite-difference-derivative algorithms, the other procs do not go past this point.
   // For parallel algorithms that do not use finite-difference derivatives, such as HOPSPACK, the other group leader procs DO continue past this point.
-
-  if (proc0_world) {
-    if (verbose > 0) std::cout << "Hello world from optimize()" << std::endl;
-
-    // Open output file
-    output_file.open(output_filename.c_str());
-    if (!output_file.is_open()) {
-      std::cerr << "output file: " << output_filename << std::endl;
-      throw std::runtime_error("Error! Unable to open output file.");
-    }
-    // Write header line of output file
-    output_file << "Least squares?" << std::endl << "no" << std::endl << "N_parameters:" << std::endl << N_parameters << std::endl << "function_evaluation,seconds";
-    for (int j=0; j<N_parameters; j++) {
-      output_file << ",x(" << j+1 << ")";
-    }
-    output_file << ",objective_function" << std::endl;
-  }
 
   if (algorithms[algorithm].least_squares)
     throw std::runtime_error("Error! An algorithm for least-squares problems was chosen, but the problem specified is not least-squares.");
@@ -57,13 +42,7 @@ double mango::Problem_data::optimize(MPI_Partition* mpi_partition_in) {
 
   memcpy(state_vector, best_state_vector, N_parameters * sizeof(double)); // Make sure we leave state_vector equal to the best state vector seen.
 
-  // Copy the line corresponding to the optimum to the bottom of the output file.
-  int function_evaluations_temp = function_evaluations;
-  function_evaluations = best_function_evaluation;
-  write_file_line(best_time, state_vector, best_objective_function);
-  function_evaluations = function_evaluations_temp;
-
-  output_file.close();
+  recorder->finalize();
 
   if (verbose > 0) {
     std::cout << "Here comes the optimal state_vector from optimize.cpp: " << state_vector[0];

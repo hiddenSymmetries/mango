@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 #include "mango.hpp"
+// This interface to C and Fortran should only "know" about mango's public API (i.e. the API to outside codes that use mango), not about
+// the implementation details in Problem_data and Least_squares_data. So Problem_data.hpp and Least_squares_data.hpp should NOT be included here!
 
 // The value in the next line must match the corresponding value in mango.F90
 #define mango_interface_string_length 256
@@ -40,13 +42,11 @@ extern "C" {
     return new mango::Problem(*N_parameters, state_vector, objective_function, 0, NULL);
   }
 
-  // 20200127 Temporarily removing the least-squares constructor. Put it back eventually!
-  /*
-  mango::Problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, 
+  mango::Least_squares_problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, 
 						     double* best_residual_function, mango::residual_function_type residual_function) {
-    return new mango::Problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
+    return new mango::Least_squares_problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
   }
-  */
+  
 
   void mango_problem_destroy(mango::Problem *This) {
     delete This;
@@ -130,11 +130,9 @@ extern "C" {
     return (int) This->get_N_parameters();
   }
 
-  /* 20200127 Reinstate this method eventually.
-  int mango_get_N_terms(mango::Problem *This) {
+  int mango_get_N_terms(mango::Least_squares_problem *This) {
     return (int) This->get_N_terms();
   }
-  */
 
   int mango_get_worker_group(mango::Problem *This) {
     return (int) This->mpi_partition.get_worker_group();
@@ -180,17 +178,15 @@ extern "C" {
     This->set_verbose(*verbose);
   }
 
-  /*
-  void mango_set_print_residuals_in_output_file(mango::Problem *This, int* print_residuals_in_output_file_int) {
+  void mango_set_print_residuals_in_output_file(mango::Least_squares_problem *This, int* print_residuals_in_output_file_int) {
     if (*print_residuals_in_output_file_int==1) {
-      This->print_residuals_in_output_file = true;
+      This->set_print_residuals_in_output_file(true);
     } else if (*print_residuals_in_output_file_int==0) {
-      This->print_residuals_in_output_file = false;
+      This->set_print_residuals_in_output_file(false);
     } else {
       throw std::runtime_error("Error in interface.cpp mango_set_print_residuals_in_output_file");
     }
   }
-  */
 
   void mango_set_user_data(mango::Problem *This, void* user_data) {
     This->set_user_data(user_data);

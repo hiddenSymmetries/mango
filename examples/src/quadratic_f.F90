@@ -2,7 +2,7 @@
 ! * Passing an integer to the objective/residual function using the user_data field.
 
 #define N_dim 3
-#define verbose_level 0
+#define verbose_level 1
 
 program quadratic
 

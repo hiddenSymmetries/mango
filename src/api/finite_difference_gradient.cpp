@@ -99,24 +99,12 @@ void mango::Problem_data::finite_difference_gradient(const double* state_vector,
     MPI_Reduce(objective_functions, objective_functions, N_evaluations, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
   }
 
-  /* Record the results in order in the output file. At the same time, check for any best-yet values of the
-   objective function. */
-  bool failed;
+  // Record the results in order in the output file. At the same time, check for any best-yet values of the objective function.
+  bool failed = false;
   clock_t now;
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
-      function_evaluations += 1;
-      now = clock();
-      write_file_line(now, &state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation]);
-
-      failed = false;
-      if (!failed && (!at_least_one_success || objective_functions[j_evaluation] < best_objective_function)) {
-	at_least_one_success = true;
-	best_objective_function = objective_functions[j_evaluation];
-	best_function_evaluation = function_evaluations;
-	memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
-	best_time = now;
-      }
+      record_function_evaluation(&state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation], failed);
     }
   }
   

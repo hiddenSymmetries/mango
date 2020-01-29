@@ -61,4 +61,5 @@ void mango::Problem_data::init_optimization() {
       ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << std::endl;
   }
 
+  recorder->init();
 }
