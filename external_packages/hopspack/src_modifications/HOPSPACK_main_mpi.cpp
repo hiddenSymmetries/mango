@@ -38,7 +38,7 @@
 */
 
 #include <string.h>    //-- FOR strcpy() and strlen()
-#include<stdexcept> // MJL
+#include <stdexcept> // MJL
 
 #include "HOPSPACK_common.hpp"
 //#include "HOPSPACK_EvaluatorDefault.hpp" // MJL
@@ -52,6 +52,7 @@
 #include "HOPSPACK_Vector.hpp"
 
 #include "mango.hpp"
+#include "Solver.hpp"
 
 //----------------------------------------------------------------------
 //  Static declarations
@@ -233,7 +234,7 @@ static bool  allocateMpiProcesses_
  */
 int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
 			     HOPSPACK::ParameterList* hopspack_parameters,
-			     mango::problem* mango_problem)
+			     mango::Solver* solver)
 {
     using HOPSPACK::parseTextInputFile;   //-- FROM HOPSPACK_utils.hpp
     using HOPSPACK::ParameterList;
@@ -326,7 +327,7 @@ int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
 
     //---- CONSTRUCT THE OPTIMIZER, CONFIGURE IT, AND RUN IT.
     Hopspack  optimizer (pExecutor);
-    if (optimizer.setInputParameters (cParams, mango_problem) == true)
+    if (optimizer.setInputParameters (cParams, solver) == true)
     {
         if (Print::doPrint (Print::FINAL_SOLUTION))
         {
@@ -360,7 +361,7 @@ int  HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &  cGPC,
 static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
                                 const int                        nProcRank,
 				HOPSPACK::GenProcComm   &  cGPC,
-				mango::problem* this_problem)
+				mango::Solver* solver)
 {
     using HOPSPACK::EvalRequestType;
     //using HOPSPACK::EvaluatorDefault; // MJL
@@ -374,7 +375,7 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
 
     /*    EvaluatorDefault *  pEvaluator
 	  = EvaluatorDefault::newInstance (cEvalParams);  //MJL */
-    HOPSPACK::MangoEvaluator *  pEvaluator = new HOPSPACK::MangoEvaluator (cEvalParams, this_problem); // MJL
+    HOPSPACK::MangoEvaluator *  pEvaluator = new HOPSPACK::MangoEvaluator (cEvalParams, solver); // MJL
     if (pEvaluator == NULL)
     {
         cerr << "ERROR: Could not construct Evaluator." << endl;
@@ -476,7 +477,7 @@ static void  doEvalWorkerLoop_ (const HOPSPACK::ParameterList &  cEvalParams,
  */
 int  HOPSPACK_behaveAsWorker(const int                nProcRank,
                              HOPSPACK::GenProcComm &  cGPC,
-			     mango::problem* this_problem)
+			     mango::Solver* solver)
 {
     using HOPSPACK::GenProcComm;
     using HOPSPACK::ParameterList;
@@ -507,7 +508,7 @@ int  HOPSPACK_behaveAsWorker(const int                nProcRank,
             cout << "[np=" << nProcRank << "]"
                  << " <end printing input parameters>" << endl;
         }
-        doEvalWorkerLoop_ (cWorkerParams, nProcRank, cGPC, this_problem);
+        doEvalWorkerLoop_ (cWorkerParams, nProcRank, cGPC, solver);
         cGPC.exit();
     }
     else if (nMsgTag == GenProcComm::INITWORKER_CTZN)

@@ -1,23 +1,29 @@
-#include<iostream>
-#include<iomanip>
-#include<stdexcept>
-#include<cassert>
+#include <iostream>
+#include <iomanip>
+#include <stdexcept>
+#include <cassert>
 #include "mango.hpp"
+#include "Least_squares_solver.hpp"
+#include "Package_petsc.hpp"
+
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
 #endif
 
 static  char help[]="";
 
-void mango::problem::optimize_least_squares_petsc() {
+void mango::Package_petsc::optimize_least_squares(Least_squares_solver* solver) {
 #ifdef MANGO_PETSC_AVAILABLE
+
+  int N_parameters = solver->N_parameters;
+  int N_terms = solver->N_terms;
 
   // The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
   PETSC_COMM_WORLD = MPI_COMM_SELF;
 
   int ierr;
-  ierr = PetscInitialize(&argc,&argv,(char *)0,help);
-  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::problem::optimize_least_squares_petsc().");
+  ierr = PetscInitialize(&(solver->argc),&(solver->argv),(char *)0,help);
+  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::Package_petsc::optimize_least_squares().");
   ierr = PetscInitializeFortran();
 
   Tao my_tao;
@@ -33,23 +39,23 @@ void mango::problem::optimize_least_squares_petsc() {
   // Set initial condition
   double* temp_array;
   VecGetArray(tao_state_vec, &temp_array);
-  memcpy(temp_array, state_vector, N_parameters * sizeof(double));
+  memcpy(temp_array, solver->state_vector, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
-  if (verbose > 0) {
+  if (solver->verbose > 0) {
     std::cout << "Here comes petsc vec for initial condition:" << std::endl;
     VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
   }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  if (verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
+  if (solver->verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
 
 #if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 10))
-  TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)this);
+  TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)solver);
 #else
-  TaoSetResidualRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)this);
+  TaoSetResidualRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)solver);
 #endif
 
-  switch (algorithm) {
+  switch (solver->algorithm) {
   case PETSC_POUNDERS:
     TaoSetType(my_tao, TAOPOUNDERS);
     break;
@@ -57,25 +63,25 @@ void mango::problem::optimize_least_squares_petsc() {
 #if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 11))
     throw std::runtime_error("The petsc_brgn algorithm requires PETSc version 3.11 or newer.");
 #else
-    TaoSetJacobianResidualRoutine(my_tao, petsc_Jacobian, petsc_Jacobian, &mango_petsc_Jacobian_function, (void*)this);
+    TaoSetJacobianResidualRoutine(my_tao, petsc_Jacobian, petsc_Jacobian, &mango_petsc_Jacobian_function, (void*)solver);
     TaoSetType(my_tao, TAOBRGN);
     break;
 #endif
   default:
-    std::cerr << "Should not get here! algorithm = " << algorithm << " i.e. " << algorithms[algorithm].name << std::endl;
+    std::cerr << "Should not get here! algorithm = " << solver->algorithm << " i.e. " << algorithms[solver->algorithm].name << std::endl;
     throw std::runtime_error("Error in mango::problem::optimize_least_squares_petsc()");
   }
 
-  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
+  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) solver->max_function_and_gradient_evaluations);
 
   Vec lower_bounds_vec, upper_bounds_vec;
-  if (bound_constraints_set) {
+  if (solver->bound_constraints_set) {
     VecCreateSeq(PETSC_COMM_SELF, N_parameters, &lower_bounds_vec);
     VecCreateSeq(PETSC_COMM_SELF, N_parameters, &upper_bounds_vec);
 
     for (int j=0; j<N_parameters; j++) {
-      VecSetValue(lower_bounds_vec, j, lower_bounds[j], INSERT_VALUES);
-      VecSetValue(upper_bounds_vec, j, upper_bounds[j], INSERT_VALUES);
+      VecSetValue(lower_bounds_vec, j, solver->lower_bounds[j], INSERT_VALUES);
+      VecSetValue(upper_bounds_vec, j, solver->upper_bounds[j], INSERT_VALUES);
     }
     VecAssemblyBegin(lower_bounds_vec);
     VecAssemblyBegin(upper_bounds_vec);
@@ -88,12 +94,12 @@ void mango::problem::optimize_least_squares_petsc() {
   // TaoSetTolerances(my_tao, 1e-30, 1e-30, 1e-30);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
-  if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  if (solver->verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
   //TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
   // Copy PETSc solution to the mango state vector.
   VecGetArray(tao_state_vec, &temp_array);
-  memcpy(state_vector, temp_array, N_parameters * sizeof(double));
+  memcpy(solver->state_vector, temp_array, N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
 
 
@@ -112,7 +118,7 @@ void mango::problem::optimize_least_squares_petsc() {
 ///////////////////////////////////////////////////////////////////////////////////
 
 #ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, Vec f, void* user_context) {
+PetscErrorCode mango::Package_petsc::mango_petsc_residual_function(Tao my_tao, Vec x, Vec f, void* user_context) {
 
   int j;
   const double* x_array;
@@ -120,39 +126,40 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
   VecGetArrayRead(x, &x_array);
   VecGetArray(f, &f_array);
   
-  mango::problem* this_problem = (mango::problem*) user_context;
-  assert(this_problem->mpi_partition.get_proc0_world()); // This subroutine should only ever be called by proc 0.
+  Least_squares_solver* solver = (Least_squares_solver*) user_context;
+
+  assert(solver->mpi_partition->get_proc0_world()); // This subroutine should only ever be called by proc 0.
 
   bool failed;
-  this_problem->residual_function_wrapper(x_array, f_array, &failed);
+  solver->residual_function_wrapper(x_array, f_array, &failed);
 
-  if (this_problem->verbose > 0) {
+  if (solver->verbose > 0) {
     std::cout << "mango_petsc_residual_function before sigma shift. state_vector:";
-    for (j=0; j < this_problem->get_N_parameters(); j++) {
+    for (j=0; j < solver->N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
     }
     std::cout << std::endl;
     std::cout << "residual:";
-    for (j=0; j < this_problem->get_N_terms(); j++) {
+    for (j=0; j < solver->N_terms; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
     }
     std::cout << std::endl << std::flush;
   }
 
   // PETSc's definition of the residual function does not include sigmas or targets, so shift and scale the mango residuals appropriately:
-  for (j=0; j<this_problem->get_N_terms(); j++) {
-    f_array[j] = (f_array[j] - this_problem->targets[j]) / this_problem->sigmas[j];
+  for (j=0; j<solver->N_terms; j++) {
+    f_array[j] = (f_array[j] - solver->targets[j]) / solver->sigmas[j];
     if (failed) f_array[j] = mango::NUMBER_FOR_FAILED;
   }
 
-  if (this_problem->verbose > 0) {
+  if (solver->verbose > 0) {
     std::cout << "mango_petsc_residual_function after sigma shift. state_vector:";
-    for (j=0; j < this_problem->get_N_parameters(); j++) {
+    for (j=0; j < solver->N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
     }
     std::cout << std::endl;
     std::cout << "residual:";
-    for (j=0; j < this_problem->get_N_terms(); j++) {
+    for (j=0; j < solver->N_terms; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << f_array[j];
     }
     std::cout << std::endl << std::flush;
@@ -167,31 +174,31 @@ PetscErrorCode mango::problem::mango_petsc_residual_function(Tao my_tao, Vec x, 
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-PetscErrorCode mango::problem::mango_petsc_Jacobian_function(Tao my_tao, Vec x, Mat Jacobian, Mat preconditioner, void* user_context) {
+PetscErrorCode mango::Package_petsc::mango_petsc_Jacobian_function(Tao my_tao, Vec x, Mat Jacobian, Mat preconditioner, void* user_context) {
   int j;
   const double* x_array;
   double* Jacobian_array;
   VecGetArrayRead(x, &x_array);
   MatDenseGetArray(Jacobian, &Jacobian_array);
   
-  mango::problem* this_problem = (mango::problem*) user_context;
+  Least_squares_solver* solver = (Least_squares_solver*) user_context;
+  // Introduce shorthand:
+  int N_parameters = solver->N_parameters;
+  int N_terms = solver->N_terms;
 
-  assert(this_problem->mpi_partition.get_proc0_world()); // This subroutine should only ever be called by proc 0.
+  assert(solver->mpi_partition->get_proc0_world()); // This subroutine should only ever be called by proc 0.
 
-  if (this_problem->verbose > 0) {
+  if (solver->verbose > 0) {
     std::cout << "mango_petsc_Jacobian_function before sigma shift. state_vector:";
-    for (j=0; j < this_problem->get_N_parameters(); j++) {
+    for (j=0; j < N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x_array[j];
     }
     std::cout << std::endl << std::flush;
   }
 
-  this_problem->finite_difference_Jacobian(x_array, this_problem->residuals, Jacobian_array);
+  solver->finite_difference_Jacobian(x_array, solver->residuals, Jacobian_array);
   // PETSc does not actually use the residuals computed here, only the Jacobian.
 
-  // Introduce shorthand:
-  int N_parameters = this_problem->N_parameters;
-  int N_terms = this_problem->N_terms;
 
   // PETSc's definition of the residual function does not include sigmas or targets, so scale the Jacobian appropriately.
   // There is probably a faster approach than these explicit loops, but I'll worry about optimizing this later.
@@ -200,7 +207,7 @@ PetscErrorCode mango::problem::mango_petsc_Jacobian_function(Tao my_tao, Vec x, 
       // MANGO's convention is Jacobian[j_parameter*N_terms+j_term].
       // PETSc's convention for the arrays underlying MatDense is that the Jacobian is in column major order, i.e. Fortran convention.
       // These are consistent.
-      Jacobian_array[j_parameter*N_terms+j_term] /= this_problem->sigmas[j_term];
+      Jacobian_array[j_parameter*N_terms+j_term] /= solver->sigmas[j_term];
     }
   }
 

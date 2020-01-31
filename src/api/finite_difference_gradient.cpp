@@ -1,26 +1,28 @@
-#include<iostream>
-#include<iomanip>
-#include<cstring>
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <cmath>
+#include <ctime>
 #include "mpi.h"
 #include "mango.hpp"
-#include<cmath>
-#include<ctime>
+#include "Solver.hpp"
 
-void mango::problem::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
+void mango::Solver::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
 
-  /* gradient should have been allocated already, with size N_parameters. */
+  // gradient should have been allocated already, with size N_parameters.
 
-  if (least_squares) {
-    finite_difference_Jacobian_to_gradient(state_vector, base_case_objective_function, gradient);
-    return;
-  }
+  // This next bit is unsatisfying- it means non-least-squared problems know about least-squared problems.
+  //if (algorithms[algorithm].least_squares) {
+  //  finite_difference_Jacobian_to_gradient(state_vector, base_case_objective_function, gradient);
+  //  return;
+  // }
 
-  /* To simplify code in this file, make some copies of variables in mpi_partition. */
-  MPI_Comm mpi_comm_group_leaders = mpi_partition.get_comm_group_leaders();
-  bool proc0_world = mpi_partition.get_proc0_world();
-  int mpi_rank_world = mpi_partition.get_rank_world();
-  int mpi_rank_group_leaders = mpi_partition.get_rank_group_leaders();
-  int N_worker_groups = mpi_partition.get_N_worker_groups();
+  // To simplify code in this file, make some copies of variables in mpi_partition.
+  MPI_Comm mpi_comm_group_leaders = mpi_partition->get_comm_group_leaders();
+  bool proc0_world = mpi_partition->get_proc0_world();
+  int mpi_rank_world = mpi_partition->get_rank_world();
+  int mpi_rank_group_leaders = mpi_partition->get_rank_group_leaders();
+  int N_worker_groups = mpi_partition->get_N_worker_groups();
 
 
   int data;
@@ -29,13 +31,13 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   if (verbose > 0) std::cout << "Hello from finite_difference_gradient from proc " << mpi_rank_world << std::endl << std::flush;
 
   if (proc0_world) {
-    /* Tell the group leaders to start this subroutine  */
+    // Tell the group leaders to start this subroutine
     data = 1;
     MPI_Bcast(&data,1,MPI_INT,0,mpi_comm_group_leaders);
   }
 
-  /* Only proc0_world has a meaningful state vector at this point. 
-     Copy it to the other processors. */
+  // Only proc0_world has a meaningful state vector at this point. 
+  // Copy it to the other processors.
   double* state_vector_copy = new double[N_parameters];
   if (proc0_world) memcpy(state_vector_copy, state_vector, N_parameters*sizeof(double));
   MPI_Bcast(state_vector_copy, N_parameters, MPI_DOUBLE, 0, mpi_comm_group_leaders);
@@ -84,7 +86,7 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
   int failed_int;
   for(j_evaluation=0; j_evaluation < N_evaluations; j_evaluation++) {
     if ((j_evaluation % N_worker_groups) == mpi_rank_group_leaders) {
-      objective_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &f, &failed_int, this, user_data);
+      objective_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &f, &failed_int, problem, user_data);
       objective_functions[j_evaluation] = f;
     }
   }
@@ -98,24 +100,12 @@ void mango::problem::finite_difference_gradient(const double* state_vector, doub
     MPI_Reduce(objective_functions, objective_functions, N_evaluations, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
   }
 
-  /* Record the results in order in the output file. At the same time, check for any best-yet values of the
-   objective function. */
-  bool failed;
+  // Record the results in order in the output file. At the same time, check for any best-yet values of the objective function.
+  bool failed = false;
   clock_t now;
   if (proc0_world) {
     for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
-      function_evaluations += 1;
-      now = clock();
-      write_file_line(now, &state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation]);
-
-      failed = false;
-      if (!failed && (!at_least_one_success || objective_functions[j_evaluation] < best_objective_function)) {
-	at_least_one_success = true;
-	best_objective_function = objective_functions[j_evaluation];
-	best_function_evaluation = function_evaluations;
-	memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
-	best_time = now;
-      }
+      record_function_evaluation(&state_vectors[j_evaluation*N_parameters], objective_functions[j_evaluation], failed);
     }
   }
   

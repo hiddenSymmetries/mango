@@ -1,6 +1,6 @@
-#include<iostream>
-#include<string>
-#include<stdexcept>
+#include <iostream>
+#include <string>
+#include <stdexcept>
 #include "mango.hpp"
 
 // Constructor

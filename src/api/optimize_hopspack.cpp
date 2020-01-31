@@ -1,8 +1,10 @@
-#include<iostream>
-#include<iomanip>
-#include<stdexcept>
-#include<cmath>
+#include <iostream>
+#include <iomanip>
+#include <stdexcept>
+#include <cmath>
 #include "mango.hpp"
+#include "Solver.hpp"
+#include "Package_hopspack.hpp"
 
 #ifdef MANGO_HOPSPACK_AVAILABLE
 #include "HOPSPACK_GenProcComm.hpp"
@@ -13,30 +15,31 @@
 #include "HOPSPACK_MangoEvaluator.hpp"
 
 int HOPSPACK_startProcComm(HOPSPACK::GenProcComm &, MPI_Comm);
-int HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &, HOPSPACK::ParameterList*, mango::problem*);
-int HOPSPACK_behaveAsWorker(const int, HOPSPACK::GenProcComm &, mango::problem*);
+int HOPSPACK_behaveAsMaster(HOPSPACK::GenProcComm &, HOPSPACK::ParameterList*, mango::Solver*);
+int HOPSPACK_behaveAsWorker(const int, HOPSPACK::GenProcComm &, mango::Solver*);
 #endif
 
 
-void mango::problem::optimize_hopspack() {
+void mango::Package_hopspack::optimize(Solver* solver) {
 #ifdef MANGO_HOPSPACK_AVAILABLE
 
   // Shorthand:
-  MPI_Comm mpi_comm_group_leaders = mpi_partition.get_comm_group_leaders();
-  int mpi_rank_group_leaders = mpi_partition.get_rank_group_leaders();
+  MPI_Comm mpi_comm_group_leaders = solver->mpi_partition->get_comm_group_leaders();
+  int mpi_rank_group_leaders = solver->mpi_partition->get_rank_group_leaders();
   bool proc0 = (mpi_rank_group_leaders == 0);
+  int N_parameters = solver->N_parameters;
 
-  if (verbose > 0) std::cout << "Entering optimize_hopspack" << std::endl;
+  if (solver->verbose > 0) std::cout << "Entering optimize_hopspack" << std::endl;
 
   //  if (mpi_partition.get_N_procs_group_leaders() < 2) throw std::runtime_error("Hopspack requires at least 2 worker groups");
 
   // Initialize HOPSPACK's MPI machinery. This code is based on code in HOPSPACK_main_mpi.cpp.
   using HOPSPACK::GenProcComm;
   GenProcComm &  cGPC = GenProcComm::getTheInstance();
-  int  nProcRank = HOPSPACK_startProcComm(cGPC, mpi_partition.get_comm_group_leaders());
+  int  nProcRank = HOPSPACK_startProcComm(cGPC, solver->mpi_partition->get_comm_group_leaders());
   if (nProcRank == -1) throw std::runtime_error("Error starting MPI in HOPSPACK");
 
-  if (verbose > 0) std::cout << "Done initializing HOPSPACK MPI variables." << std::endl;
+  if (solver->verbose > 0) std::cout << "Done initializing HOPSPACK MPI variables." << std::endl;
 
   // Set HOPSPACK's parameters:
   // See the HOPSPACK manual for the paramter sublists and parameters.
@@ -48,38 +51,38 @@ void mango::problem::optimize_hopspack() {
     cProblemParams->setParameter("Number Unknowns", N_parameters);
 
     // If bound constraints are available, hopefully hopspack can automatically set the scaling. Otherwise just try a uniform scaling.
-    if (!bound_constraints_set) {
+    if (!solver->bound_constraints_set) {
       HOPSPACK::Vector scaling(N_parameters, 1.0);
       cProblemParams->setParameter("Scaling",scaling);
     }
 
     // Set the initial condition:
     HOPSPACK::Vector x0(N_parameters, 0.0);
-    for (int j=0; j<N_parameters; j++) x0[j] = state_vector[j];
+    for (int j=0; j<N_parameters; j++) x0[j] = solver->state_vector[j];
     cProblemParams->setParameter("Initial X",x0);
 
     // Set bound constraints, if they are available:
-    if (bound_constraints_set) {
+    if (solver->bound_constraints_set) {
       HOPSPACK::Vector hopspack_lower_bounds(N_parameters, 0.0);
       HOPSPACK::Vector hopspack_upper_bounds(N_parameters, 0.0);
       // Eventually I may want to replace large values with HOPSPACK::dne() ?
-      for (int j=0; j<N_parameters; j++) hopspack_lower_bounds[j] = lower_bounds[j];
-      for (int j=0; j<N_parameters; j++) hopspack_upper_bounds[j] = upper_bounds[j];
+      for (int j=0; j<N_parameters; j++) hopspack_lower_bounds[j] = solver->lower_bounds[j];
+      for (int j=0; j<N_parameters; j++) hopspack_upper_bounds[j] = solver->upper_bounds[j];
       cProblemParams->setParameter("Lower Bounds",hopspack_lower_bounds);
       cProblemParams->setParameter("Upper Bounds",hopspack_upper_bounds);
     }
         
     HOPSPACK::ParameterList*  cMedParams = &(hopspack_parameters.getOrSetSublist ("Mediator"));
     //cout << "MJL Number Processors:" << cMedParams->getParameter("Number Processors",-17) << endl;
-    cMedParams->setParameter("Number Processors",mpi_partition.get_N_procs_group_leaders());
+    cMedParams->setParameter("Number Processors",solver->mpi_partition->get_N_procs_group_leaders());
     cMedParams->setParameter("Citizen Count",1);
-    cMedParams->setParameter("Maximum Evaluations",max_function_evaluations);
+    cMedParams->setParameter("Maximum Evaluations",solver->max_function_evaluations);
     
     HOPSPACK::ParameterList*  cCitizenParams = &(hopspack_parameters.getOrSetSublist ("Citizen 1"));
     cCitizenParams->setParameter("Type","GSS");
     cCitizenParams->setParameter("Step Tolerance",1e-5);
 
-    if (verbose > 0) {
+    if (solver->verbose > 0) {
       cProblemParams->setParameter("Display",2);
       cMedParams->setParameter("Display",2);
       cCitizenParams->setParameter("Display",1);
@@ -89,21 +92,21 @@ void mango::problem::optimize_hopspack() {
       cCitizenParams->setParameter("Display",0);
     }
     
-    if (verbose > 0) std::cout << "Done setting HOPSPACK parameters." << std::endl;
+    if (solver->verbose > 0) std::cout << "Done setting HOPSPACK parameters." << std::endl;
   }
 
   // Run HOPSPACK
   int nReturnValue;
-  if (mpi_partition.get_N_worker_groups()==1) {
+  if (solver->mpi_partition->get_N_worker_groups()==1) {
     // Run serial version of hopspack.
     // The code for this is based on HOPSPACK_main_serial.cpp.
-    if (verbose > 0) std::cout << "Beginning serial version of HOPSPACK." << std::endl;
+    if (solver->verbose > 0) std::cout << "Beginning serial version of HOPSPACK." << std::endl;
     //HOPSPACK::MangoEvaluator* pEvaluator = HOPSPACK::MangoEvaluator::newInstance (hopspack_parameters.sublist ("Evaluator"));
-    HOPSPACK::MangoEvaluator* pEvaluator = new HOPSPACK::MangoEvaluator (hopspack_parameters, this);
+    HOPSPACK::MangoEvaluator* pEvaluator = new HOPSPACK::MangoEvaluator (hopspack_parameters, solver);
     if (pEvaluator == NULL) throw std::runtime_error("Error constructing MangoEvaluator for serial HOPSPACK!");
     HOPSPACK::ExecutorSerial* pExecutor = new HOPSPACK::ExecutorSerial (pEvaluator);
     HOPSPACK::Hopspack optimizer (pExecutor);
-    if (optimizer.setInputParameters (hopspack_parameters, this) == true) optimizer.solve();
+    if (optimizer.setInputParameters (hopspack_parameters, solver) == true) optimizer.solve();
     delete pEvaluator;
     delete pExecutor;
     nReturnValue = 0;
@@ -111,23 +114,24 @@ void mango::problem::optimize_hopspack() {
   } else {
     // Run MPI version of hopspack
     if (proc0) {
-      if (verbose > 0) std::cout << "Beginning MPI version of HOPSPACK." << std::endl;
-      nReturnValue = HOPSPACK_behaveAsMaster(cGPC, &hopspack_parameters, this);
+      if (solver->verbose > 0) std::cout << "Beginning MPI version of HOPSPACK." << std::endl;
+      nReturnValue = HOPSPACK_behaveAsMaster(cGPC, &hopspack_parameters, solver);
     } else {
-      nReturnValue = HOPSPACK_behaveAsWorker(nProcRank, cGPC, this);
+      nReturnValue = HOPSPACK_behaveAsWorker(nProcRank, cGPC, solver);
     }
   }
 
   if (nReturnValue != 0) throw std::runtime_error("Error! HOPSPACK returned an error code.");
 
-  // If we ran the MPI version of hopspack, her we get the data from the optimum transferred to proc 0.
+  /* 20200131 I'll think about what to do with this next bit of code later.
+  // If we ran the MPI version of hopspack, here we get the data from the optimum transferred to proc 0.
   int proc_index, best_proc_index;
   double candidate_best_objective_function, apparent_best_objective_function;
   bool was_I_best;
-  if (mpi_partition.get_N_worker_groups() > 1) {
+  if (solver->mpi_partition->get_N_worker_groups() > 1) {
     if (proc0) {
       // Poll all other procs for their best objective function
-      for (proc_index = 1; proc_index < mpi_partition.get_N_procs_group_leaders(); proc_index++) {
+      for (proc_index = 1; proc_index < solver->mpi_partition->get_N_procs_group_leaders(); proc_index++) {
 	MPI_Recv(&candidate_best_objective_function, 1, MPI_DOUBLE, proc_index, proc_index, mpi_comm_group_leaders, MPI_STATUS_IGNORE);
 	//std::cout << "Best objective function on group leader " << proc_index << ": " << std::scientific << candidate_best_objective_function << std::endl;
 	if (proc_index==1 || (candidate_best_objective_function < apparent_best_objective_function)) {
@@ -166,6 +170,7 @@ void mango::problem::optimize_hopspack() {
     }
   }
   // Done transferring data about the optimum to proc 0.
+  */
 
 #else
   // MANGO_HOPSPACK_AVAILABLE is not defined
@@ -176,6 +181,7 @@ void mango::problem::optimize_hopspack() {
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
+/*
 void mango::problem::write_hopspack_line_to_file(std::string line, double objective_function) {
   // This subroutine only ever is called on proc0_world.
   // 'line' is almost all of the line of the output file, except that the global # of function evaluations (the first element of the line)
@@ -203,4 +209,12 @@ void mango::problem::write_hopspack_line_to_file(std::string line, double object
   // Now actually write the line of the file.
   write_function_evaluation_and_time(now);
   output_file << line << std::endl << std::flush;
+}
+*/
+
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+void mango::Package_hopspack::optimize_least_squares(Least_squares_solver* solver) {
+  throw std::runtime_error("Error! mango somehow got to Package_hopspack::optimize_least_squares. This should never happen.");
 }

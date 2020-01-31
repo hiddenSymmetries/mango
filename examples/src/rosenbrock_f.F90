@@ -1,5 +1,11 @@
-! This example demonstrates
-! * Passing a double to the objective/residual function using the user_data field.
+! The standard 2D Rosenbrock banana function:
+! f(x,y) = (x - 1)^2 + 100 * (y - x^2)^2
+! The optimum is at (x,y) = (1,1), and the objective function there is f=0.
+!
+! This example demonstrates several things:
+! * Unconstrained least-squares minimization.
+! * The problem is more challenging than the 'quadratic_c' example due to the objective function having a steep curved valley.
+! * Passing a double to the objective/residual function through the 'user_data'.
 
 #define verbose_level 0
 

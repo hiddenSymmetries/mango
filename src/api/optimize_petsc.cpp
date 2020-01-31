@@ -1,46 +1,48 @@
-#include<iostream>
-#include<stdexcept>
+#include <iostream>
+#include <stdexcept>
 #include "mango.hpp"
+#include "Solver.hpp"
+#include "Package_petsc.hpp"
 #ifdef MANGO_PETSC_AVAILABLE
 #include <petsctao.h>
 #endif
 
 static  char help[]="";
 
-void mango::problem::optimize_petsc() {
+void mango::Package_petsc::optimize(Solver* solver) {
 #ifdef MANGO_PETSC_AVAILABLE
 
   // The need for this line is described on https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Sys/PetscInitialize.html
   PETSC_COMM_WORLD = MPI_COMM_SELF;
 
   int ierr;
-  ierr = PetscInitialize(&argc,&argv,(char *)0,help);
-  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::problem::optimize_petsc().");
+  ierr = PetscInitialize(&(solver->argc),&(solver->argv),(char *)0,help);
+  if (ierr) throw std::runtime_error("Error in PetscInitialize in mango::Package_petsc::optimize().");
   ierr = PetscInitializeFortran();
 
   Tao my_tao;
   TaoCreate(PETSC_COMM_SELF, &my_tao);
 
   Vec tao_state_vec;
-  VecCreateSeq(PETSC_COMM_SELF, N_parameters, &tao_state_vec);
+  VecCreateSeq(PETSC_COMM_SELF, solver->N_parameters, &tao_state_vec);
 
   // Set initial condition
   double* temp_array;
   VecGetArray(tao_state_vec, &temp_array);
-  memcpy(temp_array, state_vector, N_parameters * sizeof(double));
+  memcpy(temp_array, solver->state_vector, solver->N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
-  if (verbose > 0) {
+  if (solver->verbose > 0) {
     std::cout << "Here comes petsc vec for initial condition:" << std::endl;
     VecView(tao_state_vec, PETSC_VIEWER_STDOUT_SELF);
   }
   TaoSetInitialVector(my_tao, tao_state_vec);
 
-  if (verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
+  if (solver->verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
 
-  switch (algorithm) {
+  switch (solver->algorithm) {
   case PETSC_NM:
     TaoSetType(my_tao, TAONM);
-    TaoSetObjectiveRoutine(my_tao, &mango_petsc_objective_function, (void*)this);
+    TaoSetObjectiveRoutine(my_tao, &mango_petsc_objective_function, (void*)solver);
     break;
   case PETSC_POUNDERS:
     throw std::runtime_error("Should not get here! For the petsc_pounders algorithm, mango_optimize_least_squares_petsc should be called instead of mango_optimize_petsc.");
@@ -49,16 +51,16 @@ void mango::problem::optimize_petsc() {
     throw std::runtime_error("Should not get here!");
   }
 
-  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) max_function_and_gradient_evaluations);
+  TaoSetMaximumFunctionEvaluations(my_tao, (PetscInt) solver->max_function_and_gradient_evaluations);
 
   Vec lower_bounds_vec, upper_bounds_vec;
-  if (bound_constraints_set) {
-    VecCreateSeq(PETSC_COMM_SELF, N_parameters, &lower_bounds_vec);
-    VecCreateSeq(PETSC_COMM_SELF, N_parameters, &upper_bounds_vec);
+  if (solver->bound_constraints_set) {
+    VecCreateSeq(PETSC_COMM_SELF, solver->N_parameters, &lower_bounds_vec);
+    VecCreateSeq(PETSC_COMM_SELF, solver->N_parameters, &upper_bounds_vec);
 
-    for (int j=0; j<N_parameters; j++) {
-      VecSetValue(lower_bounds_vec, j, lower_bounds[j], INSERT_VALUES);
-      VecSetValue(upper_bounds_vec, j, upper_bounds[j], INSERT_VALUES);
+    for (int j=0; j<solver->N_parameters; j++) {
+      VecSetValue(lower_bounds_vec, j, solver->lower_bounds[j], INSERT_VALUES);
+      VecSetValue(upper_bounds_vec, j, solver->upper_bounds[j], INSERT_VALUES);
     }
     VecAssemblyBegin(lower_bounds_vec);
     VecAssemblyBegin(upper_bounds_vec);
@@ -71,14 +73,14 @@ void mango::problem::optimize_petsc() {
   // TaoSetTolerances(my_tao, 1e-30, 1e-30, 1e-30);
   TaoSetFromOptions(my_tao);
   TaoSolve(my_tao);
-  if (verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
+  if (solver->verbose > 0) TaoView(my_tao, PETSC_VIEWER_STDOUT_SELF);
 
   // Copy PETSc solution to the mango state vector.
   VecGetArray(tao_state_vec, &temp_array);
-  memcpy(state_vector, temp_array, N_parameters * sizeof(double));
+  memcpy(solver->state_vector, temp_array, solver->N_parameters * sizeof(double));
   VecRestoreArray(tao_state_vec, &temp_array);
 
-  if (bound_constraints_set) {
+  if (solver->bound_constraints_set) {
     VecDestroy(&lower_bounds_vec);
     VecDestroy(&upper_bounds_vec);
   }
@@ -98,16 +100,16 @@ void mango::problem::optimize_petsc() {
 //////////////////////////////////////////////////////////////////////////////////
 
 #ifdef MANGO_PETSC_AVAILABLE
-PetscErrorCode mango::problem::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
+PetscErrorCode mango::Package_petsc::mango_petsc_objective_function(Tao my_tao, Vec x, PetscReal* f_petsc, void* user_context) {
 
   const double* x_array;
   VecGetArrayRead(x, &x_array);
   
-  mango::problem* this_problem = (mango::problem*) user_context;
+  mango::Solver* solver = (mango::Solver*) user_context;
 
   bool failed;
   double f;
-  this_problem->objective_function_wrapper(x_array, &f, &failed);
+  solver->objective_function_wrapper(x_array, &f, &failed);
 
   if (failed) f = (PetscReal)mango::NUMBER_FOR_FAILED;
 

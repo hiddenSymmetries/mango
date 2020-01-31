@@ -45,7 +45,7 @@
 #include "HOPSPACK_Vector.hpp"
 
 #include "mango.hpp"
-
+#include "Solver.hpp"
 //----------------------------------------------------------------------
 //! Implements HOPSPACK::Evaluator as a linked application.
 /*!
@@ -77,7 +77,7 @@ class MangoEvaluator : public HOPSPACK::Evaluator
      *                          Parameter value "Evaluator Type" determines
      *                          the particular implementation.
      */
-  MangoEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::problem*);
+  MangoEvaluator (const HOPSPACK::ParameterList &  cEvalParams, mango::Solver*);
 
     //! Destructor.
     ~MangoEvaluator (void);
@@ -142,7 +142,7 @@ class MangoEvaluator : public HOPSPACK::Evaluator
   double  evaluateF_ (const HOPSPACK::Vector &  cX, string & sMsg) const;
     void    evaluateCIneqs_ (const HOPSPACK::Vector &  cX,
                                    HOPSPACK::Vector &  cIneqs) const;
-  mango::problem* this_problem;
+  mango::Solver* solver;
 
 };
 } // namespace HOPSPACK

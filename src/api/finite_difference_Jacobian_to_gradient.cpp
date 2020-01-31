@@ -1,16 +1,16 @@
-#include<iostream>
-#include<iomanip>
-#include<cstring>
-#include<stdexcept>
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <stdexcept>
 #include "mango.hpp"
+#include "Least_squares_solver.hpp"
 
-void mango::problem::finite_difference_Jacobian_to_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
-
+void mango::Least_squares_solver::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
+  // This subroutine overrides mango::Solver::finite_difference_gradient.
   // gradient should have been allocated already, with size N_parameters.
 
-  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_partition.get_rank_world() << std::endl;
-
-  if (!mpi_partition.get_proc0_world()) throw std::runtime_error("Only proc0_world should get here!");
+  if (verbose > 0) std::cout << "Hello from finite_difference_Jacobian_to_gradient from proc " << mpi_partition->get_rank_world() << std::endl;
+  if (!mpi_partition->get_proc0_world()) throw std::runtime_error("Only proc0_world should get here!");
 
   double* base_case_residual_vector = new double[N_terms];
   double* Jacobian = new double[N_terms * N_parameters];

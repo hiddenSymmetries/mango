@@ -57,6 +57,7 @@
 #include "HOPSPACK_Vector.hpp"
 
 #include "mango.hpp"
+#include "Solver.hpp"
 
 namespace HOPSPACK
 {
@@ -137,7 +138,7 @@ Hopspack::~Hopspack (void)
 //----------------------------------------------------------------------
 //  Method setInputParameters
 //----------------------------------------------------------------------
-  bool  Hopspack::setInputParameters (const ParameterList &  cParams, mango::problem* mango_problem)
+  bool  Hopspack::setInputParameters (const ParameterList &  cParams, mango::Solver* solver)
 {
     if (_bAreParametersSet == true)
     {
@@ -184,7 +185,7 @@ Hopspack::~Hopspack (void)
                                *_pLinConstr,
                                _pInitialPoint,
                                _pExecutor,
-			       mango_problem);
+			       solver);
 
     if (makeCitizens_ (cParams, *_pProbDef, *_pLinConstr) == false)
         return( false );

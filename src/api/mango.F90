@@ -1,5 +1,6 @@
 module mango
 
+!  The value in the next line must match the corresponding value in mango.F90
 #define mango_interface_string_length 256
 
   ! Modeled after
@@ -221,17 +222,20 @@ module mango
   end interface
 
   public :: mango_problem
-  public :: mango_problem_create, mango_problem_create_least_squares, mango_problem_destroy, &
+  public :: mango_problem_create, mango_problem_create_least_squares, &
+       mango_problem_destroy, &
        mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
        mango_mpi_init, mango_mpi_partition_set_custom, mango_optimize, &
        mango_get_mpi_rank_world, mango_get_mpi_rank_worker_groups, mango_get_mpi_rank_group_leaders, &
        mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
        mango_get_proc0_world, mango_get_proc0_worker_groups, &
        mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
-       mango_get_N_parameters, mango_get_N_terms, mango_get_worker_group, mango_get_best_function_evaluation, &
+       mango_get_N_parameters, mango_get_N_terms, &
+       mango_get_worker_group, mango_get_best_function_evaluation, &
        mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
-       mango_set_verbose, mango_set_print_residuals_in_output_file, mango_set_user_data, &
+       mango_set_verbose, mango_set_print_residuals_in_output_file, &
+       mango_set_user_data, &
        mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write
   
 

@@ -5,12 +5,12 @@
 
 #define verbose_level 0
 
-#include<iostream>
-#include<iomanip>
-#include<mpi.h>
-#include<stdlib.h>
-#include<stdexcept>
-#include<cmath>
+#include <iostream>
+#include <iomanip>
+#include <mpi.h>
+#include <stdlib.h>
+#include <stdexcept>
+#include <cmath>
 #include "mango.hpp"
 
 #define N_terms 214
@@ -26,9 +26,9 @@ void partition_work(int, int, int*, int*);
 
 void do_work(int, double*, double*, int, int, datapoint*);
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
+void residual_function(int*, const double*, int*, double*, int*, mango::Problem*, void*);
 
-void worker(mango::problem*, datapoint*);
+void worker(mango::Least_squares_problem*, datapoint*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -53,20 +53,20 @@ int main(int argc, char *argv[]) {
     targets[j] = 0.0;
     sigmas[j]  = 1.0;
   }
-  mango::problem myprob(3, state_vector, N_terms, targets, sigmas, best_residual_function, &residual_function, argc, argv);
+  mango::Least_squares_problem myprob(3, state_vector, N_terms, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
   std::string extension = "chwirut_c";
   //  myprob.set_algorithm(mango::PETSC_POUNDERS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
-  myprob.verbose = verbose_level;
+  myprob.set_verbose(verbose_level);
   myprob.read_input_file("../input/mango_in." + extension);
-  myprob.output_filename = "../output/mango_out." + extension;
+  myprob.set_output_filename("../output/mango_out." + extension);
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.mpi_partition.write("../output/mango_mpi." + extension);
   // myprob.centered_differences = true;
-  myprob.max_function_evaluations = 2000;
-  myprob.print_residuals_in_output_file = false;
-  myprob.user_data = yt_data; // This passes the (y,t) data to the residual function
+  myprob.set_max_function_evaluations(2000);
+  myprob.set_print_residuals_in_output_file(false);
+  myprob.set_user_data((void*)yt_data); // This passes the (y,t) data to the residual function
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
@@ -101,7 +101,7 @@ void do_work(int N_parameters, double* x, double* f, int start_index, int stop_i
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void residual_function(int* N_parameters, const double* x, int* N_terms_copy, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
+void residual_function(int* N_parameters, const double* x, int* N_terms_copy, double* f, int* failed, mango::Problem* this_problem, void* void_user_data) {
   int j, start_index, stop_index;
   if (verbose_level > 0) std::cout << "C residual function called with N="<< *N_parameters << "\n";
 
@@ -134,7 +134,7 @@ void residual_function(int* N_parameters, const double* x, int* N_terms_copy, do
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-void worker(mango::problem* myprob, datapoint* yt_data) {
+void worker(mango::Least_squares_problem* myprob, datapoint* yt_data) {
   MPI_Comm mpi_comm_worker_groups = myprob->mpi_partition.get_comm_worker_groups();
   int N_parameters = myprob->get_N_parameters();
   int mpi_rank_worker_groups = myprob->mpi_partition.get_rank_worker_groups();

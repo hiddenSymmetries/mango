@@ -47,6 +47,7 @@
 #include "HOPSPACK_ParameterList.hpp"
 
 #include "mango.hpp"
+#include "Solver.hpp"
 
 namespace HOPSPACK
 {
@@ -85,7 +86,7 @@ public:
             const bool               bHasNonlinearConstr,
                   DataPoint * const  pInitialPoint,
 	    Executor        &  cExecutor,
-	    mango::problem* mango_problem_in);
+	    mango::Solver* solver_in);
 
   //! Destructor 
   ~Conveyor();
@@ -252,7 +253,7 @@ private:
   //! Counter for the number of evaluations and evaluation messages.
   EvalCounter counter;
 
-  mango::problem* mango_problem;
+  mango::Solver* solver;
 };
 
 }
