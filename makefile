@@ -87,7 +87,7 @@ $(F_OBJ_FILES): obj/%.f.o: src/api/%.F90
 	$(FC) $(EXTRA_F_COMPILE_FLAGS) -c $< -o $@
 
 $(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp $(HEADER_FILES)
-	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I src/api -c $< -o $@
 
 $(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp $(HEADER_FILES)
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -I src/api -c $< -o $@
@@ -95,7 +95,7 @@ $(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp $(HEADER_FILES)
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
 # Similarly, only the modified hopspack source files depend on mango.hpp, but it is easier to make the dependency apply to all hopspack files here.
 $(HOPSPACK_CPP_OBJ_FILES): obj/%.cpp.o: external_packages/hopspack/src/%.cpp $(HOPSPACK_HEADERS) $(HEADER_FILES)
-	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I src/api -c $< -o $@
 
 $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPACK_HEADERS)
 	$(CC) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@

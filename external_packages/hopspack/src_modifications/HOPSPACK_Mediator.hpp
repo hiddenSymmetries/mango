@@ -53,6 +53,7 @@
 #include "HOPSPACK_Vector.hpp"
 
 #include "mango.hpp"
+#include "Solver.hpp"
 
 namespace HOPSPACK
 {
@@ -84,7 +85,7 @@ class Mediator : public CallbackToMediator
               const LinConstr     &        cLinConstr,
                     DataPoint     * const  pInitialPoint,
 	      Executor      * const  pExecutor,
-	      mango::problem* mango_problem);
+	      mango::Solver* solver);
 
     //! Destructor.
     ~Mediator (void);

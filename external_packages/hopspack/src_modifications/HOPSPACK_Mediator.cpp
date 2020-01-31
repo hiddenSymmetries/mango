@@ -81,7 +81,7 @@ Mediator::Mediator (const ParameterList &        cMediatorParams,
                     const LinConstr     &        cLinConstr,
                           DataPoint     * const  pInitialPoint,
 		    Executor      * const  pExecutor,
-		    mango::problem* mango_problem)
+		    mango::Solver* solver)
     :
     _cProbDef (cProbDef),
     _cLinConstr (cLinConstr),
@@ -126,7 +126,7 @@ Mediator::Mediator (const ParameterList &        cMediatorParams,
                                _cProbDef.hasNonlinearConstr(),
                                pInitialPoint,
                                *_pExecutor,
-			       mango_problem);
+			       solver);
 
     _nMaxEvaluations = cMediatorParams.getParameter ("Maximum Evaluations", -1);
     if (_nMaxEvaluations < -1)

@@ -47,6 +47,7 @@
 #include "HOPSPACK_ProblemDef.hpp"
 
 #include "mango.hpp"
+#include "Solver.hpp"
 
 namespace HOPSPACK
 {
@@ -89,7 +90,7 @@ class Hopspack
      *  Parameters are parsed and used to define the optimization problem,
      *  linear constraints, the Mediator, and initial Citizens.
      */
-  bool  setInputParameters (const ParameterList &  cParams, mango::problem* mango_problem);
+  bool  setInputParameters (const ParameterList &  cParams, mango::Solver* solver);
 
     //! Read configuration parameters for the optimization instance.
     /*!

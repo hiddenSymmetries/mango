@@ -62,15 +62,16 @@
 #include "HOPSPACK_float.hpp"
 
 #include "mango.hpp"
+#include "Solver.hpp"
 
 //----------------------------------------------------------------------
 //  Constructor
 //----------------------------------------------------------------------
 HOPSPACK::MangoEvaluator::MangoEvaluator
-(const HOPSPACK::ParameterList &  cEvalParams, mango::problem* this_problem_in)
+(const HOPSPACK::ParameterList &  cEvalParams, mango::Solver* solver_in)
 {
     //---- THIS SIMPLE EXAMPLE DOES NOT USE EVALUATOR PARAMETERS.
-  this_problem = this_problem_in;
+  solver = solver_in;
     return;
 }
 
@@ -148,9 +149,10 @@ double  HOPSPACK::MangoEvaluator::evaluateF_
   double* x = &vec[0];
 
   // Call Mango objective function
-  this_problem->objective_function_wrapper(x, &f, &failed);
+  solver->objective_function_wrapper(x, &f, &failed);
   if (failed) f = HOPSPACK::dne();
 
+  /* 20200131 I'll need to replace the code below by something to pass info back to proc0...
   // Prepare the line to write to the output file. This string will be passed by MPI to proc 0 to write to the output file,
   // since only proc 0 knows the global # of function evaluations.
   this_problem->compose_x_f_string(sMsg, x, f);
@@ -160,6 +162,7 @@ double  HOPSPACK::MangoEvaluator::evaluateF_
     this_problem->compose_residuals_string(residuals_string, this_problem->residuals);
     sMsg += residuals_string;
   }
+  */
 
   //std::cout << "Here comes sMsg from HOPSPACK::MangoEvaluator:" << sMsg << endl;
   return(f);

@@ -11,12 +11,14 @@ namespace mango {
 
   class Package_hopspack : public Package {
   private:
+    Solver* solver;
+
 #ifdef MANGO_HOPSPACK_AVAILABLE
 #endif
 
   public:
-    void optimize(Solver*) {};
-    void optimize_least_squares(Least_squares_solver*) {};
+    void optimize(Solver*);
+    void optimize_least_squares(Least_squares_solver*);
   };
 }
 

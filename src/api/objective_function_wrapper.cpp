@@ -37,7 +37,7 @@ bool mango::Solver::record_function_evaluation(const double* x, double f, bool f
     best_time = now;
   }
 
-  recorder->record_function_evaluation(function_evaluations, now, x, f);
+  if (mpi_partition->get_proc0_world()) recorder->record_function_evaluation(function_evaluations, now, x, f);
 
   return new_optimum;
 }
