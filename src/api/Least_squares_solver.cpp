@@ -22,6 +22,12 @@ mango::Least_squares_solver::Least_squares_solver(Least_squares_problem* problem
   recorder = new Recorder_least_squares(this);
 }
 
+// Constructor with no arguments, used only for unit tests.
+mango::Least_squares_solver::Least_squares_solver()
+  : Solver() // Call constructor of base class
+{
+}
+
 // Destructor
 mango::Least_squares_solver::~Least_squares_solver() {
   delete[] residuals;

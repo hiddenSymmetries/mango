@@ -29,6 +29,14 @@ mango::Solver::Solver(Problem* problem_in, int N_parameters_in) {
   recorder = new Recorder_standard(this);
 }
 
+// Constructor with no arguments, used only for unit tests
+mango::Solver::Solver() {
+  //  N_parameters = 1;
+  //best_state_vector = new double[1];
+  recorder = new Recorder();
+}
+
+
 // Destructor
 mango::Solver::~Solver() {
   delete[] best_state_vector;

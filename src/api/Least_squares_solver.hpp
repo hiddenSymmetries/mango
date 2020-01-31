@@ -6,21 +6,20 @@
 
 namespace mango {
 
-  // This class contains ugly implementation details that are specific to least-squares minimization
+  // This class contains ugly implementation details that are specific to least-squares minimization.
   class Least_squares_solver : public Solver {
 
-  private:
+  protected:
     void* original_user_data;
+
+    Least_squares_solver(); // This version of the constructor, with no arguments, is used only for unit testing. Protected so Catch2 can subclass it.
 
     // Overrides the routines in Solver:
     void group_leaders_loop();
     bool record_function_evaluation(const double*, double, bool); // Overrides Solver.
-    void record_function_evaluation(const double*, double*, bool);// Not an override! Note double* instead of double in 2nd argument.
+    void record_function_evaluation(const double*, double*, bool);// Not an override! Note double* instead of double in 2nd argument, and return void instead of bool.
 
-    //void compose_residuals_string(std::string&, double*);
-    //void write_least_squares_file_line(clock_t, const double*, double, double*);
-
-    // Much of the solver are public because this information must be used by the concrete Package.
+    // Many of the solver variables and method are public because this information must be used by the concrete Package.
   public:
     int N_terms;
     double* targets;
@@ -38,9 +37,8 @@ namespace mango {
     // Overrides of routines in Solver:
     double optimize(MPI_Partition*);
     void finite_difference_gradient(const double*, double*, double*);
-    //bool record_function_evaluation(const double*, double, bool);
 
-    // Methods that do not exist in Solver:
+    // Methods that do not exist in the base class Solver:
     double residuals_to_single_objective(double*);
     void residual_function_wrapper(const double*, double*, bool*);
     void finite_difference_Jacobian(const double*, double*, double*);

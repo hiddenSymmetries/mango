@@ -1,5 +1,7 @@
 #include "catch.hpp"
 #include "mango.hpp"
+#include "Solver.hpp"
+#include "Least_squares_solver.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -10,36 +12,29 @@
 // Test finite-difference gradient, for a non-least-squares problem.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void objective_function_1(int* N_parameters, const double* x, double* f, int* failed_int, mango::problem* problem, void* user_data) {
+void objective_function_1(int* N_parameters, const double* x, double* f, int* failed_int, mango::Problem* problem, void* user_data) {
   assert(*N_parameters == 3);
   *f = exp(x[0] * x[0] - exp(x[1]) + sin(x[2])); // A 3-D model function, for testing.
   *failed_int = false;
 }
 
 
-TEST_CASE_METHOD(mango::problem, "problem::finite_difference_gradient()","[problem][finite difference]") {
-  // The Catch2 macros automatically call the mango::problem() constructor (the version with no arguments).
+TEST_CASE_METHOD(mango::Solver, "Solver::finite_difference_gradient()","[Solver][finite difference]") {
+  // The Catch2 macros automatically call the mango::Solver() constructor (the version with no arguments).
   N_parameters = 3;
-  delete[] best_state_vector; // The constructor problem() allocated best_state_vector of size 1, so reallocate it.
   best_state_vector = new double[N_parameters];
   state_vector = new double[N_parameters];
   double* gradient = new double[N_parameters];
-  least_squares = false;
   objective_function = &objective_function_1;
   function_evaluations = 0;
   verbose = 0;
   double base_case_objective_function;
 
   // Set up MPI:
+  mpi_partition = new mango::MPI_Partition();
   auto N_worker_groups_requested = GENERATE(range(1,5)); // Scan over N_worker_groups
-  mpi_partition.set_N_worker_groups(N_worker_groups_requested);
-  mpi_partition.init(MPI_COMM_WORLD);
-
-  // We need to open an output file, since the finite-differencing routine will write to it.
-  if (mpi_partition.get_proc0_world()) {
-    output_file.open("mango_out.temp");
-    if (!output_file.is_open()) throw std::runtime_error("Error! Unable to open output file.");
-  }
+  mpi_partition->set_N_worker_groups(N_worker_groups_requested);
+  mpi_partition->init(MPI_COMM_WORLD);
 
   // Set the point about which we will compute the gradient:
   state_vector[0] =  1.2;
@@ -52,22 +47,22 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_gradient()","[probl
   SECTION("1-sided differences") {
     centered_differences = false;
 
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Case of proc0_world
       finite_difference_gradient(state_vector, &base_case_objective_function, gradient);
       // Tell group leaders to exit.
       int data = -1;
-      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition->get_comm_group_leaders());
     } else {
       // Case for group leaders:
-      if (mpi_partition.get_proc0_worker_groups()) {
+      if (mpi_partition->get_proc0_worker_groups()) {
 	group_leaders_loop();
       } else {
 	// Everybody else, i.e. workers. Nothing to do here.
       }
     }
     
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       //std::cout << "base_case_objective_function: " << std::scientific << std::setw(24) << std::setprecision(15) << base_case_objective_function << ",  1-sided gradient: " << gradient[0] << ", " << gradient[1] << ", " << gradient[2] << std::endl;
       // Finally, see if the results are correct:
       CHECK(        function_evaluations == 4);
@@ -81,22 +76,22 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_gradient()","[probl
   SECTION("centered differences") {
     centered_differences = true;
 
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Case of proc0_world
       finite_difference_gradient(state_vector, &base_case_objective_function, gradient);
       // Tell group leaders to exit.
       int data = -1;
-      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition->get_comm_group_leaders());
     } else {
       // Case for group leaders:
-      if (mpi_partition.get_proc0_worker_groups()) {
+      if (mpi_partition->get_proc0_worker_groups()) {
 	group_leaders_loop();
       } else {
 	// Everybody else, i.e. workers. Nothing to do here.
       }
     }
     
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       //std::cout << "base_case_objective_function: " << std::scientific << std::setw(24) << std::setprecision(15) << base_case_objective_function << ",  centered gradient: " << gradient[0] << ", " << gradient[1] << ", " << gradient[2] << std::endl;
       // Finally, see if the results are correct:
       CHECK(        function_evaluations == 7);
@@ -107,17 +102,16 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_gradient()","[probl
     }
   }
 
-  if (mpi_partition.get_proc0_world()) output_file.close();
   delete[] state_vector;
   delete[] gradient;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Now consider a least-squares problem, and test both finite_difference_Jacobian() and
-// finite_difference_Jacobian_to_gradient().
+// finite_difference_gradient().
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void residual_function_1(int* N_parameters, const double* x, int* N_terms, double* f, int* failed_int, mango::problem* problem, void* user_data) {
+void residual_function_1(int* N_parameters, const double* x, int* N_terms, double* f, int* failed_int, mango::Problem* problem, void* user_data) {
   assert(*N_parameters == 2);
   assert(*N_terms == 4);
   for (int j = 0; j < *N_terms; j++) {
@@ -127,11 +121,10 @@ void residual_function_1(int* N_parameters, const double* x, int* N_terms, doubl
 }
 
 
-TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and problem::finite_difference_Jacobian_to_gradient()","[problem][finite difference]") {
+TEST_CASE_METHOD(mango::Least_squares_solver, "Least_squares_solver::finite_difference_Jacobian() and problem::finite_difference_gradient()","[problem][finite difference]") {
   // The Catch2 macros automatically call the mango::problem() constructor (the version with no arguments).
   N_parameters = 2;
   N_terms = 4;
-  delete[] best_state_vector; // The constructor problem() allocated best_state_vector of size 1, so reallocate it.
   best_state_vector = new double[N_parameters];
   residuals = new double[N_terms]; // We must allocate this variable since the destructor will delete it.
   double* base_case_residuals = new double[N_terms];
@@ -142,7 +135,7 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
   best_residual_function = new double[N_terms];
   double* gradient = new double[N_parameters];
   double base_case_objective_function;
-  least_squares = true;
+  mpi_partition = new mango::MPI_Partition();
   residual_function = &residual_function_1;
   function_evaluations = 0;
   verbose = 0;
@@ -150,14 +143,8 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
   // Set up MPI:
   auto N_worker_groups_requested = GENERATE(range(1,5)); // Scan over N_worker_groups
   //int N_worker_groups_requested = 1;
-  mpi_partition.set_N_worker_groups(N_worker_groups_requested);
-  mpi_partition.init(MPI_COMM_WORLD);
-
-  // We need to open an output file, since the finite-differencing routine will write to it.
-  if (mpi_partition.get_proc0_world()) {
-    output_file.open("mango_out.temp");
-    if (!output_file.is_open()) throw std::runtime_error("Error! Unable to open output file.");
-  }
+  mpi_partition->set_N_worker_groups(N_worker_groups_requested);
+  mpi_partition->init(MPI_COMM_WORLD);
 
   // Set the point about which we will compute the derivatives:
   state_vector[0] = 1.2;
@@ -195,22 +182,22 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
   SECTION("1-sided differences, Jacobian") { // This section tests finite_difference_Jacobian()
     centered_differences = false;
 
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Case of proc0_world
       finite_difference_Jacobian(state_vector, base_case_residuals, Jacobian);
       // Tell group leaders to exit.
       int data = -1;
-      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition->get_comm_group_leaders());
     } else {
       // Case for group leaders:
-      if (mpi_partition.get_proc0_worker_groups()) {
-	group_leaders_least_squares_loop();
+      if (mpi_partition->get_proc0_worker_groups()) {
+	group_leaders_loop();
       } else {
 	// Everybody else, i.e. workers. Nothing to do here.
       }
     }
     
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Finally, see if the results are correct:
       
       //std::cout << "residuals:" << std::scientific << std::setprecision(15);
@@ -247,22 +234,22 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
   SECTION("Centered differences, Jacobian") { // This section tests finite_difference_Jacobian()
     centered_differences = true;
 
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Case of proc0_world
       finite_difference_Jacobian(state_vector, base_case_residuals, Jacobian);
       // Tell group leaders to exit.
       int data = -1;
-      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition->get_comm_group_leaders());
     } else {
       // Case for group leaders:
-      if (mpi_partition.get_proc0_worker_groups()) {
-	group_leaders_least_squares_loop();
+      if (mpi_partition->get_proc0_worker_groups()) {
+	group_leaders_loop();
       } else {
 	// Everybody else, i.e. workers. Nothing to do here.
       }
     }
     
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Finally, see if the results are correct:
       
       //std::cout << "residuals:" << std::scientific << std::setprecision(15);
@@ -296,25 +283,25 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
       
     }
   }
-  SECTION("1-sided differences, gradient") { // This section tests finite_difference_Jacobian_to_gradient()
+  SECTION("1-sided differences, gradient") { // This section tests finite_difference_gradient()
     centered_differences = false;
 
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Case of proc0_world
-      finite_difference_Jacobian_to_gradient(state_vector, &base_case_objective_function, gradient);
+      finite_difference_gradient(state_vector, &base_case_objective_function, gradient);
       // Tell group leaders to exit.
       int data = -1;
-      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition->get_comm_group_leaders());
     } else {
       // Case for group leaders:
-      if (mpi_partition.get_proc0_worker_groups()) {
-	group_leaders_least_squares_loop();
+      if (mpi_partition->get_proc0_worker_groups()) {
+	group_leaders_loop();
       } else {
 	// Everybody else, i.e. workers. Nothing to do here.
       }
     }
     
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Finally, see if the results are correct:
       CHECK(function_evaluations == 3);
       
@@ -324,25 +311,25 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
       CHECK(gradient[1] == Approx(correct_gradient_1sided[1]).epsilon(1e-13));
     }
   }
-  SECTION("Centered differences, gradient") { // This section tests finite_difference_Jacobian_to_gradient()
+  SECTION("Centered differences, gradient") { // This section tests finite_difference_gradient()
     centered_differences = true;
 
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Case of proc0_world
-      finite_difference_Jacobian_to_gradient(state_vector, &base_case_objective_function, gradient);
+      finite_difference_gradient(state_vector, &base_case_objective_function, gradient);
       // Tell group leaders to exit.
       int data = -1;
-      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition.get_comm_group_leaders());
+      MPI_Bcast(&data,1,MPI_INT,0,mpi_partition->get_comm_group_leaders());
     } else {
       // Case for group leaders:
-      if (mpi_partition.get_proc0_worker_groups()) {
-	group_leaders_least_squares_loop();
+      if (mpi_partition->get_proc0_worker_groups()) {
+	group_leaders_loop();
       } else {
 	// Everybody else, i.e. workers. Nothing to do here.
       }
     }
     
-    if (mpi_partition.get_proc0_world()) {
+    if (mpi_partition->get_proc0_world()) {
       // Finally, see if the results are correct:
       CHECK(function_evaluations == 5);
       
@@ -353,7 +340,6 @@ TEST_CASE_METHOD(mango::problem, "problem::finite_difference_Jacobian() and prob
     }
   }
 
-  if (mpi_partition.get_proc0_world()) output_file.close();
   delete[] state_vector;
   delete[] Jacobian;
   delete[] targets;
