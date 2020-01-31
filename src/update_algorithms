@@ -146,16 +146,6 @@ for package in packages:
     newlines.append('    PACKAGE_'+package.upper()+',\n')
 lines = newlines + lines[end:]
 
-# Replace <optimize_packages> .. </optimize_packages>
-start, end = find_markup(lines,'optimize_packages','//')
-newlines = lines[:start+1] + comment_line
-for j in range(len(packages)):
-    if packages_for_non_least_squares[j]:
-        newlines.append('    void optimize_'+packages[j]+'();\n')
-    if packages_for_least_squares[j]:
-        newlines.append('    void optimize_least_squares_'+packages[j]+'();\n')
-lines = newlines + lines[end:]
-
 # Write new file
 #filename = 'mango_new.hpp'
 try:
@@ -167,11 +157,11 @@ f.writelines(lines)
 f.close()
 
 ##################################################################
-# Editing optimize.cpp
+# Editing set_package.cpp
 ##################################################################
 
 # Read in the file to preprocess
-filename = 'api/optimize.cpp'
+filename = 'api/set_package.cpp'
 try:
     f = open(filename)
 except:
@@ -181,59 +171,20 @@ except:
 lines = f.readlines()
 f.close()
 
-# Replace <optimize_packages> .. </optimize_packages>
-start, end = find_markup(lines,'optimize_packages','//')
+# Replace <includes> .. </includes>
+start, end = find_markup(lines,'includes','//')
 newlines = lines[:start+1] + comment_line
 for j in range(len(packages)):
-    if packages_for_non_least_squares[j]:
-        newlines.append('  case PACKAGE_'+packages[j].upper()+':\n')
-        newlines.append('    optimize_'+packages[j]+'();\n')
-        newlines.append('    break;\n')
+    newlines.append('#include "Package_'+packages[j]+'.hpp"\n')
 lines = newlines + lines[end:]
 
-# Write new file
-#filename = 'mango_new.hpp'
-try:
-    f = open(filename,'w')
-except:
-    print("Error! Unable to open "+filename+" for writing")
-    raise
-f.writelines(lines)
-f.close()
-
-##################################################################
-# Editing optimize_least_squares.cpp
-##################################################################
-
-# Read in the file to preprocess
-filename = 'api/optimize_least_squares.cpp'
-try:
-    f = open(filename)
-except:
-    print("Error! Unable to open "+filename+" for reading")
-    raise
-
-lines = f.readlines()
-f.close()
-
-# Replace <least_squares_packages> .. </least_squares_packages>
-start, end = find_markup(lines,'least_squares_packages','//')
+# Replace <packages> .. </packages>
+start, end = find_markup(lines,'packages','//')
 newlines = lines[:start+1] + comment_line
 for j in range(len(packages)):
-    if packages_for_least_squares[j]:
-        newlines.append('    case PACKAGE_'+packages[j].upper()+':\n')
-        newlines.append('      optimize_least_squares_'+packages[j]+'();\n')
-        newlines.append('      break;\n')
-lines = newlines + lines[end:]
-
-# Replace <non_least_squares_packages> .. </non_least_squares_packages>
-start, end = find_markup(lines,'non_least_squares_packages','//')
-newlines = lines[:start+1] + comment_line
-for j in range(len(packages)):
-    if packages_for_non_least_squares[j]:
-        newlines.append('    case PACKAGE_'+packages[j].upper()+':\n')
-        newlines.append('      optimize_'+packages[j]+'();\n')
-        newlines.append('      break;\n')
+    newlines.append('  case PACKAGE_'+packages[j].upper()+':\n')
+    newlines.append('    package = new Package_'+packages[j]+'();\n')
+    newlines.append('    break;\n')
 lines = newlines + lines[end:]
 
 # Write new file
