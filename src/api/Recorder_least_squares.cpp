@@ -11,6 +11,8 @@ mango::Recorder_least_squares::Recorder_least_squares(Least_squares_solver* solv
 }
 
 void mango::Recorder_least_squares::init() {
+  if (!solver->mpi_partition->get_proc0_world()) return; // Proceed only on proc0_world.
+
   int j;
   
   // Open output file
@@ -58,12 +60,17 @@ void mango::Recorder_least_squares::write_file_line(int function_evaluations, cl
 
 
 void mango::Recorder_least_squares::record_function_evaluation(int function_evaluations, clock_t print_time, const double* x, double f) {
+  if (!solver->mpi_partition->get_proc0_world()) return; // Proceed only on proc0_world.
+
   write_file_line(function_evaluations, print_time, x, f, solver->current_residuals);
 }
 
 
 void mango::Recorder_least_squares::finalize() {
   // Copy the line corresponding to the optimum to the bottom of the output file.
+
+  if (!solver->mpi_partition->get_proc0_world()) return; // Proceed only on proc0_world.
+
   write_file_line(solver->best_function_evaluation, solver->best_time, solver->state_vector, solver->best_objective_function, solver->best_residual_function);
 
   output_file.close();

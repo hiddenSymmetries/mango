@@ -17,7 +17,6 @@ namespace mango {
     Solver(); // This version of the constructor, with no arguments, is used only for unit testing.
     virtual void group_leaders_loop();
     virtual void set_package();
-    virtual bool record_function_evaluation(const double*, double, bool);
 
   public:
     // All data in this class is public because this information must be used by the concrete Package.
@@ -56,6 +55,7 @@ namespace mango {
     virtual void init_optimization();
     virtual void objective_function_wrapper(const double*, double*, bool*); 
     virtual void finite_difference_gradient(const double*, double*, double*);
+    virtual bool record_function_evaluation(const double*, double, bool);
   };
 
 }

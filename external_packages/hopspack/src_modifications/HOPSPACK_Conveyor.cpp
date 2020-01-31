@@ -275,6 +275,14 @@ void HOPSPACK::Conveyor::exchange
 
 	  // MJL 20200131
 	  //mango_problem->write_hopspack_line_to_file(msg, f[0]);
+	  //solver->record_function_evaluation(ptr->getX().getStlVector().const_pointer(), f[0], false);
+
+	  // Only record this function evaluation if N_worker_groups is >1. Otherwise the function evaluation was already
+	  // recorded by HOPSPACK_MangoEvaluator::evaluateF_().
+	  if (solver->mpi_partition->get_N_worker_groups() > 1) {
+	    vector<double> temp_vector = ptr->getX().getStlVector();
+	    solver->record_function_evaluation(&temp_vector[0], f[0], false);
+	  }
 
           if (Print::doPrint (Print::EVALUATED_POINTS))
           {

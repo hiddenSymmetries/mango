@@ -11,6 +11,8 @@ mango::Recorder_standard::Recorder_standard(Solver* solver_in) {
 }
 
 void mango::Recorder_standard::init() {
+  if (!solver->mpi_partition->get_proc0_world()) return; // Proceed only on proc0_world.
+
   // Open output file
   output_file.open(solver->output_filename.c_str());
   if (!output_file.is_open()) {
@@ -28,6 +30,7 @@ void mango::Recorder_standard::init() {
 
 void mango::Recorder_standard::write_file_line(int function_evaluations, clock_t print_time, const double* x, double f) {
   // This subroutine writes a line in the output file for non-least-squares problems.
+
   /*
   write_function_evaluation_and_time(print_time);
   std::string file_string;
@@ -44,12 +47,16 @@ void mango::Recorder_standard::write_file_line(int function_evaluations, clock_t
 
 
 void mango::Recorder_standard::record_function_evaluation(int function_evaluations, clock_t print_time, const double* x, double f) {
+  if (!solver->mpi_partition->get_proc0_world()) return; // Proceed only on proc0_world.
   write_file_line(function_evaluations, print_time, x, f);
 }
 
 
 void mango::Recorder_standard::finalize() {
   // Copy the line corresponding to the optimum to the bottom of the output file.
+
+  if (!solver->mpi_partition->get_proc0_world()) return; // Proceed only on proc0_world.
+
   write_file_line(solver->best_function_evaluation, solver->best_time, solver->state_vector, solver->best_objective_function);
 
   output_file.close();

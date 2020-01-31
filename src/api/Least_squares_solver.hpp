@@ -16,7 +16,6 @@ namespace mango {
 
     // Overrides the routines in Solver:
     void group_leaders_loop();
-    bool record_function_evaluation(const double*, double, bool); // Overrides Solver.
     void record_function_evaluation(const double*, double*, bool);// Not an override! Note double* instead of double in 2nd argument, and return void instead of bool.
 
     // Many of the solver variables and method are public because this information must be used by the concrete Package.
@@ -37,6 +36,8 @@ namespace mango {
     // Overrides of routines in Solver:
     double optimize(MPI_Partition*);
     void finite_difference_gradient(const double*, double*, double*);
+    void objective_function_wrapper(const double*, double*, bool*); 
+    bool record_function_evaluation(const double*, double, bool); // Overrides Solver.
 
     // Methods that do not exist in the base class Solver:
     double residuals_to_single_objective(double*);

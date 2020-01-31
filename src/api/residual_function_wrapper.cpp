@@ -67,3 +67,15 @@ bool mango::Least_squares_solver::record_function_evaluation(const double* x, do
 
   */
 }
+
+
+void mango::Least_squares_solver::objective_function_wrapper(const double* x, double* f, bool* failed) {
+  // This method overrides mango::Solver::objective_function_wrapper().
+  // The difference from that method is that here we do not call record_function_evaluation,
+  // since it was done already in residual_function_wrapper().
+  if (verbose > 0) std::cout << "Hello from Least_squares_solver::objective_function_wrapper" << std::endl;
+
+  int failed_int;
+  objective_function(&N_parameters, x, f, &failed_int, problem, user_data);
+  *failed = (failed_int != 0);
+}

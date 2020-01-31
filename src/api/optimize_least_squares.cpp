@@ -81,6 +81,10 @@ double mango::Least_squares_solver::optimize(MPI_Partition* mpi_partition_in) {
   // 20200129 This next line was moved to the constructor
   //objective_function = &mango::Least_squares_solver::least_squares_to_single_objective;
 
+  // This next bit is useful for hopspack.
+  memset(best_residual_function, 0, N_terms*sizeof(double));
+  current_residuals = best_residual_function;
+
   // Perform the main optimization.
   if (algorithms[algorithm].least_squares) {
     package->optimize_least_squares(this);
