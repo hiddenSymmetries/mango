@@ -160,3 +160,6 @@ test_make:
 	@echo HOPSPACK_C_OBJ_FILES is $(HOPSPACK_CPP_OBJ_FILES)
 	@echo HOPSPACK_C_OBJ_FILES is $(HOPSPACK_C_OBJ_FILES)
 	@echo HOPSPACK_HEADERS is $(HOPSPACK_HEADERS)
+	@echo "********************* Below are the results of examples/make test_make **********************"
+	$(MAKE) -C examples test_make
+

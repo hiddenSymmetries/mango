@@ -1,5 +1,10 @@
+// Minimize f = ((x[0] - 1) / 1)^2 + ((x[1] - 2) / 2)^2 + ((x[2] - 3) / 3)^2
+// Bound constraints are set to [-5, 5] for all 3 parameters, just so global
+// algorithms can be used, but the bound constraints are not active at the optimum.
+// The optimum is x = (1, 2, 3) and the objective function there is f = 0.
+
 #define N_dims 3
-#define verbose_level 1
+#define verbose_level 0
 
 #include <iostream>
 #include <iomanip>

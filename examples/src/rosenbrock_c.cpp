@@ -1,15 +1,15 @@
 #define verbose_level 0
 
-#include<iostream>
-#include<iomanip>
-#include<mpi.h>
-#include<stdlib.h>
-#include<cassert>
+#include <iostream>
+#include <iomanip>
+#include <mpi.h>
+#include <stdlib.h>
+#include <cassert>
 #include "mango.hpp"
 
-void residual_function(int*, const double*, int*, double*, int*, mango::problem*, void*);
+void residual_function(int*, const double*, int*, double*, int*, mango::Problem*, void*);
 
-void worker(mango::problem*);
+void worker(mango::Least_squares_problem*);
 
 int main(int argc, char *argv[]) {
   int ierr;
@@ -26,22 +26,22 @@ int main(int argc, char *argv[]) {
   double targets[2] = {1.0, 0.0};
   double sigmas[2] = {1.0, 0.1};
   double best_residual_function[2];
-  mango::problem myprob(2, state_vector, 2, targets, sigmas, best_residual_function, &residual_function, argc, argv);
+  mango::Least_squares_problem myprob(2, state_vector, 2, targets, sigmas, best_residual_function, &residual_function, argc, argv);
 
   std::string extension = "rosenbrock_c";
   //  myprob.set_algorithm(mango::PETSC_POUNDERS);
   // myprob.set_algorithm("nlopt_ln_neldermead");
-  myprob.verbose = verbose_level;
+  myprob.set_verbose(verbose_level);
   myprob.read_input_file("../input/mango_in." + extension);
-  myprob.output_filename = "../output/mango_out." + extension;
+  myprob.set_output_filename("../output/mango_out." + extension);
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.mpi_partition.write("../output/mango_mpi." + extension);
-  // myprob.centered_differences = true;
-  myprob.max_function_evaluations = 2000;
+  // myprob.set_centered_differences(true);
+  myprob.set_max_function_evaluations(2000);
 
   // Pass some data to the objective function
   int data = 7;
-  myprob.user_data = &data;
+  myprob.set_user_data((void*)&data);
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void residual_function(int* N_parameters, const double* x, int* N_terms, double* f, int* failed, mango::problem* this_problem, void* void_user_data) {
+void residual_function(int* N_parameters, const double* x, int* N_terms, double* f, int* failed, mango::Problem* this_problem, void* void_user_data) {
   int j;
   if (verbose_level > 0) std::cout << "C residual function called with N="<< *N_parameters << "\n";
 
@@ -83,7 +83,7 @@ void residual_function(int* N_parameters, const double* x, int* N_terms, double*
 }
 
 
-void worker(mango::problem* myprob) {
+void worker(mango::Least_squares_problem* myprob) {
   while (myprob->mpi_partition.continue_worker_loop()) {
     // For this problem, the workers don't actually do any work.
     if (verbose_level > 0) std::cout << "Proc " << std::setw(5) << myprob->mpi_partition.get_rank_world() << " could do some work here." << std::endl;
