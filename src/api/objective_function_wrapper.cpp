@@ -4,9 +4,9 @@
 #include <ctime>
 #include <sstream>
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 
-void mango::Problem_data::objective_function_wrapper(const double* x, double* f, bool* failed) {
+void mango::Solver::objective_function_wrapper(const double* x, double* f, bool* failed) {
   if (verbose > 0) std::cout << "Hello from objective_function_wrapper" << std::endl;
 
   int failed_int;
@@ -20,8 +20,8 @@ void mango::Problem_data::objective_function_wrapper(const double* x, double* f,
 }
 
 
-bool mango::Problem_data::record_function_evaluation(const double* x, double f, bool failed) {
-  if (verbose > 0) std::cout << "Hello from Problem_data::record_function_evaluation" << std::endl;
+bool mango::Solver::record_function_evaluation(const double* x, double f, bool failed) {
+  if (verbose > 0) std::cout << "Hello from Solver::record_function_evaluation" << std::endl;
 
   function_evaluations++;
 

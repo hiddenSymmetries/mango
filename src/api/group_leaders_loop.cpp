@@ -1,8 +1,8 @@
 #include <iostream>
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 
-void mango::Problem_data::group_leaders_loop() {
+void mango::Solver::group_leaders_loop() {
   double* state_vector = new double[N_parameters];
   double* gradient = new double[N_parameters];
 

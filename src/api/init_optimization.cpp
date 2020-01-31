@@ -5,9 +5,9 @@
 #include <stdexcept>
 #include <ctime>
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 
-void mango::Problem_data::init_optimization() {
+void mango::Solver::init_optimization() {
 
   // This subroutine carries out a few steps that are shared by both least_squares and conventional optimization.
 
@@ -61,5 +61,5 @@ void mango::Problem_data::init_optimization() {
       ", max_function_and_gradient_evaluations = " << max_function_and_gradient_evaluations << std::endl;
   }
 
-  recorder->init();
+  if (mpi_partition->get_proc0_world()) recorder->init();
 }

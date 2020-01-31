@@ -3,10 +3,9 @@
 #include <cstring>
 #include <ctime>
 #include "mango.hpp"
-#include "Problem_data.hpp"
-#include "Least_squares_data.hpp"
+#include "Least_squares_solver.hpp"
 
-void mango::Least_squares_data::residual_function_wrapper(const double* x, double* f, bool* failed) {
+void mango::Least_squares_solver::residual_function_wrapper(const double* x, double* f, bool* failed) {
   // This subroutine is used to call the residual function when N_worker_groups = 1 (i.e. parallelization only within the objective function evaluation),
   // or for algorithms like hopspack that allow concurrent evaluations of the objective function but not using finite difference Jacobians.
   // This subroutine is not used for finite difference Jacobians.
@@ -17,13 +16,13 @@ void mango::Least_squares_data::residual_function_wrapper(const double* x, doubl
   // For non-least-squares algorithms, 
 
   int failed_int;
-  residual_function(&(problem_data->N_parameters), x, &N_terms, f, &failed_int, problem_data->problem, original_user_data);
+  residual_function(&(N_parameters), x, &N_terms, f, &failed_int, problem, original_user_data);
   *failed = (failed_int != 0);
 
-  if (problem_data->verbose > 0) {
+  if (verbose > 0) {
     std::cout << "Hello from residual_function_wrapper. Here comes x:" << std::endl;
     int j;
-    for (j=0; j < problem_data->N_parameters; j++) {
+    for (j=0; j < N_parameters; j++) {
       std::cout << std::setw(24) << std::setprecision(15) << x[j];
     }
     std::cout << std::endl;
@@ -31,47 +30,40 @@ void mango::Least_squares_data::residual_function_wrapper(const double* x, doubl
 
   record_function_evaluation(x, f, *failed);
 
-  /*
-  //double objective_value = residuals_to_single_objective(f);
-
-
-  if (algorithms[problem_data->algorithm].least_squares) {
-    // For non-least-squares algorithms, the steps below are handled by objective_function_wrapper.
-    problem_data->function_evaluations++;
-    current_residuals = f;
-    clock_t now = clock();
-    problem_data->recorder->record_function_evaluation(problem_data->function_evaluations, now, x, objective_value);
-  }
-
-  // I may want to change the logic in the next line at some point. The idea is that only proc 0 should write to the output file.
-  // This subroutine is only called on proc 0 except for hopspack, where this subroutine is called by all group leaders.
-  // Hence, for hopspack, we should not write to the file here.
-  if (algorithms[problem_data->algorithm].package != PACKAGE_HOPSPACK) {
-    write_least_squares_file_line(now, x, objective_value, f);
-  }
-
-  if (! *failed && (!problem_data->at_least_one_success || objective_value < problem_data->best_objective_function)) {
-    problem_data->at_least_one_success = true;
-    problem_data->best_objective_function = objective_value;
-    problem_data->best_function_evaluation = problem_data->function_evaluations;
-    memcpy(problem_data->best_state_vector, x, problem_data->N_parameters * sizeof(double));
-    memcpy(best_residual_function, f, N_terms * sizeof(double));
-    problem_data->best_time = now;
-  }
-  */
 }
 
-void mango::Least_squares_data::record_function_evaluation(const double* x, double* f, bool failed) {
+void mango::Least_squares_solver::record_function_evaluation(const double* x, double *f, bool failed) {
+  // This method is NOT an override: note double*f instead of double f, and return void instead of bool.
+  if (verbose>0) std::cout << "Hello from Least_squares_solver::record_function_evaluation, the non-override." << std::endl;
+  double objective_value = residuals_to_single_objective(f);
+  current_residuals = f;
+  record_function_evaluation(x, objective_value, failed);
+}
+
+bool mango::Least_squares_solver::record_function_evaluation(const double* x, double f, bool failed) {
+  // This method overrides mango::Solver::record_function_evaluation()
+
+  if (verbose>0) std::cout << "Hello from Least_squares_solver::record_function_evaluation, the override." << std::endl;
+  // Call the overridden function from the base class:
+  bool new_optimum = mango::Solver::record_function_evaluation(x,f,failed);
+  if (new_optimum) {
+    memcpy(best_residual_function, current_residuals, N_terms * sizeof(double));
+  }
+  
+  return new_optimum;
+  /*
 
   // For non-least-squares algorithms, the function evaluations are recorded in objective_function_wrapper.
   // Otherwise, do the recording here.
   bool new_optimum;
-  if (algorithms[problem_data->algorithm].least_squares) {
+  if (algorithms[algorithm].least_squares) {
     double objective_value = residuals_to_single_objective(f);
     current_residuals = f;
-    new_optimum = problem_data->record_function_evaluation(x, objective_value, failed);
+    new_optimum = record_function_evaluation(x, objective_value, failed);
     if (new_optimum) {
       memcpy(best_residual_function, f, N_terms * sizeof(double));
     }
   }
+
+  */
 }

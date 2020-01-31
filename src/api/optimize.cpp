@@ -5,9 +5,9 @@
 #include <stdexcept>
 #include <ctime>
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 
-double mango::Problem_data::optimize(MPI_Partition* mpi_partition_in) {
+double mango::Solver::optimize(MPI_Partition* mpi_partition_in) {
   // This subroutine is run only for non-least-squares optimizaiton.
   // It carries out the part of the optimization that is not specific to any one package.
 

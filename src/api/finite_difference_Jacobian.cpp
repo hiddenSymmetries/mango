@@ -5,22 +5,19 @@
 #include <ctime>
 #include "mpi.h"
 #include "mango.hpp"
-#include "Problem_data.hpp"
-#include "Least_squares_data.hpp"
+#include "Least_squares_solver.hpp"
 
-void mango::Least_squares_data::finite_difference_Jacobian(const double* state_vector, double* base_case_residual_function, double* Jacobian) {
+void mango::Least_squares_solver::finite_difference_Jacobian(const double* state_vector, double* base_case_residual_function, double* Jacobian) {
 
   // base_case_residual_function should have been allocated already, with size N_terms.
   // Jacobian should have been allocated already, with size N_parameters * N_terms.
 
   // To simplify code in this file, make some copies of variables.
-  MPI_Comm mpi_comm_group_leaders = problem_data->mpi_partition->get_comm_group_leaders();
-  bool proc0_world = problem_data->mpi_partition->get_proc0_world();
-  int mpi_rank_world = problem_data->mpi_partition->get_rank_world();
-  int mpi_rank_group_leaders = problem_data->mpi_partition->get_rank_group_leaders();
-  int N_worker_groups = problem_data->mpi_partition->get_N_worker_groups();
-  int N_parameters = problem_data->N_parameters;
-  int verbose = problem_data->verbose;
+  MPI_Comm mpi_comm_group_leaders = mpi_partition->get_comm_group_leaders();
+  bool proc0_world = mpi_partition->get_proc0_world();
+  int mpi_rank_world = mpi_partition->get_rank_world();
+  int mpi_rank_group_leaders = mpi_partition->get_rank_group_leaders();
+  int N_worker_groups = mpi_partition->get_N_worker_groups();
 
   int data;
   int j_evaluation, j_parameter;
@@ -41,7 +38,7 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
   MPI_Bcast(state_vector_copy, N_parameters, MPI_DOUBLE, 0, mpi_comm_group_leaders);
 
   int N_evaluations;
-  if (problem_data->centered_differences) {
+  if (centered_differences) {
     N_evaluations = N_parameters * 2+ 1;
   } else {
     N_evaluations = N_parameters + 1;
@@ -61,10 +58,10 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
       // This is the base case, so do not perturb the state vector.
     } else if (j_evaluation <= N_parameters + 1) {
       // We are doing a forward step
-      perturbed_state_vector[j_evaluation - 2] = perturbed_state_vector[j_evaluation - 2] + problem_data->finite_difference_step_size;
+      perturbed_state_vector[j_evaluation - 2] = perturbed_state_vector[j_evaluation - 2] + finite_difference_step_size;
     } else {
       // We must be doing a backwards step
-      perturbed_state_vector[j_evaluation - 2 - N_parameters] = perturbed_state_vector[j_evaluation - 2 - N_parameters] - problem_data->finite_difference_step_size;
+      perturbed_state_vector[j_evaluation - 2 - N_parameters] = perturbed_state_vector[j_evaluation - 2 - N_parameters] - finite_difference_step_size;
     }
     memcpy(&state_vectors[(j_evaluation-1)*N_parameters], perturbed_state_vector, N_parameters*sizeof(double));
   }
@@ -84,7 +81,7 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
   for(j_evaluation=0; j_evaluation < N_evaluations; j_evaluation++) {
     if ((j_evaluation % N_worker_groups) == mpi_rank_group_leaders) {
       // Note that the use of &residual_functions[j_evaluation*N_terms] in the next line means that j_terms must be the least-signficiant dimension in residual_functions.
-      residual_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &N_terms, &residual_functions[j_evaluation*N_terms], &failed_int, problem_data->problem, original_user_data);
+      residual_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &N_terms, &residual_functions[j_evaluation*N_terms], &failed_int, problem, original_user_data);
     }
   }
 
@@ -107,22 +104,22 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
       //total_objective_function = residuals_to_single_objective(current_residuals);
       record_function_evaluation(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms], failed);
       /*
-      problem_data->function_evaluations += 1;
+      function_evaluations += 1;
       now = clock();
       current_residuals = &residual_functions[j_evaluation*N_terms];
       total_objective_function = residuals_to_single_objective(current_residuals);
-      problem_data->recorder->record_function_evaluation(problem_data->function_evaluations, now, &state_vectors[j_evaluation*N_parameters], total_objective_function);
+      recorder->record_function_evaluation(function_evaluations, now, &state_vectors[j_evaluation*N_parameters], total_objective_function);
       //write_least_squares_file_line(now, &state_vectors[j_evaluation*N_parameters], total_objective_function, &residual_functions[j_evaluation*N_terms]);
 
       failed = false;
-      if (!failed && (!problem_data->at_least_one_success || total_objective_function < problem_data->best_objective_function)) {
+      if (!failed && (!at_least_one_success || total_objective_function < best_objective_function)) {
 	// This next stuff is duplicated in residual_function_wrapper. There should be a more elegant solution.
-        problem_data->at_least_one_success = true;
-        problem_data->best_objective_function = total_objective_function;
-        problem_data->best_function_evaluation = problem_data->function_evaluations;
-        memcpy(problem_data->best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
+        at_least_one_success = true;
+        best_objective_function = total_objective_function;
+        best_function_evaluation = function_evaluations;
+        memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
         memcpy(best_residual_function, &residual_functions[j_evaluation*N_terms], N_terms * sizeof(double));
-	problem_data->best_time = now;
+	best_time = now;
       }
       */
     }
@@ -130,18 +127,18 @@ void mango::Least_squares_data::finite_difference_Jacobian(const double* state_v
   
   // Finally, evaluate the finite difference derivatives.
   memcpy(base_case_residual_function, residual_functions, N_terms*sizeof(double));
-  if (problem_data->centered_differences) {
+  if (centered_differences) {
     for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {
       for (int j_term=0; j_term<N_terms; j_term++) {
 	Jacobian[j_parameter*N_terms+j_term] = (residual_functions[(j_parameter+1)*N_terms+j_term] - residual_functions[(j_parameter+1+N_parameters)*N_terms+j_term])
-	  / (2 * problem_data->finite_difference_step_size);
+	  / (2 * finite_difference_step_size);
       }
     }
   } else {
     // 1-sided finite differences
     for (j_parameter=0; j_parameter<N_parameters; j_parameter++) {
       for (int j_term=0; j_term<N_terms; j_term++) {
-	Jacobian[j_parameter*N_terms+j_term] = (residual_functions[(j_parameter+1)*N_terms+j_term] - base_case_residual_function[j_term]) / problem_data->finite_difference_step_size;
+	Jacobian[j_parameter*N_terms+j_term] = (residual_functions[(j_parameter+1)*N_terms+j_term] - base_case_residual_function[j_term]) / finite_difference_step_size;
       }
     }
   }

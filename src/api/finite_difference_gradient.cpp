@@ -5,16 +5,17 @@
 #include <ctime>
 #include "mpi.h"
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 
-void mango::Problem_data::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
+void mango::Solver::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
 
   // gradient should have been allocated already, with size N_parameters.
 
-  //  if (least_squares) {
+  // This next bit is unsatisfying- it means non-least-squared problems know about least-squared problems.
+  //if (algorithms[algorithm].least_squares) {
   //  finite_difference_Jacobian_to_gradient(state_vector, base_case_objective_function, gradient);
   //  return;
-  //}
+  // }
 
   // To simplify code in this file, make some copies of variables in mpi_partition.
   MPI_Comm mpi_comm_group_leaders = mpi_partition->get_comm_group_leaders();

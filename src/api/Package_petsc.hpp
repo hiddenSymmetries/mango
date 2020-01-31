@@ -7,8 +7,8 @@
 
 namespace mango {
 
-  class Problem_data;
-  class Least_squares_data;
+  class Solver;
+  class Least_squares_solver;
 
   class Package_petsc : public Package {
   private:
@@ -19,8 +19,8 @@ namespace mango {
 #endif
 
   public:
-    void optimize(Problem_data*);
-    void optimize_least_squares(Problem_data*, Least_squares_data*);
+    void optimize(Solver*);
+    void optimize_least_squares(Least_squares_solver*);
   };
 }
 

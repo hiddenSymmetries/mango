@@ -181,11 +181,11 @@ namespace mango {
   typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::Problem*, void*);
   typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::Problem*, void*);
 
-  class Problem_data;
+  class Solver;
   class Problem {
   protected:
-    // Many implementation details are hidden in the Problem_data class, so users see only the interface provided by Problem.
-    Problem_data* data;
+    // Many implementation details are hidden in the Solver class, so users see only the interface provided by Problem.
+    Solver* solver;
 
   public:
     MPI_Partition mpi_partition;
@@ -216,17 +216,17 @@ namespace mango {
   //////////////////////////////////////////////////////////////////////////////////////
   // A least-squares problem is a subclass of Problem
 
-  class Least_squares_data;
+  class Least_squares_solver;
   class Least_squares_problem : public Problem {
   private:
-    // Many implementation details are hidden in the Least_squares_data class, so users see only the interface provided by Least_sauqres_problem.
-    Least_squares_data* least_squares_data;
+    // Many implementation details are hidden in the Least_squares_solver class, so users see only the interface provided by Least_squares_problem.
+    Least_squares_solver* least_squares_solver;
 
   public:
     Least_squares_problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); // For least-squares problems
     ~Least_squares_problem();
 
-    double optimize();
+    //double optimize();
     int get_N_terms();
     void set_print_residuals_in_output_file(bool);
   };

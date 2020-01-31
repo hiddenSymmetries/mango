@@ -1,11 +1,11 @@
 #include <stdexcept>
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 #include "Recorder_standard.hpp"
 
 // Constructor
-mango::Problem_data::Problem_data(Problem* problem_in, int N_parameters_in) {
-  if (N_parameters_in < 1) throw std::runtime_error("Error in mango::Problem_data::Problem_data(int). N_parameters must be at least 1.");
+mango::Solver::Solver(Problem* problem_in, int N_parameters_in) {
+  if (N_parameters_in < 1) throw std::runtime_error("Error in mango::Solver::Solver(). N_parameters must be at least 1.");
   N_parameters = N_parameters_in;
   best_state_vector = new double[N_parameters_in];
 
@@ -30,6 +30,6 @@ mango::Problem_data::Problem_data(Problem* problem_in, int N_parameters_in) {
 }
 
 // Destructor
-mango::Problem_data::~Problem_data() {
+mango::Solver::~Solver() {
   delete[] best_state_vector;
 }

@@ -1,5 +1,5 @@
-#ifndef MANGO_PROBLEM_DATA_H
-#define MANGO_PROBLEM_DATA_H
+#ifndef MANGO_SOLVER_H
+#define MANGO_SOLVER_H
 
 #include <mpi.h>
 #include <string>
@@ -10,13 +10,15 @@
 
 namespace mango {
 
-  class Problem_data {
+  class Solver {
     // This class contains the ugly implementation details of the interface for Problem specified in mango.hpp.
+    // All methods are "virtual" so they can be over-ridden in subclasses of Solver that replace the solver in Problem.
+  protected:
+    virtual void group_leaders_loop();
+    virtual void set_package();
+    virtual bool record_function_evaluation(const double*, double, bool);
 
-  private:
-    void group_leaders_loop();
-    void load_algorithm_properties();
-    void set_package();
+    //virtual void load_algorithm_properties();
     // 20200127 Temporarily commenting out the next 2 lines, until I get least-squares problems working.
     //void compose_residuals_string(std::string&, double*);
     //void write_least_squares_file_line(clock_t, const double*, double, double*);
@@ -63,17 +65,16 @@ namespace mango {
     Problem* problem;
     Recorder* recorder;
 
-    Problem_data(Problem*, int);
-    ~Problem_data();
+    Solver(Problem*, int);
+    ~Solver();
 
-    double optimize(MPI_Partition*);
-    void init_optimization();
-    void objective_function_wrapper(const double*, double*, bool*); 
-    bool record_function_evaluation(const double*, double, bool);
-    void finite_difference_gradient(const double*, double*, double*);
-    void compose_x_f_string(std::string&, const double*, double);
-    void write_file_line(clock_t, const double*, double);
-    void write_function_evaluation_and_time(clock_t);
+    virtual double optimize(MPI_Partition*);
+    virtual void init_optimization();
+    virtual void objective_function_wrapper(const double*, double*, bool*); 
+    virtual void finite_difference_gradient(const double*, double*, double*);
+    //virtual void compose_x_f_string(std::string&, const double*, double);
+    //virtual void write_file_line(clock_t, const double*, double);
+    //virtual void write_function_evaluation_and_time(clock_t);
   };
 
 }

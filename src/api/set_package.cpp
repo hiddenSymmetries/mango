@@ -1,14 +1,14 @@
 #include <stdexcept>
 #include "mango.hpp"
-#include "Problem_data.hpp"
+#include "Solver.hpp"
 #include "Package_nlopt.hpp"
 #include "Package_gsl.hpp"
 #include "Package_petsc.hpp"
 
-// This file is the only place where the core of mango (specifically Problem_data) knows
+// This file is the only place where the core of mango (specifically Solver) knows
 // anything about the concrete Packages available.
 
-void mango::Problem_data::set_package() {
+void mango::Solver::set_package() {
   switch (algorithms[algorithm].package) {
   case PACKAGE_NLOPT:
     package = new Package_nlopt();
@@ -20,6 +20,6 @@ void mango::Problem_data::set_package() {
     package = new Package_petsc();
     break;
   default:
-    throw std::runtime_error("Unknown package in mango::Problem_data::set_package");
+    throw std::runtime_error("Unknown package in mango::Solver::set_package");
   }
 }
