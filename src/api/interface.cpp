@@ -209,4 +209,9 @@ extern "C" {
     This->mpi_partition.write(filename);
   }
 
+  void mango_set_relative_bound_constraints(mango::Problem *This, double* min_factor, double* max_factor, double* min_radius, int* preserve_sign) {
+    if (*preserve_sign != 0 && *preserve_sign != 1) throw std::runtime_error("preserve_sign should be 0 or 1.");
+    This->set_relative_bound_constraints(*min_factor, *max_factor, *min_radius, (*preserve_sign)==1);
+  }
+
 }

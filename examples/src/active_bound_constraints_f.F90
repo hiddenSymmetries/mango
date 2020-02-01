@@ -1,9 +1,11 @@
-! Minimize f = (x[0] - x[1]) ^ 2 + x[1] ^ 2                                                                                                            
-! subject to                                                                                                                                           
-! x[0] in [2, 4]                                                                                                                                       
-! x[1] in [-3, 1]                                                                                                                                      
-!                                                                                                                                                      
+! Minimize f = (x[0] - x[1]) ^ 2 + x[1] ^ 2
+! subject to
+! x[0] in [2, 4]
+! x[1] in [-3, 1]
+!
 ! The solution is (x[0], x[1]) = (2, 1), and at this point f = 2.
+!
+! This script also demonstrates set_relative_bound_constraints().
 
 #define N_dim 2
 #define verbose_level 0
@@ -23,8 +25,8 @@ program active_bound_constraints
   !type(mango_least_squares_problem) :: problem
   type(mango_problem) :: problem
   double precision, dimension(N_dim) :: targets = (/ 0.0d+0, 0.0d+0 /), sigmas = (/ 1.0d+0, 1.0d+0 /)
-  double precision, dimension(N_dim) :: lower_bounds = (/ 2.0d+0, -3.0d+0 /)
-  double precision, dimension(N_dim) :: upper_bounds = (/ 4.0d+0,  1.0d+0 /)
+  double precision, dimension(N_dim) :: lower_bounds
+  double precision, dimension(N_dim) :: upper_bounds
   double precision, dimension(N_dim) :: state_vector = (/ 3.0d+0, -2.0d+0 /) ! Initial condition
   double precision, dimension(N_dim) :: best_residual_function
   integer :: j
@@ -43,6 +45,22 @@ program active_bound_constraints
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_set_max_function_evaluations(problem, 500)
   call mango_set_bound_constraints(problem, lower_bounds, upper_bounds)
+
+  call mango_set_relative_bound_constraints(problem, 0.5d+0, 2.0d+0, 0.0d+0, .false.)
+  if (verbose_level > 0) then
+     print *, "After calling set_relative_bound_constraints(0.5, 2.0, 0.0, false),"
+     print *, "  Lower bounds = ", lower_bounds
+     print *, "  Upper bounds = ", upper_bounds
+  end if
+  call mango_set_relative_bound_constraints(problem, 0.5d+0, 2.0d+0, 0.0d+0, .true.)
+  if (verbose_level > 0) then
+     print *, "After calling set_relative_bound_constraints(0.5, 2.0, 0.0, true),"
+     print *, "  Lower bounds = ", lower_bounds
+     print *, "  Upper bounds = ", upper_bounds
+  end if
+
+  lower_bounds = (/ 2.0d+0, -3.0d+0 /)
+  upper_bounds = (/ 4.0d+0,  1.0d+0 /)
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)

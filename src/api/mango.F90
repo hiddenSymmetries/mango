@@ -219,6 +219,12 @@ module mango
        type(C_ptr), value :: this
        character(C_char) :: filename(mango_interface_string_length)
      end subroutine C_mango_mpi_partition_write
+     subroutine C_mango_set_relative_bound_constraints(this, min_factor, max_factor, min_radius, preserve_sign) bind(C,name="mango_set_relative_bound_constraints")
+       import
+       type(C_ptr), value :: this
+       real(C_double) :: min_factor, max_factor, min_radius
+       integer(C_int) :: preserve_sign
+     end subroutine C_mango_set_relative_bound_constraints
   end interface
 
   public :: mango_problem
@@ -236,7 +242,8 @@ module mango
        mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
        mango_set_verbose, mango_set_print_residuals_in_output_file, &
        mango_set_user_data, &
-       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write
+       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write, &
+       mango_set_relative_bound_constraints
   
 
   abstract interface
@@ -580,5 +587,15 @@ contains
     end do
     call C_mango_mpi_partition_write(this%object, filename_padded)
   end subroutine mango_mpi_partition_write
+
+  subroutine mango_set_relative_bound_constraints(this, min_factor, max_factor, min_radius, preserve_sign_logical)
+    type(mango_problem), intent(in) :: this
+    real(C_double), intent(in) :: min_factor, max_factor, min_radius
+    logical, intent(in) :: preserve_sign_logical
+    integer(C_int) :: preserve_sign_int
+    preserve_sign_int = 0
+    if (preserve_sign_logical) preserve_sign_int = 1 
+    call C_mango_set_relative_bound_constraints(this%object, min_factor, max_factor, min_radius, preserve_sign_int)
+  end subroutine mango_set_relative_bound_constraints
 
 end module mango

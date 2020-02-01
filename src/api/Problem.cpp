@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <cassert>
 #include "mango.hpp"
 #include "Solver.hpp"
 
@@ -99,4 +100,55 @@ void mango::Problem::mpi_init(MPI_Comm mpi_comm_world) {
 double mango::Problem::optimize() {
   // Delegate this work to Solver so we don't need to put "solver->" in front of all the variables, and so we can replace solver with derived classes.
   return solver->optimize(&mpi_partition);
+}
+
+
+void mango::Problem::set_relative_bound_constraints(double min_factor, double max_factor, double min_radius, bool preserve_sign) {
+  if (min_factor < 0) throw std::runtime_error("mango::Problem::set_relative_bound_constraints: min_factor must be >= 0.");
+  if (min_factor > 1) throw std::runtime_error("mango::Problem::set_relative_bound_constraints: min_factor must be <= 1.");
+
+  if (max_factor < 1) throw std::runtime_error("mango::Problem::set_relative_bound_constraints: max_factor must be >= 1.");
+
+  if (min_radius < 0) throw std::runtime_error("mango::Problem::set_relative_bound_constraints: min_radius must be >= 0.");
+
+  if (! solver->bound_constraints_set) throw std::runtime_error("mango::Problem::set_relative_bound_constraints can only be called after bound constraints are set.");
+
+  int j;
+  double temp;
+  if (preserve_sign) {
+    // Approach in which the sign of the variable is preserved.
+    for (j=0; j < solver->N_parameters; j++) {
+      if (solver->state_vector[j] > 0) {
+	// Initial value and both bounds are positive
+	solver->lower_bounds[j] = min_factor * solver->state_vector[j];
+	solver->upper_bounds[j] = max_factor * solver->state_vector[j];
+	if (solver->upper_bounds[j] - solver->state_vector[j] < min_radius) solver->upper_bounds[j] = solver->state_vector[j] + min_radius;
+	if (solver->state_vector[j] - solver->lower_bounds[j] < min_radius) solver->lower_bounds[j] = solver->state_vector[j] - min_radius;
+	if (solver->lower_bounds[j] < 0) solver->lower_bounds[j] = 0;
+      } else if (solver->state_vector[j] < 0) {
+	// Initial value and both bounds are negative
+	solver->lower_bounds[j] = max_factor * solver->state_vector[j];
+	solver->upper_bounds[j] = min_factor * solver->state_vector[j];
+	if (solver->upper_bounds[j] - solver->state_vector[j] < min_radius) solver->upper_bounds[j] = solver->state_vector[j] + min_radius;
+	if (solver->state_vector[j] - solver->lower_bounds[j] < min_radius) solver->lower_bounds[j] = solver->state_vector[j] - min_radius;
+	if (solver->upper_bounds[j] > 0) solver->upper_bounds[j] = 0;
+      } else {
+	// Initial value is 0, so there is a bound of each sign
+	assert(solver->state_vector[j] == 0);
+	solver->lower_bounds[j] = -min_radius;
+	solver->upper_bounds[j] =  min_radius;
+      }
+      if (! (solver->upper_bounds[j] >= solver->lower_bounds[j])) std::cout << "ub:" << solver->upper_bounds[j] << " lb:" << solver->lower_bounds[j] << "\n";
+      assert(solver->upper_bounds[j] >= solver->lower_bounds[j]);
+    }
+  } else {
+    // Approach in which the sign of the variable is not preserved.
+    for (j=0; j < solver->N_parameters; j++) {
+      temp = max_factor * abs(solver->state_vector[j]);
+      if (temp < min_radius) temp = min_radius;
+      solver->lower_bounds[j] = -temp;
+      solver->upper_bounds[j] =  temp;
+      assert(solver->upper_bounds[j] >= solver->lower_bounds[j]);
+    }
+  }
 }

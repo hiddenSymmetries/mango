@@ -210,6 +210,7 @@ namespace mango {
     void set_verbose(int);
     void set_output_filename(std::string&);
     void set_user_data(void*);
+    void set_relative_bound_constraints(double, double, double, bool);
   };
 
   

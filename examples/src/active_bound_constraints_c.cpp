@@ -4,6 +4,8 @@
 // x[1] in [-3, 1]
 //
 // The solution is (x[0], x[1]) = (2, 1), and at this point f = 2.
+//
+// This script also demonstrates set_relative_bound_constraints().
 
 #define N_dims 2
 #define verbose_level 0
@@ -45,10 +47,27 @@ int main(int argc, char *argv[]) {
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.set_max_function_evaluations(500);
 
-  double lower_bounds[N_dims] = {2.0, -3.0};
-  double upper_bounds[N_dims] = {4.0, 1.0};
+  double lower_bounds[N_dims];
+  double upper_bounds[N_dims];
 
   myprob.set_bound_constraints(lower_bounds, upper_bounds);
+
+  if (verbose_level>0) {
+    myprob.set_relative_bound_constraints(0.5, 2.0, 0.0, false);
+    std::cout << "After calling set_relative_bound_constraints(0.5, 2.0, 0.0, false)," << std::endl;
+    std::cout << "  Lower bounds = " << lower_bounds[0] << ", " << lower_bounds[1] << std::endl;
+    std::cout << "  Upper bounds = " << upper_bounds[0] << ", " << upper_bounds[1] << std::endl;
+    myprob.set_relative_bound_constraints(0.5, 2.0, 0.0, true);
+    std::cout << "After calling set_relative_bound_constraints(0.5, 2.0, 0.0, true)," << std::endl;
+    std::cout << "  Lower bounds = " << lower_bounds[0] << ", " << lower_bounds[1] << std::endl;
+    std::cout << "  Upper bounds = " << upper_bounds[0] << ", " << upper_bounds[1] << std::endl;
+    // Restore bounds to their original values
+  }
+
+  lower_bounds[0] =  2.0;
+  lower_bounds[1] = -3.0;
+  upper_bounds[0] =  4.0;
+  upper_bounds[1] =  1.0;
 
   // Pass some data to the objective function
   int data = 7;
