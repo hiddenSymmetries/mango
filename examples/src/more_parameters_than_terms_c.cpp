@@ -2,7 +2,7 @@
 // when the number of parameters exceeds the number of least-squares terms. Some algorithms
 // like those in GSL fail in this case.
 //
-// Objective function: f = [z - x^2 - y^2)]^2 + [(x + y + z - (-1)]^2
+// Objective function: f = [z - x^2 - y^2]^2 + [x + y + z - (-1)]^2
 //
 // The first term is minimized for points on the graph z = x^2 + y^2.
 // The second term is minimized for points on the plane x + y + z = -1.
