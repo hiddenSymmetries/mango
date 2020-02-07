@@ -1,3 +1,23 @@
+// Copyright 2019, University of Maryland and the MANGO development team.
+//
+// This file is part of MANGO.
+//
+// MANGO is free software: you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// MANGO is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with MANGO.  If not, see
+// <https://www.gnu.org/licenses/>.
+
+////////////////////////////////////////////////////////////////////////
+
 // Minimize f = ((x[0] - 1) / 1)^2 + ((x[1] - 2) / 2)^2 + ((x[2] - 3) / 3)^2
 // Bound constraints are set to [-5, 5] for all 3 parameters, just so global
 // algorithms can be used, but the bound constraints are not active at the optimum.

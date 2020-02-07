@@ -1,3 +1,23 @@
+! Copyright 2019, University of Maryland and the MANGO development team.
+!
+! This file is part of MANGO.
+!
+! MANGO is free software: you can redistribute it and/or modify it
+! under the terms of the GNU Lesser General Public License as
+! published by the Free Software Foundation, either version 3 of the
+! License, or (at your option) any later version.
+!
+! MANGO is distributed in the hope that it will be useful, but
+! WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+! Lesser General Public License for more details.
+!
+! You should have received a copy of the GNU Lesser General Public
+! License along with MANGO.  If not, see
+! <https://www.gnu.org/licenses/>.
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
 ! The standard 2D Rosenbrock banana function:
 ! f(x,y) = (x - 1)^2 + 100 * (y - x^2)^2
 ! The optimum is at (x,y) = (1,1), and the objective function there is f=0.

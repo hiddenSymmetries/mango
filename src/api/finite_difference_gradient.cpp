@@ -1,3 +1,21 @@
+// Copyright 2019, University of Maryland and the MANGO development team.
+//
+// This file is part of MANGO.
+//
+// MANGO is free software: you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// MANGO is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with MANGO.  If not, see
+// <https://www.gnu.org/licenses/>.
+
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -10,12 +28,6 @@
 void mango::Solver::finite_difference_gradient(const double* state_vector, double* base_case_objective_function, double* gradient) {
 
   // gradient should have been allocated already, with size N_parameters.
-
-  // This next bit is unsatisfying- it means non-least-squared problems know about least-squared problems.
-  //if (algorithms[algorithm].least_squares) {
-  //  finite_difference_Jacobian_to_gradient(state_vector, base_case_objective_function, gradient);
-  //  return;
-  // }
 
   // To simplify code in this file, make some copies of variables in mpi_partition.
   MPI_Comm mpi_comm_group_leaders = mpi_partition->get_comm_group_leaders();
