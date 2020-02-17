@@ -163,6 +163,37 @@ MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS --mca btl_base_warn_component
 # an artifact of using mpi on the travis virtual machine.
 
 #####################################################################
+# Generic Ubuntu (assumes 18.04 LTS)
+#####################################################################
+else ifeq ($(shell lsb_release -si),Ubuntu)
+MANGO_HOST = ubuntu
+
+MANGO_PETSC_AVAILABLE = F
+MANGO_HOPSPACK_AVAILABLE = F
+MANGO_NLOPT_AVAILABLE = T
+MANGO_GSL_AVAILABLE = T
+MANGO_DAKOTA_AVAILABLE = F
+
+CC = mpicxx
+FC = mpif90
+CLINKER = $(CC)
+FLINKER = $(CC)
+EXTRA_C_COMPILE_FLAGS = -O0
+EXTRA_F_COMPILE_FLAGS = -ffree-line-length-none -O0
+
+ifeq ($(MANGO_NLOPT_AVAILABLE),T)
+EXTRA_LINK_FLAGS += -lnlopt
+endif
+
+ifeq ($(MANGO_GSL_AVAILABLE),T)
+EXTRA_LINK_FLAGS += -lgsl -lgslcblas
+endif
+
+EXTRA_C_LINK_FLAGS = $(EXTRA_LINK_FLAGS) -lgfortran
+#EXTRA_F_LINK_FLAGS = $(EXTRA_LINK_FLAGS)
+EXTRA_F_LINK_FLAGS = $(EXTRA_C_LINK_FLAGS) -lmpi_mpifh
+
+#####################################################################
 # Matt's laptop, with mpi and petsc via macports
 #####################################################################
 
