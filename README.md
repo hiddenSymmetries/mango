@@ -1,4 +1,6 @@
-# MANGO [![Build Status](https://travis-ci.org/landreman/mango.svg?branch=master)](https://travis-ci.org/landreman/mango)
+# MANGO
+[![Build Status](https://travis-ci.org/landreman/mango.svg?branch=master)](https://travis-ci.org/landreman/mango)
+
 Multiprocessor Algorithms for Nonlinear Gradient-free Optimization
 
 MANGO is a library for optimization using MPI parallelism. It provides
