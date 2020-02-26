@@ -1,3 +1,5 @@
+# Examples
+
 This subdirectory contains several examples that illustrate how to call mango from C++ and fortran.
 These same examples are also used for regression/functional testing, i.e. making sure that certain results do not change when modifications are made to the code.
 
