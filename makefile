@@ -74,7 +74,10 @@ else ifneq ($(MANGO_DAKOTA_AVAILABLE),F)
 endif
 
 # Put .mod files in the ./obj/ directory:
+#EXTRA_C_COMPILE_FLAGS += obj -I obj -I include
+#EXTRA_F_COMPILE_FLAGS += obj -I obj
 EXTRA_C_COMPILE_FLAGS += -J obj -I obj -I include
+EXTRA_C_COMPILE_FLAGS += -I src/api
 EXTRA_F_COMPILE_FLAGS += -J obj -I obj
 
 export
@@ -122,12 +125,13 @@ $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPAC
 lib/libmango.a: $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
 	ar rcs lib/libmango.a $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
 	cp obj/mango.* include
+	cp mango.mod include
 #	rm include/mango.o
 #	cp obj/mango.* include
 # May need to copy any fortran module files from obj to include here?
 
 examples: lib/libmango.a
-	$(MAKE) -C examples	
+	$(MAKE) -C examples
 
 examples/packages_available:
 	@echo $(MANGO_AVAILABLE_PACKAGES) > examples/packages_available

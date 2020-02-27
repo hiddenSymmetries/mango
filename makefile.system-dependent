@@ -31,13 +31,30 @@ MANGO_HOST = cori
 
 FC = ftn
 FLINKER = $(FC)
+CLINKER = $(CC)
+
+MANGO_PETSC_AVAILABLE = T
+MANGO_HOPSPACK_AVAILABLE = T
+MANGO_NLOPT_AVAILABLE = T
+MANGO_GSL_AVAILABLE = T
+MANGO_DAKOTA_AVAILABLE = F
+
 ## NERSC documentation recommends against specifying -O3
 ## -mkl MUST APPEAR AT THE END!!
-EXTRA_COMPILE_FLAGS = -qopenmp -mkl
-EXTRA_LINK_FLAGS =  -qopenmp -mkl -Wl,-ydgemm_
+EXTRA_COMPILE_FLAGS = -I/global/homes/m/mfmartin/mango/external_packages/nlopt/nlopt-2.6.1/install/include -qopenmp -mkl
+EXTRA_LINK_FLAGS +=  -qopenmp -mkl -Wl,-ydgemm_ -lstdc++
+EXTRA_C_LINK_FLAGS += -lstdc++
+EXTRA_F_LINK_FLAGS += -lstdc++
 # Above, the link flag "-Wl,-ydgemm_" causes the linker to report which version of DGEMM (the BLAS3 matrix-matrix-multiplication subroutine) is used.
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
-REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
+EXTRA_C_COMPILE_FLAGS = -O0 -g -I/global/homes/m/mfmartin/mango/external_packages/nlopt/nlopt-2.6.1/install/include -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include -I/global/common/sw/cray/cnl7/haswell/gsl/2.5/intel/19.0.3.199/7twqxxq/include
+EXTRA_F_COMPILE_FLAGS = -O0 -g -module obj -I/global/homes/m/mfmartin/mango/external_packages/nlopt/nlopt-2.6.1/install/include -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include -I/global/common/sw/cray/cnl7/haswell/gsl/2.5/intel/19.0.3.199/7twqxxq/include
+
+# the petsc library at $(PETSC_DIR) was not named libpetsc but rather libcraypetsc_intel_real
+EXTRA_C_LINK_FLAGS = -L/global/homes/m/mfmartin/mango/external_packages/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -L$(PETSC_DIR)/lib -lcraypetsc_intel_real -L/global/common/sw/cray/cnl7/haswell/gsl/2.5/intel/19.0.3.199/7twqxxq/lib -lgsl -lgslcblas
+EXTRA_F_LINK_FLAGS = -L/global/homes/m/mfmartin/mango/external_packages/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -cxxlib -L$(PETSC_DIR)/lib -lcraypetsc_intel_real -L/global/common/sw/cray/cnl7/haswell/gsl/2.5/intel/19.0.3.199/7twqxxq/lib -lgsl -lgslcblas
+
+MANGO_COMMAND_TO_SUBMIT_JOB = srun -N 1 -n 32
 
 #####################################################################
 # PPPL cluster
