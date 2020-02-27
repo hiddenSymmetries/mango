@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Doxygen
-      run: sudo apt-get doxygen doxygen-latex doxygen-doc
+      run: sudo apt-get install doxygen doxygen-latex doxygen-doc
     - name: Generate docs
       working-directory: ./docs
       run: /usr/bin/doxygen
