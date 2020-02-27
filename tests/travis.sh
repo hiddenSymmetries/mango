@@ -23,7 +23,7 @@ cd ..
 make test_make
 
 # Executables need to know where to find the nlopt shared library:
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/landreman/mango/external_packages/nlopt/nlopt-2.6.1/install/lib
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/hiddenSymmetries/mango/external_packages/nlopt/nlopt-2.6.1/install/lib
 
 make -j
 
