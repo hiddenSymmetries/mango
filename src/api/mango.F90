@@ -493,6 +493,7 @@ contains
     mango_get_N_terms = C_mango_get_N_terms(this%object)
   end function mango_get_N_terms
 
+  !> Returns an integer indicating the worker group to which this MPI process belongs.
   integer function mango_get_worker_group(this)
     type(mango_problem), intent(in) :: this
     mango_get_worker_group = C_mango_get_worker_group(this%object)

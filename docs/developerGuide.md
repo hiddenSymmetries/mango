@@ -1,2 +1,3 @@
-# Developer Guide
+# Developer Guide {#developerGuide}
 
+* @subpage algorithmDatabase

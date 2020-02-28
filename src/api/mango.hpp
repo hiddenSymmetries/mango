@@ -175,6 +175,8 @@ namespace mango {
     void write_line(std::ofstream&, int, std::string[], int[]);
 
   public:
+
+    //! If true, information is printed to stdout that may be useful for debugging.
     int verbose;
 
     MPI_Partition();
@@ -193,10 +195,24 @@ namespace mango {
     int get_N_procs_world();
     int get_N_procs_worker_groups();
     int get_N_procs_group_leaders();
+
+    //! Returns an integer indicating the worker group to which this MPI process belongs.
     int get_worker_group();
+
+    //! Returns the number of worker groups.
     int get_N_worker_groups();
+    
+    //! Set the number of worker groups to the given integer. 
+    /**
+     * Except when using a custom partition, this method must be
+     * called before any of the 'get' methods or before using the
+     * MPI_Partition for an optimization. This method does not need to
+     * be called when using a custom partition.
+     */
     void set_N_worker_groups(int);
-    void write(std::string);
+
+    //! Write a file with the given filename, showing the worker group assignments and rank of each process in each communicator.
+    void write(std::string filename);
 
     void stop_workers();
     void mobilize_workers();
@@ -219,7 +235,17 @@ namespace mango {
   public:
     MPI_Partition mpi_partition;
 
-    Problem(int, double*, objective_function_type, int, char**); // For non-least-squares problems
+    //! Constructor for a standard optimization problem
+    /**
+     * @param[in] N_parameters Number of independent variables.
+     * @param[in] state_vector An array of size N_parameters, giving the initial values of the independent variables.
+     * @param[in] objective_function The objective function to minimize.
+     * @param[in] argc (Optional) A number of arguments. Used to pass options to some optimization libraries. 
+     * @param[in] argv (Optional) An array of arguments. Used to pass options to some optimization libraries. 
+     */
+    Problem(int N_parameters, double* state_vector, objective_function_type objective_function, int argc, char** argv); // For non-least-squares problems
+
+    //! Destructor
     ~Problem();
 
     void mpi_init(MPI_Comm);
@@ -227,8 +253,26 @@ namespace mango {
     void set_algorithm(std::string);
     void read_input_file(std::string);
     void set_output_filename(std::string);
-    void set_bound_constraints(double*, double*);
+
+    //! Sets bound constraints for the optimization problem.
+    /**
+     * @param[in] lower   An array of lower bounds, corresponding to
+     *                    the vector of independent parameters. It is 
+     *                    assumed that an array of size N_parameters has
+     *                    been properly allocated.  
+     * @param[in] upper   An array of upper bounds, corresponding to
+     *                    the vector of independent parameters. It is 
+     *                    assumed that an array of size N_parameters has
+     *                    been properly allocated.  
+    */
+    void set_bound_constraints(double* lower, double* upper);
+
+    //! Solve the optimization problem that has been set up.
+    /**
+     * The return value is the minimum value found for the objective function.
+     */
     double optimize();
+
     int get_N_parameters();
     int get_best_function_evaluation();
     int get_function_evaluations();
@@ -238,7 +282,13 @@ namespace mango {
     void set_max_function_evaluations(int);
     void set_verbose(int);
     void set_output_filename(std::string&);
-    void set_user_data(void*);
+
+    //! Pass the prescribed pointer to the objective function whenever it is called.
+    /**
+     * This method allows any data structure to be passed to the objective function.
+     */
+    void set_user_data(void* user_data);
+
     void set_relative_bound_constraints(double, double, double, bool);
   };
 
@@ -254,11 +304,22 @@ namespace mango {
 
   public:
     Least_squares_problem(int, double*, int, double*, double*, double*, residual_function_type, int, char**); // For least-squares problems
+
+    //! Destructor
     ~Least_squares_problem();
 
-    //double optimize();
+    //! Return the number of least-squares terms that are summed to form the objective function.
     int get_N_terms();
-    void set_print_residuals_in_output_file(bool);
+
+    //! Determine whether or not to print each individual residual in the MANGO output file.
+    /**
+     * You may wish to print this information to see the relative magnitude of each term
+     * in the objective function. On the other hand, for problems with many terms, you may
+     * wish to suppress this information to make the file more readable.
+     *
+     * @param[in] print Whether or not to print every residual term in the output file.
+     */
+    void set_print_residuals_in_output_file(bool print);
   };
 }
 
