@@ -1,7 +1,8 @@
-# MANGO
-[![Build Status](https://travis-ci.org/hiddenSymmetries/mango.svg?branch=master)](https://travis-ci.org/hiddenSymmetries/mango)
+# MANGO [![Build Status](https://travis-ci.org/hiddenSymmetries/mango.svg?branch=master)](https://travis-ci.org/hiddenSymmetries/mango) 
 
 Multiprocessor Algorithms for Nonlinear Gradient-free Optimization
+
+**View the [main documentation here.](https://hiddensymmetries.github.io/mango/)**
 
 MANGO is a library for optimization using MPI parallelism. It provides
 a common interface for calling other optimization libraries, including non-parallel algorithms,
@@ -17,7 +18,5 @@ making them parallel by providing parallelized finite-difference gradient calcul
 * MANGO presently includes support for (optional) bound constraints. Support for nonlinear equality and inequality constraints is planned.
 * MANGO includes a collection of test problems, which allow you to compare existing algorithms and try out new ones.
 * For reliability, MANGO includes unit tests, integrated tests, regression tests, and continuous integration.
-
-View the [main documentation here.](https://hiddensymmetries.github.io/mango/)
 
 MANGO is being developed as part of the [Collaboration on Hidden Symmetries and Fusion Energy](https://hiddensymmetries.princeton.edu/). This work is supported by a grant from the Simons Foundation (560651, M.L.).
