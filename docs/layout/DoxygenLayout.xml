@@ -5,6 +5,7 @@
     <tab type="mainpage" visible="yes" title="MANGO"/>
     <tab type="pages" visible="yes" title="" intro=""/>
     <tab type="modules" visible="yes" title="" intro=""/>
+    <tab type="usergroup" title="Full source code reference">
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>
       <tab type="namespacemembers" visible="yes" title="" intro=""/>
@@ -33,7 +34,8 @@
       <tab type="filelist" visible="yes" title="" intro=""/>
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
-    <tab type="examples" visible="yes" title="" intro=""/>  
+    <tab type="examples" visible="yes" title="" intro=""/>
+    </tab>
     <tab type="user" url="https://github.com/hiddenSymmetries/mango" title="GitHub Repository"/>
   </navindex>
 
