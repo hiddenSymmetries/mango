@@ -20,9 +20,11 @@ body {
 }
 
 div.fragment, pre.fragment {
+	/* Used for displaying the source code files */
 	border: 1px solid #000000;
 	/* background: #32363d; */
-	background: #0000FF;
+	/* background: #E2EEF9; */
+	background: #FFFFFF;
 }
 
 a, a:link, a:visited {
@@ -137,10 +139,13 @@ p code,
 li code,
 td code,
 dd code {
-	background-color: #000000;
+        /* Used for snippets of source code */
+	/* background-color: #000000; */
+	background-color: #E2EEF9;
 	border: 1px solid #A8B8D9;
 
-	color: #D8D8D8;
+	/* color: #D8D8D8; */
+	color: #000000;
 }
 
 /*********************************************/
@@ -173,9 +178,11 @@ div.header {
 /**               Field table               **/
 /*********************************************/
 .fieldtable th {
-	background: #282923;
-	/* background: #EEEEEE; */
-	color: inherit;
+	/* Used for the header row when listing possible values of an enum. */
+	/* background: #282923; */
+	background: #272525;
+	color: #A4A4A4;
+	/* color: inherit; */
 }
 
 /*********************************************/
@@ -384,7 +391,7 @@ td.memItemLeft, td.memItemRight {
 }
 
 .paramname, .paramname em {
-	/* Used for the Parameters list in the detailed subroutine descriptions /*
+	/* Used for the Parameters list in the detailed subroutine descriptions */
 	color: #bf5f82;
 	font-family: monospace, fixed;
 	font-weight: normal !important;
