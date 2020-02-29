@@ -10,9 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install Doxygen-latex to get the latex bits needed
-      run: sudo apt-get install doxygen-latex
-    - name: Install newer version of Doxygen
+    - name: Install the desired version of Doxygen
       run: curl -s http://doxygen.nl/files/doxygen-1.8.17.linux.bin.tar.gz | sudo tar -C /usr/local -xz
     - name: Generate docs
       working-directory: ./docs
