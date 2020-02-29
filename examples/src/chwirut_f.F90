@@ -25,7 +25,7 @@
 
 program chwirut
 
-  use mango
+  use mango_mod
   !use iso_c_binding
 
   implicit none
@@ -148,7 +148,7 @@ end subroutine residual_function
 
 subroutine worker(problem)
 
-  use mango
+  use mango_mod
 
   implicit none
 

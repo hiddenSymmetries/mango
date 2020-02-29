@@ -16,7 +16,9 @@
 ! License along with MANGO.  If not, see
 ! <https://www.gnu.org/licenses/>.
 
-module mango
+! If the module name is "mango", doxygen gets confused and combines the contents with the "mango" C++ namespace.
+! Therefore I'll use a longer name for the module name.
+module mango_mod
 
 !  The value in the next line must match the corresponding value in mango.F90
 #define mango_interface_string_length 256
@@ -300,6 +302,14 @@ contains
 !    this%object = C_mango_problem_create(N_parameters)
 !  end subroutine mango_problem_create_least_squares
 
+  !> Create a standard optimization problem.
+  !> @param this  An object storing the created optimization problem.
+  !> @param N_parameters  The number of independent variables.
+  !> @param state_vector An array of size N_parameters, which will be used to store the initial condition.
+  !>                     You can set the values of this array either before or after calling this routine,
+  !>                     as long as they are set before calling \ref mango_optimize.
+  !> @param dummy This should be removed.
+  !> @param objective_function  A reference to the objective function that will be minimized.
   subroutine mango_problem_create(this, N_parameters, state_vector, dummy, objective_function)
     type(mango_problem), intent(out) :: this
     integer, intent(in) :: N_parameters, dummy
@@ -333,6 +343,18 @@ contains
     !print *,"Done calling objective fn from mango.F90. f=",f
   end subroutine mango_problem_create
 
+  !> Create a least-squares optimization problem.
+  !> @param this  An object storing the created optimization problem.
+  !> @param N_parameters  The number of independent variables.
+  !> @param state_vector An array of size N_parameters, which will be used to store the initial condition.
+  !>                     You can set the values of this array either before or after calling this routine,
+  !>                     as long as they are set before calling \ref mango_optimize.
+  !> @param N_terms  The number of terms that are summed in the objective function, i.e. the number of elements in the residual vector.
+  !> @param targets  An array of size N_terms, storing the target values of each residual function.
+  !> @param sigmas   An array of size N_terms, storing the scaling factors for each term in the residual function.
+  !> @param best_residual_function An array of size N_terms. When \ref mango_optimize concludes successfully, this array will store
+  !>                               the values of the residuals for the optimum point.
+  !> @param residual_function  A reference to the subroutine that computes the residuals.
   subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
     type(mango_problem), intent(out) :: this
     integer, intent(in) :: N_parameters, N_terms
@@ -341,12 +363,15 @@ contains
     this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
   end subroutine mango_problem_create_least_squares
 
+  !> Delete an optimization problem, freeing memory used internally by MANGO.
+  !> @param this The optimization problem to destroy.
   subroutine mango_problem_destroy(this)
     type(mango_problem), intent(inout) :: this
     call C_mango_problem_destroy(this%object)
     this%object = C_NULL_ptr
   end subroutine mango_problem_destroy
 
+  !> Sets the optimization algorithm
   subroutine mango_set_algorithm(this,algorithm)
     type(mango_problem), intent(in) :: this
     integer, intent(in) :: algorithm
@@ -483,17 +508,25 @@ contains
     mango_get_mpi_comm_group_leaders = C_mango_get_mpi_comm_group_leaders(this%object)
   end function mango_get_mpi_comm_group_leaders
 
+  !> Get the number of independent variables for an optimization problem.
+  !> @param this   The mango_problem object to query.
+  !> @return       The number of independent variables, i.e. the dimensionality of the parameter space.
   integer function mango_get_N_parameters(this)
     type(mango_problem), intent(in) :: this
     mango_get_N_parameters = C_mango_get_N_parameters(this%object)
   end function mango_get_N_parameters
 
+  !> For least-squares optimization problems, get the number of terms that are summed in the objective function.
+  !> @param this   The mango_problem object to query.
+  !> @return       The number of terms that are summed in the objective function.
   integer function mango_get_N_terms(this)
     type(mango_problem), intent(in) :: this
     mango_get_N_terms = C_mango_get_N_terms(this%object)
   end function mango_get_N_terms
 
-  !> Returns an integer indicating the worker group to which this MPI process belongs.
+  !> Determine which worker group this MPI process belongs to.
+  !> @param this   The mango_problem object to query.
+  !> @return       An integer indicating the worker group to which this MPI process belongs.
   integer function mango_get_worker_group(this)
     type(mango_problem), intent(in) :: this
     mango_get_worker_group = C_mango_get_worker_group(this%object)
@@ -549,6 +582,7 @@ contains
     call C_mango_set_bound_constraints(this%object, lower_bounds(1), upper_bounds(1))
   end subroutine mango_set_bound_constraints
 
+  !>
   subroutine mango_set_verbose(this, verbose)
     type(mango_problem), intent(in) :: this
     integer, intent(in) :: verbose
@@ -617,4 +651,4 @@ contains
     call C_mango_set_relative_bound_constraints(this%object, min_factor, max_factor, min_radius, preserve_sign_int)
   end subroutine mango_set_relative_bound_constraints
 
-end module mango
+end module mango_mod

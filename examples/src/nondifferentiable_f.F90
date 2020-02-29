@@ -34,7 +34,7 @@ end module my_type_module
 
 program nondifferentiable
 
-  use mango
+  use mango_mod
   use iso_c_binding, only: c_loc
   use my_type_module
 
@@ -162,7 +162,7 @@ end program nondifferentiable
 
 subroutine worker(problem)
 
-  use mango
+  use mango_mod
 
   implicit none
 

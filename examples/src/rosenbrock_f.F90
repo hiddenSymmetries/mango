@@ -31,7 +31,7 @@
 
 program rosenbrock
 
-  use mango
+  use mango_mod
   use iso_c_binding, only: c_loc
 
   implicit none
@@ -128,7 +128,7 @@ end program rosenbrock
 
 subroutine worker(problem)
 
-  use mango
+  use mango_mod
 
   implicit none
 

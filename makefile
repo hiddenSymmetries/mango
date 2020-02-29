@@ -121,7 +121,7 @@ $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPAC
 
 lib/libmango.a: $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
 	ar rcs lib/libmango.a $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
-	cp obj/mango.* include
+	cp obj/mango_mod.* include
 #	rm include/mango.o
 #	cp obj/mango.* include
 # May need to copy any fortran module files from obj to include here?
