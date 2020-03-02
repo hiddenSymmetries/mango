@@ -70,6 +70,7 @@ void mango::Problem::set_finite_difference_step_size(double delta) {
 }
 
 void mango::Problem::set_max_function_evaluations(int n) {
+  if (n < 1) throw std::runtime_error("Error! max_function_evaluations must be >= 1.");
   solver->max_function_evaluations = n;
 }
 
