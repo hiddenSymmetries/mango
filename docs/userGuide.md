@@ -1,4 +1,4 @@
 # User Guide {#userGuide}
 
-* @subpage installation
-* @subpage leastSquaresProblems
+* @subpage gettingStarted
+* @subpage concepts

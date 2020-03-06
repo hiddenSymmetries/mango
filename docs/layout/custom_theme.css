@@ -20,8 +20,9 @@ body {
 }
 
 div.fragment, pre.fragment {
-	/* Used for displaying the source code files */
-	border: 1px solid #000000;
+	/* Used for displaying the source code files and multi-line code blocks */
+	border: 1px solid #DDDDDD;
+	padding: 12px;
 	/* background: #32363d; */
 	/* background: #E2EEF9; */
 	background: #FFFFFF;
@@ -139,10 +140,13 @@ p code,
 li code,
 td code,
 dd code {
-        /* Used for snippets of source code */
-	/* background-color: #000000; */
-	background-color: #E2EEF9;
-	border: 1px solid #A8B8D9;
+        /* Used for inline snippets of source code */
+	background-color: #FFFFFF;
+	/* background-color: #E2EEF9; */
+	/* border: 1px solid #A8B8D9; */
+	border: 1px solid #DDDDDD;
+	padding-left: 2px;
+	padding-right: 2px;
 
 	/* color: #D8D8D8; */
 	color: #000000;
@@ -299,15 +303,18 @@ span.comment {
 }
 
 span.preprocessor {
-	color: #a6e22b;
+	/* color: #a6e22b; */
+	color: #009900;
 }
 
 span.stringliteral {
-	color: #e7db74;
+	/* color: #e7db74; */
+	color: #e79900;
 }
 
 span.charliteral {
-	color: #e7db74;
+	/* color: #e7db74; */
+	color: #e79900;
 }
 
 span.vhdldigit { 
@@ -470,3 +477,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #00FFFF;
 }
 */
+
+h1 {
+   font-size: 14pt;
+}

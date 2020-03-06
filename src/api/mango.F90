@@ -270,6 +270,7 @@ module mango_mod
   
 
   abstract interface
+  !> Blah blah
   subroutine objective_function_interface(N_parameters, state_vector, f, failed, this, user_data)
     import
     integer(C_int), intent(in) :: N_parameters
