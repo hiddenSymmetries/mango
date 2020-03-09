@@ -3,6 +3,8 @@
 # If any changes are made to this file, run the update_algorithms script to propagate the changes from this file to the main source code.
 
 # package,                      name, least_squares, uses_derivatives, parallel, allows_bound_constraints, requires_bound_constraints, deterministic
+    mango,       levenberg_marquardt,             T,                T,        T,                        F,                          F,             T
+
     petsc,                        nm,             F,                F,        F,                        F,                          F,             T
     petsc,                  pounders,             T,                F,        F,                        T,                          F,             F
     petsc,                      brgn,             T,                T,        T,                        T,                          F,             T
@@ -45,3 +47,4 @@
       gsl,              conjugate_pr,             F,                T,        T,                        F,                          F,             T
       gsl,                      bfgs,             F,                T,        T,                        F,                          F,             T
       gsl,                        nm,             F,                F,        F,                        F,                          F,             T
+
