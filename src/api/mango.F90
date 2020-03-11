@@ -45,7 +45,8 @@ module mango
 !       integer(C_int) :: N_parameters, N_terms
 !       type(C_ptr) :: this
 !     end function C_mango_problem_create_least_squares
-     function C_mango_problem_create(N_parameters, state_vector, dummy, objective_function) result(this) bind(C,name="mango_problem_create")
+     function C_mango_problem_create(N_parameters, state_vector, dummy, objective_function) &
+          result(this) bind(C,name="mango_problem_create")
        import
        integer(C_int) :: N_parameters, dummy
        type(C_ptr) :: this
@@ -54,7 +55,9 @@ module mango
        real(C_double) :: state_vector
        type(C_funptr), value :: objective_function ! The "value" attribute is critical; otherwise a pointer to the pointer is passed instead of the pointer.
      end function C_mango_problem_create
-     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function) result(this) bind(C,name="mango_problem_create_least_squares")
+     function C_mango_problem_create_least_squares(N_parameters, state_vector, N_terms, &
+          targets, sigmas, best_residual_function, residual_function) &
+          result(this) bind(C,name="mango_problem_create_least_squares")
        import
        integer(C_int) :: N_parameters, N_terms
        type(C_ptr) :: this
@@ -210,7 +213,8 @@ module mango
        integer(C_int) :: verbose
        type(C_ptr), value :: this
      end subroutine C_mango_set_verbose
-     subroutine C_mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file_int) bind(C,name="mango_set_print_residuals_in_output_file")
+     subroutine C_mango_set_print_residuals_in_output_file(this, print_residuals_in_output_file_int)&
+          bind(C,name="mango_set_print_residuals_in_output_file")
        import
        type(C_ptr), value :: this
        integer(C_int) :: print_residuals_in_output_file_int
@@ -237,7 +241,8 @@ module mango
        type(C_ptr), value :: this
        character(C_char) :: filename(mango_interface_string_length)
      end subroutine C_mango_mpi_partition_write
-     subroutine C_mango_set_relative_bound_constraints(this, min_factor, max_factor, min_radius, preserve_sign) bind(C,name="mango_set_relative_bound_constraints")
+     subroutine C_mango_set_relative_bound_constraints(this, min_factor, max_factor, min_radius, &
+          preserve_sign) bind(C,name="mango_set_relative_bound_constraints")
        import
        type(C_ptr), value :: this
        real(C_double) :: min_factor, max_factor, min_radius
@@ -333,12 +338,15 @@ contains
     !print *,"Done calling objective fn from mango.F90. f=",f
   end subroutine mango_problem_create
 
-  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
+  subroutine mango_problem_create_least_squares(this, N_parameters, state_vector, N_terms, &
+       targets, sigmas, best_residual_function, residual_function)
     type(mango_problem), intent(out) :: this
     integer, intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:), best_residual_function(:)
     procedure(residual_function_interface) :: residual_function
-    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
+    this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), &
+         state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), &
+         best_residual_function(1), C_funloc(residual_function))
   end subroutine mango_problem_create_least_squares
 
   subroutine mango_problem_destroy(this)

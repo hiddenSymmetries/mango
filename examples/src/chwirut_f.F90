@@ -51,7 +51,8 @@ program chwirut
   sigmas = 1
   call init_data(N_terms, t, y)
 
-  call mango_problem_create_least_squares(problem, N_parameters, state_vector, N_terms, targets, sigmas, best_residual_function, residual_function)
+  call mango_problem_create_least_squares(problem, N_parameters, state_vector, &
+       N_terms, targets, sigmas, best_residual_function, residual_function)
   if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")
@@ -135,7 +136,8 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_
      if (j==0) then
         call do_work(N_parameters, x, N_terms, f, start_index, stop_index)
      else
-        call mpi_recv(f(start_index:stop_index), stop_index - start_index + 1, MPI_DOUBLE, j, j, mpi_comm_worker_groups,mpi_status,ierr)
+        call mpi_recv(f(start_index:stop_index), stop_index - start_index + 1, &
+             MPI_DOUBLE, j, j, mpi_comm_worker_groups,mpi_status,ierr)
      end if
   end do
 
@@ -169,7 +171,8 @@ subroutine worker(problem)
   call partition_work(N_terms, mpi_rank_worker_groups, mango_get_N_procs_worker_groups(problem), start_index, stop_index)
 
   do while (mango_continue_worker_loop(problem))
-     if (verbose_level > 0) print "(a,i4,a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem)," is processing indices",start_index," to",stop_index
+     if (verbose_level > 0) print "(a,i4,a,i4,a,i4)", "Proc",mango_get_mpi_rank_world(problem),&
+          " is processing indices",start_index," to",stop_index
 
      ! Get the state vector
      call mpi_bcast(x, N_parameters, MPI_DOUBLE, 0, mpi_comm_worker_groups, ierr)
@@ -177,7 +180,8 @@ subroutine worker(problem)
      call do_work(N_parameters, x, N_terms, f, start_index, stop_index)
 
      ! Send my terms of the residual back to the master proc.
-     call mpi_send(f(start_index:stop_index), stop_index - start_index + 1, MPI_DOUBLE, 0,mpi_rank_worker_groups,mpi_comm_worker_groups,ierr)
+     call mpi_send(f(start_index:stop_index), stop_index - start_index + 1, &
+          MPI_DOUBLE, 0,mpi_rank_worker_groups,mpi_comm_worker_groups,ierr)
   end do
 
   if (verbose_level > 0) print "(a,i4,a)", "Proc",mango_get_mpi_rank_world(problem)," is exiting."

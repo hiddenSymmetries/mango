@@ -1,0 +1,10 @@
+#!/bin/bash -l
+
+#SBATCH -p debug
+#SBATCH -N 1
+#SBATCH -t 00:30:00
+#SBATCH -J mango
+#SBATCH -C haswell
+
+srun -n 32 ./run_examples chwirut_c
+
