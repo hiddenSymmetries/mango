@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <cmath>
 #include <cassert>
 #include "mango.hpp"
 #include "Solver.hpp"
