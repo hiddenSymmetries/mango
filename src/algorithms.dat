@@ -4,6 +4,7 @@
 
 # package,                      name, least_squares, uses_derivatives, parallel, allows_bound_constraints, requires_bound_constraints, deterministic
     mango,       levenberg_marquardt,             T,                T,        T,                        F,                          F,             T
+    mango,                     imfil,             F,                F,        T,                        T,                          T,             T
 
     petsc,                        nm,             F,                F,        F,                        F,                          F,             T
     petsc,                  pounders,             T,                F,        F,                        T,                          F,             F

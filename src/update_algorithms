@@ -250,6 +250,113 @@ f.writelines(lines)
 f.close()
 
 ##################################################################
+# Editing optimize_least_squares_mango.cpp
+##################################################################
+
+# Read in the file to preprocess
+filename = 'api/optimize_least_squares_mango.cpp'
+try:
+    f = open(filename)
+except:
+    print("Error! Unable to open "+filename+" for reading")
+    raise
+
+lines = f.readlines()
+f.close()
+
+# Replace <algorithms> .. </algorithms>
+start, end = find_markup(lines,'algorithms','//')
+newlines = lines[:start+1] + comment_line
+for j in range(len(database)):
+    if database[j][0] == 'mango' and database[j][2] == 'true': # If least-squares
+        newlines.append('  case '+names[j].upper()+':\n')
+        newlines.append('    '+database[j][1]+'::solve(solver);\n')
+        newlines.append('    break;\n')
+lines = newlines + lines[end:]
+
+# Write new file
+try:
+    f = open(filename,'w')
+except:
+    print("Error! Unable to open "+filename+" for writing")
+    raise
+f.writelines(lines)
+f.close()
+
+##################################################################
+# Editing optimize_mango.cpp
+##################################################################
+
+# Read in the file to preprocess
+filename = 'api/optimize_mango.cpp'
+try:
+    f = open(filename)
+except:
+    print("Error! Unable to open "+filename+" for reading")
+    raise
+
+lines = f.readlines()
+f.close()
+
+# Replace <algorithms> .. </algorithms>
+start, end = find_markup(lines,'algorithms','//')
+newlines = lines[:start+1] + comment_line
+for j in range(len(database)):
+    if database[j][0] == 'mango' and database[j][2] == 'false': # If not least-squares
+        newlines.append('  case '+names[j].upper()+':\n')
+        newlines.append('    '+database[j][1]+'::solve(solver);\n')
+        newlines.append('    break;\n')
+lines = newlines + lines[end:]
+
+# Write new file
+try:
+    f = open(filename,'w')
+except:
+    print("Error! Unable to open "+filename+" for writing")
+    raise
+f.writelines(lines)
+f.close()
+
+##################################################################
+# Editing Package_mango.hpp
+##################################################################
+
+# Read in the file to preprocess
+filename = 'api/Package_mango.hpp'
+try:
+    f = open(filename)
+except:
+    print("Error! Unable to open "+filename+" for reading")
+    raise
+
+lines = f.readlines()
+f.close()
+
+# Replace <algorithms> .. </algorithms>
+start, end = find_markup(lines,'algorithms','//')
+newlines = lines[:start+1] + comment_line
+for j in range(len(database)):
+    if database[j][0] == 'mango':
+        newlines.append('  namespace '+database[j][1]+' {\n')
+        if database[j][2] == 'true': # If least-squares
+            #newlines.append('    void '+database[j][1]+'(Least_squares_solver *);\n')
+            newlines.append('    void solve(Least_squares_solver *);\n')
+        else:
+            #newlines.append('    void '+database[j][1]+'(Solver *);\n')
+            newlines.append('    void solve(Solver *);\n')
+        newlines.append('  }\n')
+lines = newlines + lines[end:]
+
+# Write new file
+try:
+    f = open(filename,'w')
+except:
+    print("Error! Unable to open "+filename+" for writing")
+    raise
+f.writelines(lines)
+f.close()
+
+##################################################################
 # Editing ../examples/tests/nondeterministic_algorithms.py
 ##################################################################
 
