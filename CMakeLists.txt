@@ -5,7 +5,37 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.8)
 #---- where this source file exists
 PROJECT (MANGO CXX C Fortran)
 
+#---- Flags to include MPI headers
+SET (CMAKE_C_FLAGS "-I $ENV{CRAY_MPICH_DIR}/include")
+SET (CMAKE_CXX_FLAGS "-I $ENV{CRAY_MPICH_DIR}/include")
+SET (CMAKE_Fortran_FLAGS "-I $ENV{CRAY_MPICH_DIR}/include")
+SET (MPI_LIB_DIR "-L $ENV{CRAY_MPICH_DIR}/lib -lmpich")
+SET (MPI_C_HEADER_DIR $ENV{CRAY_MPICH_DIR}/include)
+#SET (MPIEXEC_EXECUTABLE /usr/common/software/mpich/3.3.1-debug/gcc/7.3.0/bin/mpiexec)
+#SET (MPIEXEC_EXECUTABLE /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin/mpiexec)
+#SET (MPIEXEC_EXECUTABLE ${CRAY_MPICH_DIR}/bin/mpiexec)
+#FIND_PACKAGE (MPI REQUIRED)
+
+INCLUDE_DIRECTORIES (SYSTEM ${MPI_C_INCLUDE_PATH})
+INCLUDE_DIRECTORIES (SYSTEM ${MPI_CXX_INCLUDE_PATH})
+INCLUDE_DIRECTORIES (SYSTEM ${MPI_Fortran_INCLUDE_PATH})
+#---- the find_package command sets '<package>_found' to true if it's successful
+
+#IF (NOT MPI_C_COMPILER)
+#   IF (NOT MPI_C_FOUND)
+#      MESSAGE (FATAL_ERROR "mango: unable to find MPI_C compiler")
+#   ELSE ()
+#      MESSAGE (FATAL_ERROR "Found MPI_C ??")
+#   ENDIF ()
+#ENDIF (NOT MPI_C_COMPILER)
+
+
+#---- Empty vector to be filled with -D flags depending on which packages are used
+SET (COMPILE_DEF_LIST "")
+
 INCLUDE (FindPkgConfig)
+INCLUDE_DIRECTORIES ($ENV{CRAY_HDF5_PREFIX}/include)
+#INCLUDE_DIRECTORIES ($ENV{CRAY_HDF5_DIR}/include)
 SET (ENV{PKG_CONFIG_PATH} $ENV{PKG_CONFIG_PATH}:$ENV{CRAY_PETSC_PREFIX_DIR}/lib/pkgconfig)
 #MESSAGE ("pkg configs --> $ENV{PKG_CONFIG_PATH}")
 SET (PKG_CONFIG_EXECUTABLE ${PKG_CONFIG_PATH})
@@ -22,7 +52,16 @@ FIND_LIBRARY (CRAY_PETSC_LIBRARY
 MESSAGE ("petsc library --> ${CRAY_PETSC_LIBRARY}")
 FIND_PACKAGE (GSL)
 MESSAGE ("gsl library --> ${GSL_LIBRARY}")
-MESSAGE ("found petsc --> ${FOUND_CRAY_PETSC}")
+MESSAGE ("found petsc --> ${CRAY_PETSC_FOUND}")
+IF (${CRAY_PETSC_FOUND})
+   MESSAGE ("found petsc")
+   SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_PETSC_AVAILABLE)
+   INCLUDE_DIRECTORIES (SYSTEM ${CRAY_PETSC_INCLUDE_DIR})
+ENDIF ()
+
+FOREACH (i IN LISTS COMPILE_DEF_LIST)
+	MESSAGE ("list output --> ${i}")
+ENDFOREACH ()
 #---- set location of mango source files
 SET (MANGO_API_DIR ${MANGO_SOURCE_DIR}/src/api)
 #---- the location of binaries is the directory where ccmake is invoked, which
@@ -62,17 +101,6 @@ INCLUDE_DIRECTORIES(SYSTEM /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin)
 #ENDIF ()
 
 #SET (MPI_GUESS_LIBRARY_NAME MPICH)
-#SET (MPIEXEC_EXECUTABLE /usr/common/software/mpich/3.3.1-debug/gcc/7.3.0/bin/mpiexec)
-FIND_PACKAGE (MPI REQUIRED)
-#---- the find_package command sets '<package>_found' to true if it's successful
-
-IF (NOT MPI_C_COMPILER)
-   IF (NOT MPI_C_FOUND)
-      MESSAGE (FATAL_ERROR "mango: unable to find MPI_C compiler")
-   ELSE ()
-      MESSAGE (FATAL_ERROR "Found MPI_C ??")
-   ENDIF ()
-ENDIF (NOT MPI_C_COMPILER)
 
 #IF (NOT MPI_CXX_COMPILER)
 #   IF (NOT MPI_CXX_FOUND)
@@ -80,7 +108,7 @@ ENDIF (NOT MPI_C_COMPILER)
 #   ENDIF ()
 #ELSE ()
    #---- when running make on OSX, cmake can't find "mpi.h". Needed to hardcode it in
-INCLUDE_DIRECTORIES(SYSTEM /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/include)
+#INCLUDE_DIRECTORIES(SYSTEM /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/include)
 #ENDIF ()
 
 #IF (NOT MPI_Fortran_COMPILER)
@@ -92,11 +120,49 @@ INCLUDE_DIRECTORIES(SYSTEM /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/inclu
 #---- End of Compiler Verification
 #------------------------------------------------------------------------------
 
-EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_hopspack.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages)
+#---- Install HOPSPACK
+EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_hopspack.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages RESULT_VARIABLE ierr)
+MESSAGE ("ierr hops --> ${ierr}")
+IF (${ierr})
+   MESSAGE (FATAL_ERROR "Unsuccessful HOPSPACK Installation. Exiting...")
+ELSE ()
+   SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_HOPSPACK_AVAILABLE)
+ENDIF ()
 
-EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_nlopt.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages)
+#---- Install nlopt
+IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/nlopt)
+   MESSAGE ("nlopt directory already exists. Checking for required files...")
+   IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib64/libnlopt.a)
+      MESSAGE ("nlopt is already installed on this system")
+   ELSE ()
+      MESSAGE ("nlopt was not correctly installed. Continuing without...")
+   ENDIF ()
+ELSE ()
+   EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_nlopt.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages RESULT_VARIABLE ierr)
+   MESSAGE ("ierr nlopt --> ${ierr}")
+   IF (${ierr})
+      MESSAGE ("Unsuccessful NLOPT Installation. Continuing without NLOPT")
+   ELSE ()
+      SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_HOPSPACK_AVAILABLE)
+   ENDIF ()
+ENDIF ()
 
-EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_catch2.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages)
+#---- Install Catch2
+IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/catch2)
+   MESSAGE ("catch2 directory already exists. Checking for required files...")
+   IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/catch2/catch.hpp)
+      MESSAGE ("catch2 is already installed on this system")
+   ELSE ()
+      MESSAGE (FATAL_ERROR "catch2 was not correctly installed. Exiting...")
+   ENDIF ()
+ELSE ()
+   EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_catch2.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages)
+   IF (${ierr})
+      MESSAGE (FATAL_ERROR "Unsuccessful Catch2 Installation. Exiting...")
+   ELSE ()
+      SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_HOPSPACK_AVAILABLE)
+   ENDIF ()
+ENDIF ()
 
 INCLUDE_DIRECTORIES (src/api)
 INCLUDE_DIRECTORIES (external_packages/hopspack/src)
@@ -108,15 +174,20 @@ INCLUDE_DIRECTORIES (examples/src)
 # Creating objects from source files in src/api
 FILE (GLOB F_SRC_FILES src/api/*.F90)
 ADD_LIBRARY (F_OBJ_FILES OBJECT ${F_SRC_FILES})
+TARGET_LINK_LIBRARIES (F_OBJ_FILES PUBLIC ${MPI_LIB_DIR})
+TARGET_COMPILE_DEFINITIONS (F_OBJ_FILES PUBLIC ${COMPILE_DEF_LIST})
 FILE (GLOB CPP_SRC_FILES src/api/*.cpp)
 FILE (GLOB HEADER_FILES src/api/*.hpp)
 ADD_LIBRARY (CPP_OBJ_FILES OBJECT ${CPP_SRC_FILES} ${HEADER_FILES})
+TARGET_LINK_LIBRARIES (F_OBJ_FILES PUBLIC ${MPI_LIB_DIR})
+TARGET_COMPILE_DEFINITIONS (CPP_OBJ_FILES PUBLIC ${COMPILE_DEF_LIST})
 
 # Creating objects from source files in hopspack
 FILE (GLOB HOPSPACK_CPP_SRC_FILES external_packages/hopspack/src/*.cpp)
 FILE (GLOB HOPSPACK_C_SRC_FILES external_packages/hopspack/src/*.c)
 FILE (GLOB HOPSPACK_HEADER_FILES external_packages/hopspack/src/*.hpp)
 ADD_LIBRARY (HOPSPACK_CPP_OBJ_FILES OBJECT ${HOPSPACK_CPP_SRC_FILES} ${HOPSPACK_HEADER_FILES} ${HEADER_FILES})
+
 ADD_LIBRARY (HOPSPACK_C_OBJ_FILES OBJECT ${HOPSPACK_C_SRC_FILES} ${HOPSPACK_HEADER_FILES})
 
 FILE (GLOB TEST_SRC_FILES src/api/tests/*.cpp)
