@@ -34,7 +34,7 @@ void mango::Least_squares_solver::residual_function_wrapper(const double* x, dou
   // For non-least-squares algorithms, 
 
   int failed_int;
-  residual_function(&(N_parameters), x, &N_terms, f, &failed_int, problem, original_user_data);
+  residual_function(&(N_parameters), x, &N_terms, f, &failed_int, problem, user_data);
   *failed = (failed_int != 0);
 
   if (verbose > 0) {

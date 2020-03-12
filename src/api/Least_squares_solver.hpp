@@ -35,7 +35,6 @@ namespace mango {
 
     // Many of the solver variables and method are public because this information must be used by the concrete Package.
   public:
-    void* original_user_data;
     int N_terms;
     double* targets;
     double* sigmas;

@@ -177,3 +177,6 @@ void mango::Problem::set_N_line_search(int N_line_search) {
   solver->N_line_search = N_line_search;
 }
 
+mango::Solver* mango::Problem::get_solver() {
+  return solver;
+}

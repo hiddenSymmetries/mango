@@ -612,6 +612,13 @@ namespace mango {
      * @param N_line_search The number of points considered as a set for parallel line searches.
      */
     void set_N_line_search(int N_line_search);
+
+    //! Get the Solver object associated with the optimization problem.
+    /**
+     * Users generally should not need this method.
+     * @return The Solver object associated with the optimization problem.
+     */
+    Solver* get_solver();
   };
 
   

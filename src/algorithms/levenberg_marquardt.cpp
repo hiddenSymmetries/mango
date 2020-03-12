@@ -129,7 +129,7 @@ void mango::levenberg_marquardt::solve(Least_squares_solver* solver) {
 	state_vector_tentative = state_vector + delta_x;
 	
 	// Evaluate the residuals at the new point
-	solver->residual_function(&N_parameters, state_vector_tentative.data(), &N_terms, residuals.data(), &failed_int, solver->problem, solver->original_user_data);
+	solver->residual_function(&N_parameters, state_vector_tentative.data(), &N_terms, residuals.data(), &failed_int, solver->problem, solver->user_data);
 	failed = false;
 	solver->record_function_evaluation(state_vector_tentative.data(), residuals.data(), failed);
 	// Apply the transformation involving sigmas and targets

@@ -99,7 +99,7 @@ void mango::Least_squares_solver::finite_difference_Jacobian(const double* state
   for(j_evaluation=0; j_evaluation < N_evaluations; j_evaluation++) {
     if ((j_evaluation % N_worker_groups) == mpi_rank_group_leaders) {
       // Note that the use of &residual_functions[j_evaluation*N_terms] in the next line means that j_terms must be the least-signficiant dimension in residual_functions.
-      residual_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &N_terms, &residual_functions[j_evaluation*N_terms], &failed_int, problem, original_user_data);
+      residual_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &N_terms, &residual_functions[j_evaluation*N_terms], &failed_int, problem, user_data);
     }
   }
 

@@ -42,9 +42,6 @@ double mango::Least_squares_solver::optimize(MPI_Partition* mpi_partition_in) {
   MPI_Bcast(targets, N_terms, MPI_DOUBLE, 0, mpi_partition->get_comm_group_leaders());
   MPI_Bcast(sigmas,  N_terms, MPI_DOUBLE, 0, mpi_partition->get_comm_group_leaders());
 
-  original_user_data = user_data;
-  user_data = (void*)this;
-
   if (algorithms[algorithm].uses_derivatives && !proc0_world && algorithms[algorithm].package != PACKAGE_MANGO) {
     // In line above, we include algorithms[algorithm].package != PACKAGE_MANGO
     // because MANGO's own algorithms may need a parallel line search in addition to parallel gradients.
@@ -151,9 +148,9 @@ double mango::Least_squares_solver::optimize(MPI_Partition* mpi_partition_in) {
 
 void mango::Least_squares_solver::least_squares_to_single_objective(int* N, const double* x, double* f, int* failed_int, mango::Problem* this_problem, void* user_data) {
   // Note that this function is static, so "this" does not exist.
-  // To circumvent this problem, we take advantage of the user_data parameter to get a pointer to the original least squares data.
-
-  Least_squares_solver* least_squares_solver = (Least_squares_solver*)user_data;
+  // We therefore need a pointer to the Least_squares_solver.
+  // Since this function is being called, this_problem->solver must be a Least_squares_solver, so we can cast the pointer:
+  Least_squares_solver* least_squares_solver = (Least_squares_solver*)(this_problem->get_solver());
 
   // Note that this subroutine sets the 'residuals' array of the mango::Least_squares_solver class.
 

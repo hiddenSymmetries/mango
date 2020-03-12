@@ -75,6 +75,7 @@ namespace mango {
     virtual void objective_function_wrapper(const double*, double*, bool*); 
     virtual void finite_difference_gradient(const double*, double*, double*);
     virtual bool record_function_evaluation(const double*, double, bool);
+    //void evaluate_set_in_parallel(residual_function_type, int, int, const double*, double*, bool*);
   };
 
 }
