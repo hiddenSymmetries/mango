@@ -28,16 +28,14 @@ namespace mango {
   class Least_squares_solver : public Solver {
 
   protected:
-    void* original_user_data;
-
     Least_squares_solver(); // This version of the constructor, with no arguments, is used only for unit testing. Protected so Catch2 can subclass it.
 
     // Overrides the routines in Solver:
     void group_leaders_loop();
-    void record_function_evaluation(const double*, double*, bool);// Not an override! Note double* instead of double in 2nd argument, and return void instead of bool.
 
     // Many of the solver variables and method are public because this information must be used by the concrete Package.
   public:
+    void* original_user_data;
     int N_terms;
     double* targets;
     double* sigmas;
@@ -62,6 +60,7 @@ namespace mango {
     void residual_function_wrapper(const double*, double*, bool*);
     void finite_difference_Jacobian(const double*, double*, double*);
     static void least_squares_to_single_objective(int*, const double*, double*, int*, mango::Problem*, void*);
+    void record_function_evaluation(const double*, double*, bool);// Not an override! Note double* instead of double in 2nd argument, and return void instead of bool.
   };
 }
 

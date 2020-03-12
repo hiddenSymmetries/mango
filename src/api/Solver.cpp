@@ -45,6 +45,7 @@ mango::Solver::Solver(Problem* problem_in, int N_parameters_in) {
   user_data = NULL;
   problem = problem_in;
   recorder = new Recorder_standard(this);
+  N_line_search = 0;
 }
 
 // Constructor with no arguments, used only for unit tests

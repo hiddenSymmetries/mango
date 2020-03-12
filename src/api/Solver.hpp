@@ -65,6 +65,7 @@ namespace mango {
     MPI_Partition* mpi_partition;
     Problem* problem;
     Recorder* recorder;
+    int N_line_search;
 
     Solver(Problem*, int);
     ~Solver();

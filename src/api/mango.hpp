@@ -603,6 +603,15 @@ namespace mango {
      * @param preserve_sign See description above.
      */
     void set_relative_bound_constraints(double min_factor, double max_factor, double min_radius, bool preserve_sign);
+
+    //! Sets the number of points considered as a set for parallel line searches
+    /**
+     * The default value is 0.
+     * If the value is \f$<=\f$0, the number will be set to the number of worker groups.
+     * Normally this default makes sense.
+     * @param N_line_search The number of points considered as a set for parallel line searches.
+     */
+    void set_N_line_search(int N_line_search);
   };
 
   

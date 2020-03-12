@@ -45,7 +45,11 @@ double mango::Least_squares_solver::optimize(MPI_Partition* mpi_partition_in) {
   original_user_data = user_data;
   user_data = (void*)this;
 
-  if (algorithms[algorithm].uses_derivatives && !proc0_world) {
+  if (algorithms[algorithm].uses_derivatives && !proc0_world && algorithms[algorithm].package != PACKAGE_MANGO) {
+    // In line above, we include algorithms[algorithm].package != PACKAGE_MANGO
+    // because MANGO's own algorithms may need a parallel line search in addition to parallel gradients.
+    // Therefore MANGO's own algorithms are responsible for launching their own group_leaders_loop.
+    // For a more general solution, I might want to consider adding an algorithm property like "parallel_only_in_gradient".
     group_leaders_loop();
     return std::numeric_limits<double>::quiet_NaN();
   }

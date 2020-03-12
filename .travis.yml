@@ -16,6 +16,7 @@ addons:
       - libpetsc3.7-dev
       - python3-numpy
       - libgsl-dev
+      - libeigen3-dev
 
 script:
  - ./tests/travis.sh

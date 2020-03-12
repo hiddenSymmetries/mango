@@ -118,6 +118,7 @@ void mango::Problem::mpi_init(MPI_Comm mpi_comm_world) {
 
 double mango::Problem::optimize() {
   // Delegate this work to Solver so we don't need to put "solver->" in front of all the variables, and so we can replace solver with derived classes.
+  if (solver->N_line_search <= 0) solver->N_line_search = mpi_partition.get_N_worker_groups();
   return solver->optimize(&mpi_partition);
 }
 
@@ -171,3 +172,8 @@ void mango::Problem::set_relative_bound_constraints(double min_factor, double ma
     }
   }
 }
+
+void mango::Problem::set_N_line_search(int N_line_search) {
+  solver->N_line_search = N_line_search;
+}
+

@@ -232,4 +232,8 @@ extern "C" {
     This->set_relative_bound_constraints(*min_factor, *max_factor, *min_radius, (*preserve_sign)==1);
   }
 
+  void mango_set_N_line_search(mango::Problem *This, int* N) {
+    This->set_N_line_search(*N);
+  }
+
 }
