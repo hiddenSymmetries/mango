@@ -23,7 +23,7 @@
 #include <ctime>
 #include "mpi.h"
 #include "mango.hpp"
-#include "Least_squares_solver.hpp"
+#include "Solver.hpp"
 
 void mango::Solver::finite_difference_Jacobian(vector_function_type vector_function, int N_terms, const double* state_vector, double* base_case_residual_function, double* Jacobian) {
 
@@ -34,8 +34,6 @@ void mango::Solver::finite_difference_Jacobian(vector_function_type vector_funct
   MPI_Comm mpi_comm_group_leaders = mpi_partition->get_comm_group_leaders();
   bool proc0_world = mpi_partition->get_proc0_world();
   int mpi_rank_world = mpi_partition->get_rank_world();
-  int mpi_rank_group_leaders = mpi_partition->get_rank_group_leaders();
-  int N_worker_groups = mpi_partition->get_N_worker_groups();
 
   int data;
   int j_evaluation, j_parameter;
