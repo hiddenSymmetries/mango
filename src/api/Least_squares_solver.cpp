@@ -50,3 +50,8 @@ mango::Least_squares_solver::Least_squares_solver()
 mango::Least_squares_solver::~Least_squares_solver() {
   delete[] residuals;
 }
+
+void mango::Least_squares_solver::finite_difference_Jacobian(const double* state_vector_arg, double* base_case_residual, double* Jacobian) {
+  // Call Solver::finite_difference_Jacobian
+  mango::Solver::finite_difference_Jacobian(residual_function, N_terms, state_vector_arg, base_case_residual, Jacobian);
+}

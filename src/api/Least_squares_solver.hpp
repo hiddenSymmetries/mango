@@ -38,7 +38,7 @@ namespace mango {
     int N_terms;
     double* targets;
     double* sigmas;
-    residual_function_type residual_function;
+    vector_function_type residual_function;
     double* best_residual_function;
     double* residuals;
     bool print_residuals_in_output_file;
@@ -52,14 +52,14 @@ namespace mango {
     double optimize(MPI_Partition*);
     void finite_difference_gradient(const double*, double*, double*);
     void objective_function_wrapper(const double*, double*, bool*); 
-    bool record_function_evaluation(const double*, double, bool); // Overrides Solver.
+    bool record_function_evaluation(const double*, double, bool);
+    void record_function_evaluation_pointer(const double*, double*, bool);
 
     // Methods that do not exist in the base class Solver:
     double residuals_to_single_objective(double*);
     void residual_function_wrapper(const double*, double*, bool*);
-    void finite_difference_Jacobian(const double*, double*, double*);
     static void least_squares_to_single_objective(int*, const double*, double*, int*, mango::Problem*, void*);
-    void record_function_evaluation(const double*, double*, bool);// Not an override! Note double* instead of double in 2nd argument, and return void instead of bool.
+    void finite_difference_Jacobian(const double*, double*, double*); // Not an override due to the different arguments from the method in Solver.
   };
 }
 

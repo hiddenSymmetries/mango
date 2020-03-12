@@ -61,7 +61,7 @@ extern "C" {
   }
 
   mango::Least_squares_problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, 
-						     double* best_residual_function, mango::residual_function_type residual_function) {
+						     double* best_residual_function, mango::vector_function_type residual_function) {
     return new mango::Least_squares_problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
   }
   

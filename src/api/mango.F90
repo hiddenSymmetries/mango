@@ -285,7 +285,7 @@ module mango_mod
     type(mango_problem), value, intent(in) :: this
     type(C_ptr), value, intent(in) :: user_data
   end subroutine objective_function_interface
-  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this, user_data)
+  subroutine vector_function_interface(N_parameters, state_vector, N_terms, f, failed, this, user_data)
     import
     integer(C_int), intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(N_parameters)
@@ -294,7 +294,7 @@ module mango_mod
     integer(C_int), intent(out) :: failed
     type(mango_problem), value, intent(in) :: this
     type(C_ptr), value, intent(in) :: user_data
-  end subroutine residual_function_interface
+  end subroutine vector_function_interface
   end interface
 
 contains
@@ -368,7 +368,7 @@ contains
     type(mango_problem), intent(out) :: this
     integer, intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:), best_residual_function(:)
-    procedure(residual_function_interface) :: residual_function
+    procedure(vector_function_interface) :: residual_function
     this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
   end subroutine mango_problem_create_least_squares
 

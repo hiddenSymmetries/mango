@@ -74,8 +74,12 @@ namespace mango {
     virtual void init_optimization();
     virtual void objective_function_wrapper(const double*, double*, bool*); 
     virtual void finite_difference_gradient(const double*, double*, double*);
-    virtual bool record_function_evaluation(const double*, double, bool);
-    //void evaluate_set_in_parallel(residual_function_type, int, int, const double*, double*, bool*);
+    virtual bool record_function_evaluation(const double*, double, bool); // Called from objective_function_wrapper
+    virtual void record_function_evaluation_pointer(const double*, double*, bool); // Called from evaluate_set_in_parallel
+
+    void finite_difference_Jacobian(vector_function_type, int, const double*, double*, double*);
+    void evaluate_set_in_parallel(vector_function_type, int, int, double*, double*, bool*);
+    static void objective_to_vector_function(int*, const double*, int*, double*, int*, mango::Problem*, void*);
   };
 
 }

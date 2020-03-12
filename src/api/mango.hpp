@@ -410,10 +410,11 @@ namespace mango {
 
   class Problem;
   typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::Problem*, void*);
-  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::Problem*, void*);
+  typedef void (*vector_function_type)(int*, const double*, int*, double*, int*, mango::Problem*, void*);
 
   class Solver;
   class Problem {
+    friend class Solver;
   protected:
     // Many implementation details are hidden in the Solver class, so users see only the interface provided by Problem.
     Solver* solver;
@@ -645,7 +646,7 @@ namespace mango {
      * @param[in] argc (Optional) A number of arguments. Used to pass options to some optimization libraries. 
      * @param[in] argv (Optional) An array of arguments. Used to pass options to some optimization libraries. 
      */
-    Least_squares_problem(int N_parameters, double* state_vector, int N_terms, double* targets, double* sigmas, double* best_residual_function, residual_function_type residual_function, int argc, char** argv);
+    Least_squares_problem(int N_parameters, double* state_vector, int N_terms, double* targets, double* sigmas, double* best_residual_function, vector_function_type residual_function, int argc, char** argv);
 
     //! Destructor
     ~Least_squares_problem();

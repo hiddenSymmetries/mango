@@ -46,12 +46,12 @@ void mango::Least_squares_solver::residual_function_wrapper(const double* x, dou
     std::cout << std::endl;
   }
 
-  record_function_evaluation(x, f, *failed);
+  record_function_evaluation_pointer(x, f, *failed);
 
 }
 
-void mango::Least_squares_solver::record_function_evaluation(const double* x, double *f, bool failed) {
-  // This method is NOT an override: note double*f instead of double f, and return void instead of bool.
+void mango::Least_squares_solver::record_function_evaluation_pointer(const double* x, double *f, bool failed) {
+  // This method overrides mango::Solver::record_function_evaluation_pointer().
   if (verbose>0) std::cout << "Hello from Least_squares_solver::record_function_evaluation, the non-override." << std::endl;
   double objective_value = residuals_to_single_objective(f);
   current_residuals = f;
