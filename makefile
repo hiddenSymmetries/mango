@@ -80,7 +80,7 @@ else ifneq ($(MANGO_EIGEN_AVAILABLE),F)
 endif
 
 # Put .mod files in the ./obj/ directory:
-EXTRA_C_COMPILE_FLAGS += -J obj -I obj -I include
+EXTRA_C_COMPILE_FLAGS += -J obj -I obj -I include -I src/algorithms
 EXTRA_F_COMPILE_FLAGS += -J obj -I obj
 
 export
