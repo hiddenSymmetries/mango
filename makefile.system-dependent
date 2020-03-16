@@ -106,6 +106,8 @@ ifeq ($(MANGO_PETSC_AVAILABLE),T)
   EXTRA_F_LINK_FLAGS += -L $(GSL_HOME)/lib -lgsl
 endif
 
+EXTRA_C_COMPILE_FLAGS += -I external_packages/eigen/eigen-3.3.7
+
 #PETSC_DIR=/opt/local/lib/petsc
 #
 #EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
