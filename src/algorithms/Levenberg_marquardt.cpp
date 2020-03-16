@@ -82,6 +82,10 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
 
 }
 
+//! The main driver for the Levenberg-Marquardt solver
+/**
+ *
+ */
 void mango::Levenberg_marquardt::solve() {
   keep_going_outer = true;
   //  if (solver->mpi_partition->get_proc0_world()) {

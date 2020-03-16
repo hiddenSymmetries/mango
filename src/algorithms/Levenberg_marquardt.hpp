@@ -1,3 +1,6 @@
+#ifndef MANGO_LEVENBERG_MARQUARDT_H
+#define MANGO_LEVENBERG_MARQUARDT_H
+
 #include "Package_mango.hpp"
 #include "Least_squares_solver.hpp"
 
@@ -66,3 +69,4 @@ namespace mango {
 
 }
 
+#endif

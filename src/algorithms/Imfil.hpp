@@ -1,3 +1,6 @@
+#ifndef MANGO_IMFIL_H
+#define MANGO_IMFIL_H
+
 #include "Package_mango.hpp"
 #include "Solver.hpp"
 
@@ -10,3 +13,4 @@ namespace mango {
   };
 }
 
+#endif
