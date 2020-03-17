@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+
+# Copyright 2019, University of Maryland and the MANGO development team.
+#
+# This file is part of MANGO.
+#
+# MANGO is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# MANGO is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with MANGO.  If not, see
+# <https://www.gnu.org/licenses/>.
+
+myfigsize=(14,6.8)
+
+import os
+print()
+print("usage: " + os.path.basename(__file__) + " <filename>_levenberg_marquardt")
+
+import numpy as np
+import sys
+
+if len(sys.argv) != 2:
+    print("Error! You must specify 1 argument: the *_levenberg_marquardt file.")
+    exit(1)
+
+lm_str = "_levenberg_marquardt"
+N = len(lm_str)
+if len(sys.argv[1]) < N or sys.argv[1][-N:] != lm_str:
+   print("Error! The argument must end in "+lm_str)
+   exit(1)
+
+data = np.loadtxt(sys.argv[1],skiprows=1,delimiter=",")
+N_line_search = (data.shape[1]-4)/2
+# Make sure we don't get a half-integer
+assert(abs(N_line_search - round(N_line_search)) < 1.0e-12)
+N_line_search = int(N_line_search)
+print("N_line_search = ",N_line_search)
+N_lines = data.shape[0]
+
+colors = ['r','y','g','c','b','m','k']
+N_colors = len(colors)
+
+import matplotlib.pyplot as plt
+
+fig = plt.figure(figsize=myfigsize)
+fig.patch.set_facecolor('white')
+
+for j in range(N_lines):
+    outer_iteration = data[j,0]
+    j_line_search = int(data[j,1])
+    min_objective_function_index = int(data[j,-2])
+    line_search_succeeded = (int(data[j,-1])==1)
+    offset = 2
+    lambdas = data[j, offset:offset+N_line_search]
+    mycolor = colors[np.mod(j_line_search,N_colors)]
+    plt.semilogy(np.ones(N_line_search) * outer_iteration, lambdas, 'o-', color=mycolor, fillstyle='none')
+    best_lambda = lambdas[min_objective_function_index]
+    if outer_iteration==1 and line_search_succeeded:
+        old_best_lambda = best_lambda
+    if outer_iteration>1 and line_search_succeeded:
+        plt.plot([outer_iteration-1,outer_iteration],[old_best_lambda,best_lambda],'k-')
+        old_best_lambda = best_lambda
+
+plt.xlabel('Outer iteration')
+plt.ylabel(r'Levenber-Marquardt parameter \lambda')
+
+plt.show()

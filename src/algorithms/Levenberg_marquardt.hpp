@@ -1,6 +1,7 @@
 #ifndef MANGO_LEVENBERG_MARQUARDT_H
 #define MANGO_LEVENBERG_MARQUARDT_H
 
+#include <fstream>
 #include "Package_mango.hpp"
 #include "Least_squares_solver.hpp"
 
@@ -39,6 +40,8 @@ namespace mango {
     Eigen::VectorXd delta_x;
     Eigen::MatrixXd lambda_scan_residuals;
     Eigen::MatrixXd lambda_scan_state_vectors;
+    Eigen::VectorXd lambdas;
+    Eigen::VectorXd lambda_scan_objective_functions;
     Eigen::VectorXd delta_x_direct;
     Eigen::MatrixXd alpha;
     Eigen::MatrixXd alpha_prime;
@@ -53,6 +56,8 @@ namespace mango {
     bool line_search_succeeded;
     double lambda_increase_factor;
     double* normalized_lambda_grid;
+    std::ofstream lambda_file;
+    int outer_iteration;
 
     void evaluate_on_lambda_grid();
     void process_lambda_grid_results();

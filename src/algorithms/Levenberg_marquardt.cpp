@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include "Least_squares_solver.hpp"
 #include "Package_mango.hpp"
 #include "Levenberg_marquardt.hpp"
@@ -59,6 +60,8 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
   delta_x.resize(N_parameters);
   lambda_scan_residuals.resize(N_terms, N_line_search);
   lambda_scan_state_vectors.resize(N_parameters, N_line_search);
+  lambdas.resize(N_line_search);
+  lambda_scan_objective_functions.resize(N_line_search);
 #ifdef CHECK_LEAST_SQUARES_SOLUTION
   delta_x_direct.resize(N_parameters);
   alpha.resize(N_parameters, N_parameters);
@@ -80,6 +83,16 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
     std::cout << std::endl;
   }
 
+  // Open output file:
+  if (proc0_world) {
+    std::string filename = solver->output_filename + "_levenberg_marquardt";
+    lambda_file.open(filename.c_str());
+    if (!lambda_file.is_open()) {
+      std::cerr << "Levenberg-Marquardt output file: " << filename << std::endl;
+      throw std::runtime_error("Error! Unable to open Levenberg-Marquardt output file.");
+    }
+    lambda_file << "outer_iteration,j_line_search,lambdas(1:N_line_search),objective_functions(1:N_line_search),min_objective_function_index,line_search_succeeded" << std::endl;
+  }
 }
 
 //! The main driver for the Levenberg-Marquardt solver
@@ -88,8 +101,10 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
  */
 void mango::Levenberg_marquardt::solve() {
   keep_going_outer = true;
+  outer_iteration = 0;
   //  if (solver->mpi_partition->get_proc0_world()) {
   while (keep_going_outer) {
+    outer_iteration++;
     // In finite_difference_Jacobian, proc0 will bcast, so other procs need a corresponding bcast here:
     if (! proc0_world) MPI_Bcast(&data,1,MPI_INT,0,comm_group_leaders);
     // Evaluate the Jacobian:
@@ -135,7 +150,9 @@ void mango::Levenberg_marquardt::solve() {
       if (verbose>0) std::cout << "Line search failed, so exiting outer loop on proc" << solver->mpi_partition->get_rank_world() << std::endl;
     }
   } // while (keep_going_outer)
-    
+
+  // Finalize output file:
+  if (proc0_world) lambda_file.close();
 
   delete[] normalized_lambda_grid;
 
@@ -170,6 +187,7 @@ void mango::Levenberg_marquardt::evaluate_on_lambda_grid() {
     // Check if this MPI proc owns this point in the lambda grid:
     if ((j_lambda_grid % solver->mpi_partition->get_N_worker_groups()) == solver->mpi_partition->get_rank_group_leaders()) {
       lambda = central_lambda * normalized_lambda_grid[j_lambda_grid];
+      lambdas(j_lambda_grid) = lambda;
       if (verbose>0) std::cout << "Proc " << solver->mpi_partition->get_rank_world() << " is handling j_lambda_grid=" << j_lambda_grid 
 			       << ", lambda=" << lambda << std::endl;
       Jacobian_extended.topRows(N_terms) = Jacobian;
@@ -224,6 +242,9 @@ void mango::Levenberg_marquardt::evaluate_on_lambda_grid() {
  *
  */
 void mango::Levenberg_marquardt::process_lambda_grid_results() { 
+  double original_central_lambda = central_lambda;
+  int original_j_line_search = j_line_search;
+
   if (proc0_world) {
     // proc0 is responsible for finding the best function evaluation and deciding how to proceed.
     failed = false;
@@ -234,6 +255,7 @@ void mango::Levenberg_marquardt::process_lambda_grid_results() {
       shifted_residuals = (lambda_scan_residuals.col(j_lambda_grid) - targets).cwiseQuotient(sigmas);
       tentative_objective_function = shifted_residuals.dot(shifted_residuals);
       if (verbose>0) std::cout<< "For j_lambda_grid=" << j_lambda_grid << ", objective function=" << tentative_objective_function << std::endl;
+      lambda_scan_objective_functions(j_lambda_grid) = tentative_objective_function;
       // Find the index in the lambda grid with smallest value of the objective function:
       if (j_lambda_grid==0) {
 	min_objective_function = tentative_objective_function;
@@ -265,6 +287,13 @@ void mango::Levenberg_marquardt::process_lambda_grid_results() {
       keep_going_outer = false;
       if (verbose>0) std::cout << "Maximum number of function evaluations reached." << std::endl;
     }
+
+    // Record results in the _levenberg_marquardt output file:
+    lambda_file << std::setw(6) << outer_iteration << "," << std::setw(3) << original_j_line_search << ",";
+    for (int j=0; j<N_line_search; j++) lambda_file << std::setw(24) << std::setprecision(16) << std::scientific << lambdas(j) << ",";
+    for (int j=0; j<N_line_search; j++) lambda_file << std::setw(24) << std::setprecision(16) << std::scientific << lambda_scan_objective_functions(j) << ",";
+    lambda_file << std::setw(3) << min_objective_function_index << ", " << std::setw(1) << line_search_succeeded << std::endl << std::flush;
+
   } // if proc0_world
   // Broadcast results from proc0 to all group leaders.
   MPI_Bcast(&central_lambda, 1, MPI_DOUBLE, 0, comm_group_leaders);
