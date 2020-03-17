@@ -147,13 +147,10 @@ void mango::Levenberg_marquardt::solve() {
  */
 void mango::Levenberg_marquardt::line_search() {
   line_search_succeeded = false;
-  std::cout << "max_line_search_iterations:" << max_line_search_iterations << std::endl;
   // Loop over values of central_lambda:
   for (j_line_search = 0; j_line_search < max_line_search_iterations; j_line_search++) {
-    if (verbose>0 && proc0_world) std::cout << "mango::Levenberg_marquardt::line_search() j_line_search=" << j_line_search 
-					    << " max_line_search_iterations:" << max_line_search_iterations << std::endl;
-    evaluate_on_lambda_grid();
-    process_lambda_grid_results();
+    evaluate_on_lambda_grid(); // This is the expensive parallelized evaluation of the residuals.
+    process_lambda_grid_results(); // This is fast post-processing on proc0_world to determine which evaluation was best, & updating lambda.
   }
   MPI_Bcast(&line_search_succeeded, 1, MPI_C_BOOL, 0, comm_group_leaders);
   MPI_Bcast(&keep_going_outer, 1, MPI_C_BOOL, 0, comm_group_leaders);

@@ -80,6 +80,10 @@ mango::Levenberg_marquardt_tester::~Levenberg_marquardt_tester() {
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+
 TEST_CASE_METHOD(mango::Least_squares_solver, "mango::Levenberg_marquardt::process_lambda_grid_results().","[Levenberg_marquardt]") {
   // First, set up some variables that are needed.
 
@@ -173,23 +177,29 @@ TEST_CASE_METHOD(mango::Least_squares_solver, "mango::Levenberg_marquardt::proce
   delete[] best_residual_function;
 }
 
-
-TEST_CASE_METHOD(mango::Levenberg_marquardt_tester, "mango::Levenberg_marquardt::process_lambda_grid_results() old.","[problem][Levenberg_marquardt]") {
+/*
+TEST_CASE_METHOD(mango::Levenberg_marquardt_tester, "mango::Levenberg_marquardt::evaluate_on_lambda_grid()","[problem][Levenberg_marquardt]") {
   // Set up MPI:
-  mpi_partition->set_N_worker_groups(1); // No reason to scan this, since only proc0_world does any work.
+  mpi_partition->set_N_worker_groups(GENERATE(range(1,6)));
   mpi_partition->init(MPI_COMM_WORLD);
 
-  N_line_search = GENERATE(range(1,5));
+  N_line_search = 4;
     
   mango::Levenberg_marquardt lm(this);
 				 
-  //lm.central_lambda = 0.02;
-  //lm.lambda_increase_factor = 25;
-  double temp = GENERATE(take(1,random(-10.0, 10.0)));
-  //std::cout << "temp=" << temp << std::endl;
-  CHECK(lm.max_line_search_iterations == 4);
-}
+  lm.central_lambda = 0.02;
+  lm.normalized_lambda_grid[0] = 0.1;
+  lm.normalized_lambda_grid[1] = 0.3;
+  lm.normalized_lambda_grid[2] = 1.0;
+  lm.normalized_lambda_grid[3] = 3.0;
 
+  // Call the subroutine we want to test:
+  if (mpi_partition->get_proc0_worker_groups()) { // Only group leaders should call the subroutine
+    lm.evaluate_on_lambda_grid();
+  }
+
+}
+*/
 
 
 
