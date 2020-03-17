@@ -31,13 +31,14 @@ if len(sys.argv) != 2:
     print("Error! You must specify 1 argument: the *_levenberg_marquardt file.")
     exit(1)
 
+filename = sys.argv[1]
 lm_str = "_levenberg_marquardt"
 N = len(lm_str)
-if len(sys.argv[1]) < N or sys.argv[1][-N:] != lm_str:
+if len(filename) < N or filename[-N:] != lm_str:
    print("Error! The argument must end in "+lm_str)
    exit(1)
 
-data = np.loadtxt(sys.argv[1],skiprows=1,delimiter=",")
+data = np.loadtxt(filename,skiprows=1,delimiter=",")
 N_line_search = (data.shape[1]-4)/2
 # Make sure we don't get a half-integer
 assert(abs(N_line_search - round(N_line_search)) < 1.0e-12)
@@ -70,6 +71,11 @@ for j in range(N_lines):
         old_best_lambda = best_lambda
 
 plt.xlabel('Outer iteration')
-plt.ylabel(r'Levenber-Marquardt parameter \lambda')
+plt.ylabel(r'Levenberg-Marquardt parameter $\lambda$')
+
+plt.figtext(0.5,0.995, os.path.abspath(filename), ha='center',va='top',fontsize=7)
+plt.figtext(0.5,0.005, "Run in "+os.getcwd(), ha='center',va='bottom',fontsize=7)
+
+plt.subplots_adjust(left=0.06, bottom=0.1, right=0.99, top=0.97)
 
 plt.show()

@@ -184,10 +184,10 @@ void mango::Levenberg_marquardt::evaluate_on_lambda_grid() {
   lambda_scan_state_vectors = Eigen::MatrixXd::Zero(N_parameters, N_line_search); // Initialize to 0.
   // Perform concurrent function evaluations for several values of lambda: 
   for (j_lambda_grid = 0; j_lambda_grid < N_line_search; j_lambda_grid++) {
+    lambda = central_lambda * normalized_lambda_grid[j_lambda_grid];
+    lambdas(j_lambda_grid) = lambda; // Do this on all procs so proc0_world has the complete list of lambdas.
     // Check if this MPI proc owns this point in the lambda grid:
     if ((j_lambda_grid % solver->mpi_partition->get_N_worker_groups()) == solver->mpi_partition->get_rank_group_leaders()) {
-      lambda = central_lambda * normalized_lambda_grid[j_lambda_grid];
-      lambdas(j_lambda_grid) = lambda;
       if (verbose>0) std::cout << "Proc " << solver->mpi_partition->get_rank_world() << " is handling j_lambda_grid=" << j_lambda_grid 
 			       << ", lambda=" << lambda << std::endl;
       Jacobian_extended.topRows(N_terms) = Jacobian;
@@ -242,7 +242,6 @@ void mango::Levenberg_marquardt::evaluate_on_lambda_grid() {
  *
  */
 void mango::Levenberg_marquardt::process_lambda_grid_results() { 
-  double original_central_lambda = central_lambda;
   int original_j_line_search = j_line_search;
 
   if (proc0_world) {
