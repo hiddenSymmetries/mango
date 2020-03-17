@@ -58,6 +58,8 @@ namespace mango {
     double* normalized_lambda_grid;
     std::ofstream lambda_file;
     int outer_iteration;
+    bool check_least_squares_solution;
+    bool save_lambda_history;
 
     void evaluate_on_lambda_grid();
     void process_lambda_grid_results();

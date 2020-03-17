@@ -71,11 +71,12 @@ for j in range(N_lines):
         old_best_lambda = best_lambda
 
 plt.xlabel('Outer iteration')
-plt.ylabel(r'Levenberg-Marquardt parameter $\lambda$')
+plt.title(r'Levenberg-Marquardt parameter $\lambda$')
+plt.ylabel(r'Newton $\leftarrow \rightarrow$ Gradient descent')
 
 plt.figtext(0.5,0.995, os.path.abspath(filename), ha='center',va='top',fontsize=7)
 plt.figtext(0.5,0.005, "Run in "+os.getcwd(), ha='center',va='bottom',fontsize=7)
 
-plt.subplots_adjust(left=0.06, bottom=0.1, right=0.99, top=0.97)
+plt.subplots_adjust(left=0.06, bottom=0.1, right=0.99, top=0.94)
 
 plt.show()

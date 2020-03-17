@@ -7,6 +7,7 @@
 #ifdef MANGO_EIGEN_AVAILABLE // Don't bother doing any testing if Eigen is unavailable.
 
 #include <iostream>
+#include <iomanip>
 #include "catch.hpp"
 #include "Levenberg_marquardt.hpp"
 
@@ -119,6 +120,7 @@ TEST_CASE_METHOD(mango::Least_squares_solver, "mango::Levenberg_marquardt::proce
   CAPTURE(N_parameters, N_terms, N_line_search);
 
   mango::Levenberg_marquardt lm(this);
+  lm.save_lambda_history = false;
 				 
   lm.line_search_succeeded = false;
   double original_central_lambda = GENERATE(take(1,random(-10.0,10.0)));
@@ -177,29 +179,77 @@ TEST_CASE_METHOD(mango::Least_squares_solver, "mango::Levenberg_marquardt::proce
   delete[] best_residual_function;
 }
 
-/*
+
 TEST_CASE_METHOD(mango::Levenberg_marquardt_tester, "mango::Levenberg_marquardt::evaluate_on_lambda_grid()","[problem][Levenberg_marquardt]") {
+  // Validate one piece of the parallelized lambda scan.
+  // We won't actually calculate the true Jacobian, just plug in an ad-hoc matrix for testing.
+  // This test case is a mini-regression test just for one subroutine.
+
   // Set up MPI:
   mpi_partition->set_N_worker_groups(GENERATE(range(1,6)));
   mpi_partition->init(MPI_COMM_WORLD);
 
   N_line_search = 4;
-    
+  //centered_differences = true;
+
   mango::Levenberg_marquardt lm(this);
-				 
+  lm.check_least_squares_solution = false;
+  lm.save_lambda_history = false;
+
+  lm.state_vector << 0.6, -0.8;
+
   lm.central_lambda = 0.02;
   lm.normalized_lambda_grid[0] = 0.1;
   lm.normalized_lambda_grid[1] = 0.3;
   lm.normalized_lambda_grid[2] = 1.0;
   lm.normalized_lambda_grid[3] = 3.0;
 
+  lm.Jacobian <<  
+    1.1,  2.5,
+    3.2,  4.0,
+    -1.1, -2.5,
+    -3.2, -4.0;
+
+  lm.residuals_extended << 0.7, 0.9, -1.2, -1.9, 0.0, 0.0;
+ 
+  //if (mpi_partition->get_proc0_world()) {
+  //  std::cout << "Jacobian:" << std::endl << lm.Jacobian << std::endl;
+  //  std::cout << "residuals_extended:" << std::endl << lm.residuals_extended << std::endl;
+  //}
+  
   // Call the subroutine we want to test:
   if (mpi_partition->get_proc0_worker_groups()) { // Only group leaders should call the subroutine
     lm.evaluate_on_lambda_grid();
   }
 
+  if (mpi_partition->get_proc0_world()) {
+    // The reference values later in this subroutine were obtained using these next 2 lines:
+    //std::cout << "lambda_scan_state_vectors:" << std::endl << std::setprecision(16) << std::scientific << lm.lambda_scan_state_vectors << std::endl;
+    //std::cout << "lambda_scan_residuals:" << std::endl << std::setprecision(16) << std::scientific << lm.lambda_scan_residuals << std::endl;
+
+    Eigen::MatrixXd lambda_scan_state_vectors(2,4);
+    lambda_scan_state_vectors <<
+      6.5966619313657804e-01,  6.2136563284770552e-01,  5.4071043403897379e-01,  4.5835619960968432e-01,
+      -1.1993276056100737e+00, -1.1711321102947181e+00, -1.1107753800090787e+00, -1.0447504305249349e+00;
+
+    Eigen::MatrixXd lambda_scan_residuals(4,4);
+    lambda_scan_residuals <<
+      1.1431215076343009e+00, 1.0790483326566978e+00, 9.6373805043769645e-01, 8.6789095841964070e-01,
+      3.1073264219230281e+00, 2.9331574746897324e+00, 2.6197116298993373e+00, 2.3591722213560140e+00,
+      8.4465889478040292e+00, 7.9731486634579225e+00, 7.1211145193581968e+00, 6.4128949795174135e+00,
+      2.2960209249278702e+01, 2.1673265127480192e+01, 1.9357196196347253e+01, 1.7432055890638424e+01;
+
+    for (int j=0; j<N_line_search; j++) {
+      for (int k=0; k<N_parameters; k++) {
+	CHECK(lambda_scan_state_vectors(k,j) == Approx(lm.lambda_scan_state_vectors(k,j)));
+      }
+      for (int k=0; k<N_terms; k++) {
+	CHECK(lambda_scan_residuals(k,j) == Approx(lm.lambda_scan_residuals(k,j)));
+      }
+    }
+  }
 }
-*/
+
 
 
 

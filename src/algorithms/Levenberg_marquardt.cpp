@@ -8,10 +8,6 @@
 #include <Eigen/Dense>
 #endif
 
-// If the next line is uncommented, the least-squares problem will be solved
-// a second way, to make sure the 2 methods agree. This check adds some computational cost.
-#define CHECK_LEAST_SQUARES_SOLUTION
-
 #ifndef MANGO_EIGEN_AVAILABLE
 // Eigen is NOT available.
 
@@ -33,10 +29,16 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
 {
   solver = solver_in;
 
+  // If check_least_squares_solution == true, the least-squares problem will be solved
+  // a second way, to make sure the 2 methods agree. This check adds some computational cost.
+  check_least_squares_solution = false;
+
   // Initial value for the Levenberg-Marquardt parameter:
   central_lambda = 0.01;
 
   max_line_search_iterations = 4;
+
+  save_lambda_history = true;
 
   // Define shorthand variable names:
   N_parameters = solver->N_parameters;
@@ -62,12 +64,12 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
   lambda_scan_state_vectors.resize(N_parameters, N_line_search);
   lambdas.resize(N_line_search);
   lambda_scan_objective_functions.resize(N_line_search);
-#ifdef CHECK_LEAST_SQUARES_SOLUTION
-  delta_x_direct.resize(N_parameters);
-  alpha.resize(N_parameters, N_parameters);
-  alpha_prime.resize(N_parameters, N_parameters);
-  beta.resize(N_parameters);
-#endif
+  if (check_least_squares_solution) {
+    delta_x_direct.resize(N_parameters);
+    alpha.resize(N_parameters, N_parameters);
+    alpha_prime.resize(N_parameters, N_parameters);
+    beta.resize(N_parameters);
+  }
 
   residuals_extended.bottomRows(N_parameters) = Eigen::VectorXd::Zero(N_parameters);
   Jacobian_extended.bottomRows(N_parameters) = Eigen::MatrixXd::Zero(N_parameters,N_parameters);
@@ -83,8 +85,15 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
     std::cout << std::endl;
   }
 
+}
+
+//! The main driver for the Levenberg-Marquardt solver
+/**
+ *
+ */
+void mango::Levenberg_marquardt::solve() {
   // Open output file:
-  if (proc0_world) {
+  if (save_lambda_history && proc0_world) {
     std::string filename = solver->output_filename + "_levenberg_marquardt";
     lambda_file.open(filename.c_str());
     if (!lambda_file.is_open()) {
@@ -93,13 +102,7 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
     }
     lambda_file << "outer_iteration,j_line_search,lambdas(1:N_line_search),objective_functions(1:N_line_search),min_objective_function_index,line_search_succeeded" << std::endl;
   }
-}
 
-//! The main driver for the Levenberg-Marquardt solver
-/**
- *
- */
-void mango::Levenberg_marquardt::solve() {
   keep_going_outer = true;
   outer_iteration = 0;
   //  if (solver->mpi_partition->get_proc0_world()) {
@@ -138,11 +141,11 @@ void mango::Levenberg_marquardt::solve() {
       std::cout << Jacobian << std::endl;
     }
 
-#ifdef CHECK_LEAST_SQUARES_SOLUTION
-    alpha = Jacobian.transpose() * Jacobian;
-    alpha_prime = alpha;
-    beta = -Jacobian.transpose() * shifted_residuals;
-#endif
+    if (check_least_squares_solution) {
+      alpha = Jacobian.transpose() * Jacobian;
+      alpha_prime = alpha;
+      beta = -Jacobian.transpose() * shifted_residuals;
+    }
 
     line_search();
     if (!line_search_succeeded) {
@@ -152,7 +155,7 @@ void mango::Levenberg_marquardt::solve() {
   } // while (keep_going_outer)
 
   // Finalize output file:
-  if (proc0_world) lambda_file.close();
+  if (save_lambda_history && proc0_world) lambda_file.close();
 
   delete[] normalized_lambda_grid;
 
@@ -199,22 +202,22 @@ void mango::Levenberg_marquardt::evaluate_on_lambda_grid() {
       // Solve the linear least-squares system to compute the step in parameter space
       delta_x = -Jacobian_extended.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(residuals_extended);
       if (verbose>0 && proc0_world) std::cout << "Here comes delta_x from Eigen" << std::endl << delta_x << std::endl;
-      
-#ifdef CHECK_LEAST_SQUARES_SOLUTION
-      // Direct approach
-      for (j=0; j<N_parameters; j++) {
-	alpha_prime(j,j) = alpha(j,j) * (1 + lambda);
+
+      if (check_least_squares_solution) {
+	// Direct approach
+	for (j=0; j<N_parameters; j++) {
+	  alpha_prime(j,j) = alpha(j,j) * (1 + lambda);
+	}
+	delta_x_direct = alpha_prime.colPivHouseholderQr().solve(beta); // Solve alpha * delta_x = beta for delta_x.
+	if (verbose>0 && proc0_world) std::cout << "Here comes delta_x_direct from Eigen" << std::endl << delta_x_direct << std::endl;
+	difference = (delta_x - delta_x_direct).norm();
+	if (verbose>0 && proc0_world) std::cout << "(delta_x - delta_x_direct).norm() = " << difference << std::endl;
+	if (difference > 1e-10) {
+	  std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+	  std::cerr << "WARNING!!! delta_x vs delta_x_norm disagree!!" << std::endl;
+	  std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+	}
       }
-      delta_x_direct = alpha_prime.colPivHouseholderQr().solve(beta); // Solve alpha * delta_x = beta for delta_x.
-      if (verbose>0 && proc0_world) std::cout << "Here comes delta_x_direct from Eigen" << std::endl << delta_x_direct << std::endl;
-      difference = (delta_x - delta_x_direct).norm();
-      if (verbose>0 && proc0_world) std::cout << "(delta_x - delta_x_direct).norm() = " << difference << std::endl;
-      if (difference > 1e-10) {
-	std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	std::cerr << "WARNING!!! delta_x vs delta_x_norm disagree!!" << std::endl;
-	std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-      }
-#endif
       
       state_vector_tentative = state_vector + delta_x;
       lambda_scan_state_vectors.col(j_lambda_grid) = state_vector_tentative;
@@ -288,10 +291,12 @@ void mango::Levenberg_marquardt::process_lambda_grid_results() {
     }
 
     // Record results in the _levenberg_marquardt output file:
-    lambda_file << std::setw(6) << outer_iteration << "," << std::setw(3) << original_j_line_search << ",";
-    for (int j=0; j<N_line_search; j++) lambda_file << std::setw(24) << std::setprecision(16) << std::scientific << lambdas(j) << ",";
-    for (int j=0; j<N_line_search; j++) lambda_file << std::setw(24) << std::setprecision(16) << std::scientific << lambda_scan_objective_functions(j) << ",";
-    lambda_file << std::setw(3) << min_objective_function_index << ", " << std::setw(1) << line_search_succeeded << std::endl << std::flush;
+    if (save_lambda_history) {
+      lambda_file << std::setw(6) << outer_iteration << "," << std::setw(3) << original_j_line_search << ",";
+      for (int j=0; j<N_line_search; j++) lambda_file << std::setw(24) << std::setprecision(16) << std::scientific << lambdas(j) << ",";
+      for (int j=0; j<N_line_search; j++) lambda_file << std::setw(24) << std::setprecision(16) << std::scientific << lambda_scan_objective_functions(j) << ",";
+      lambda_file << std::setw(3) << min_objective_function_index << ", " << std::setw(1) << line_search_succeeded << std::endl << std::flush;
+    }
 
   } // if proc0_world
   // Broadcast results from proc0 to all group leaders.
@@ -306,7 +311,7 @@ void mango::Levenberg_marquardt::process_lambda_grid_results() {
 */
 double mango::Levenberg_marquardt::compute_lambda_increase_factor(const int N_line_search) {
   // Step size when N_line_search -> infinity:
-  double max_lambda_step = 1000.0;
+  double max_lambda_step = 1.0e6;
 
   // Step size when N_line_search = 1:
   double min_lambda_step = 10.0;
