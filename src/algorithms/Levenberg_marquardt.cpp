@@ -35,9 +35,10 @@ mango::Levenberg_marquardt::Levenberg_marquardt(Least_squares_solver* solver_in)
 
   // Initial value for the Levenberg-Marquardt parameter:
   central_lambda = 0.01;
+  lambda_reduction_on_success = 10.0;
 
   max_line_search_iterations = 4;
-
+  max_outer_iterations = 100000;
   save_lambda_history = true;
 
   // Define shorthand variable names:
@@ -106,7 +107,7 @@ void mango::Levenberg_marquardt::solve() {
   keep_going_outer = true;
   outer_iteration = 0;
   //  if (solver->mpi_partition->get_proc0_world()) {
-  while (keep_going_outer) {
+  while (keep_going_outer && (outer_iteration < max_outer_iterations)) {
     outer_iteration++;
     // In finite_difference_Jacobian, proc0 will bcast, so other procs need a corresponding bcast here:
     if (! proc0_world) MPI_Bcast(&data,1,MPI_INT,0,comm_group_leaders);
@@ -132,7 +133,7 @@ void mango::Levenberg_marquardt::solve() {
     residuals_extended.topRows(N_terms) = shifted_residuals;
     if (verbose>0 && proc0_world) {
       std::cout << "Here comes state_vector from Eigen" << std::endl;
-      std::cout << state_vector << std::endl;
+      std::cout << std::setprecision(16) << std::scientific << state_vector << std::endl;
       std::cout << "Here comes shifted_residuals from Eigen" << std::endl;
       std::cout << shifted_residuals << std::endl;
       std::cout << "Here comes residuals_extended from Eigen" << std::endl;
@@ -274,7 +275,7 @@ void mango::Levenberg_marquardt::process_lambda_grid_results() {
       state_vector = lambda_scan_state_vectors.col(min_objective_function_index);
       objective_function = min_objective_function;
       // Take the optimal lambda from the previous step, and try reducing it a bit so the next step will be more like a Newton step.
-      central_lambda = central_lambda * normalized_lambda_grid[min_objective_function_index] / 10; 
+      central_lambda = central_lambda * normalized_lambda_grid[min_objective_function_index] / lambda_reduction_on_success; 
       if (verbose>0) std::cout << "Line search succeeded. New central lambda = " << central_lambda << std::endl;
       line_search_succeeded = true;
       j_line_search = max_line_search_iterations; // Exit "for" loop
@@ -283,6 +284,7 @@ void mango::Levenberg_marquardt::process_lambda_grid_results() {
       central_lambda = central_lambda * lambda_increase_factor;
       if (verbose>0) std::cout << "Increasing central lambda to " << central_lambda << std::endl;
     }
+    //std::cout << "solver->function_evaluations: " << solver->function_evaluations << ", solver->max_function_evaluations: " << solver->max_function_evaluations << std::endl;
     if (solver->function_evaluations >= solver->max_function_evaluations) {
       // Quit due to hitting max_function_evaluations
       j_line_search = max_line_search_iterations; // Exit inner "for" loop

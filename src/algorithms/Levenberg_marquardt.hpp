@@ -15,9 +15,6 @@ namespace mango {
 #ifdef MANGO_EIGEN_AVAILABLE
     Least_squares_solver* solver;
 
-    double central_lambda;
-    int max_line_search_iterations;
-
     // Define shorthand variable names:
     int N_parameters;
     int N_terms;
@@ -47,6 +44,10 @@ namespace mango {
     Eigen::MatrixXd alpha_prime;
     Eigen::VectorXd beta;
 
+    double central_lambda;
+    double lambda_reduction_on_success;
+    int max_line_search_iterations;
+    int max_outer_iterations;
     int data, j, j_line_search, failed_int, j_lambda_grid;
     double lambda, objective_function, tentative_objective_function, min_objective_function;
     int min_objective_function_index;
