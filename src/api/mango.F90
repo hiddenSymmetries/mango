@@ -248,6 +248,11 @@ module mango_mod
        real(C_double) :: min_factor, max_factor, min_radius
        integer(C_int) :: preserve_sign
      end subroutine C_mango_set_relative_bound_constraints
+     subroutine C_mango_set_N_line_search (this, N) bind(C,name="mango_set_N_line_search")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_N_line_search
   end interface
 
   public :: mango_problem
@@ -266,7 +271,7 @@ module mango_mod
        mango_set_verbose, mango_set_print_residuals_in_output_file, &
        mango_set_user_data, &
        mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write, &
-       mango_set_relative_bound_constraints
+       mango_set_relative_bound_constraints, mango_set_N_line_search
   
 
   abstract interface
@@ -280,7 +285,7 @@ module mango_mod
     type(mango_problem), value, intent(in) :: this
     type(C_ptr), value, intent(in) :: user_data
   end subroutine objective_function_interface
-  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this, user_data)
+  subroutine vector_function_interface(N_parameters, state_vector, N_terms, f, failed, this, user_data)
     import
     integer(C_int), intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(N_parameters)
@@ -289,7 +294,7 @@ module mango_mod
     integer(C_int), intent(out) :: failed
     type(mango_problem), value, intent(in) :: this
     type(C_ptr), value, intent(in) :: user_data
-  end subroutine residual_function_interface
+  end subroutine vector_function_interface
   end interface
 
 contains
@@ -363,7 +368,7 @@ contains
     type(mango_problem), intent(out) :: this
     integer, intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(:), targets(:), sigmas(:), best_residual_function(:)
-    procedure(residual_function_interface) :: residual_function
+    procedure(vector_function_interface) :: residual_function
     this%object = C_mango_problem_create_least_squares(int(N_parameters,C_int), state_vector(1), int(N_terms,C_int), targets(1), sigmas(1), best_residual_function(1), C_funloc(residual_function))
   end subroutine mango_problem_create_least_squares
 
@@ -864,5 +869,18 @@ contains
     if (preserve_sign) preserve_sign_int = 1 
     call C_mango_set_relative_bound_constraints(this%object, min_factor, max_factor, min_radius, preserve_sign_int)
   end subroutine mango_set_relative_bound_constraints
+
+  !> Sets the number of points considered as a set for parallel line searches
+  !>
+  !> The default value is 0.
+  !> If the value is \f$<=\f$0, the number will be set to the number of worker groups.
+  !> Normally this default makes sense.
+  !> @param this The optimization problem to control
+  !> @param N_line_search The number of points considered as a set for parallel line searches.
+  subroutine mango_set_N_line_search(this, N_line_search)
+    type(mango_problem), intent(in) :: this
+    integer, intent(in) :: N_line_search
+    call C_mango_set_N_line_search(this%object, N_line_search)
+  end subroutine mango_set_N_line_search
 
 end module mango_mod

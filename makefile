@@ -24,8 +24,6 @@ all: lib/libmango.a examples examples/packages_available
 
 include makefile.system-dependent
 
-MANGO_AVAILABLE_PACKAGES = mango
-
 ifeq ($(MANGO_PETSC_AVAILABLE),T)
   EXTRA_C_COMPILE_FLAGS += -DMANGO_PETSC_AVAILABLE
   EXTRA_F_COMPILE_FLAGS += -DMANGO_PETSC_AVAILABLE
@@ -73,8 +71,16 @@ else ifneq ($(MANGO_DAKOTA_AVAILABLE),F)
   $(error MANGO_DAKOTA_AVAILABLE must be set to either T or F (case-sensitive))
 endif
 
+ifeq ($(MANGO_EIGEN_AVAILABLE),T)
+  EXTRA_C_COMPILE_FLAGS += -DMANGO_EIGEN_AVAILABLE
+  EXTRA_F_COMPILE_FLAGS += -DMANGO_EIGEN_AVAILABLE
+  MANGO_AVAILABLE_PACKAGES += mango
+else ifneq ($(MANGO_EIGEN_AVAILABLE),F)
+  $(error MANGO_EIGEN_AVAILABLE must be set to either T or F (case-sensitive))
+endif
+
 # Put .mod files in the ./obj/ directory:
-EXTRA_C_COMPILE_FLAGS += -J obj -I obj -I include
+EXTRA_C_COMPILE_FLAGS += -J obj -I obj -I include -I src/algorithms
 EXTRA_F_COMPILE_FLAGS += -J obj -I obj
 
 export
@@ -86,13 +92,17 @@ F_SRC_FILES = $(wildcard src/api/*.F90)
 F_OBJ_FILES = $(patsubst src/api/%.F90, obj/%.f.o, $(F_SRC_FILES))
 CPP_SRC_FILES = $(wildcard src/api/*.cpp)
 CPP_OBJ_FILES = $(patsubst src/api/%.cpp, obj/%.cpp.o, $(CPP_SRC_FILES))
+ALGORITHM_SRC_FILES = $(wildcard src/algorithms/*.cpp)
+ALGORITHM_OBJ_FILES = $(patsubst src/algorithms/%.cpp, obj/%.cpp.o, $(ALGORITHM_SRC_FILES))
 HOPSPACK_CPP_OBJ_FILES = $(patsubst external_packages/hopspack/src/%.cpp, obj/%.cpp.o, $(HOPSPACK_CPP_SRC_FILES))
 HOPSPACK_C_OBJ_FILES   = $(patsubst external_packages/hopspack/src/%.c,   obj/%.c.o,   $(HOPSPACK_C_SRC_FILES))
 HOPSPACK_HEADERS = $(wildcard external_packages/hopspack/src/*.h) $(wildcard external_packages/hopspack/src/*.hpp)
-HEADER_FILES = $(wildcard src/api/*.hpp)
+HEADER_FILES = $(wildcard src/api/*.hpp) $(wildcard src/algorithms/*.hpp)
 
 TEST_SRC_FILES = $(wildcard src/api/tests/*.cpp)
 TEST_OBJ_FILES = $(patsubst src/api/tests/%.cpp, obj/%.cpp.o, $(TEST_SRC_FILES))
+ALGORITHM_TEST_SRC_FILES = $(wildcard src/algorithms/tests/*.cpp)
+ALGORITHM_TEST_OBJ_FILES = $(patsubst src/algorithms/tests/%.cpp, obj/%.cpp.o, $(ALGORITHM_TEST_SRC_FILES))
 
 include makefile.dependencies
 
@@ -107,8 +117,14 @@ $(F_OBJ_FILES): obj/%.f.o: src/api/%.F90
 $(CPP_OBJ_FILES): obj/%.cpp.o: src/api/%.cpp $(HEADER_FILES)
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I src/api -c $< -o $@
 
+$(ALGORITHM_OBJ_FILES): obj/%.cpp.o: src/algorithms/%.cpp $(HEADER_FILES)
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I src/api -c $< -o $@
+
 $(TEST_OBJ_FILES): obj/%.cpp.o: src/api/tests/%.cpp $(HEADER_FILES)
 	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -I src/api -c $< -o $@
+
+$(ALGORITHM_TEST_OBJ_FILES): obj/%.cpp.o: src/algorithms/tests/%.cpp $(HEADER_FILES)
+	$(CXX) $(EXTRA_C_COMPILE_FLAGS) -I external_packages/catch2 -I src/api -I src/algorithms -c $< -o $@
 
 # Each hopspack file does not actually depend on _all_ the hopspack headers, but it is easier to impose a dependency on all the headers than the more precise dependencies.
 # Similarly, only the modified hopspack source files depend on mango.hpp, but it is easier to make the dependency apply to all hopspack files here.
@@ -119,8 +135,8 @@ $(HOPSPACK_C_OBJ_FILES): obj/%.c.o: external_packages/hopspack/src/%.c $(HOPSPAC
 	$(CC) $(EXTRA_C_COMPILE_FLAGS) -c $< -o $@
 
 
-lib/libmango.a: $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
-	ar rcs lib/libmango.a $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
+lib/libmango.a: $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(ALGORITHM_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
+	ar rcs lib/libmango.a $(F_OBJ_FILES) $(CPP_OBJ_FILES) $(ALGORITHM_OBJ_FILES) $(HOPSPACK_CPP_OBJ_FILES) $(HOPSPACK_C_OBJ_FILES)
 	cp obj/mango_mod.* include
 #	rm include/mango.o
 #	cp obj/mango.* include
@@ -136,7 +152,7 @@ clean:
 	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ src/api/*~ examples/packages_available tests/unit_tests
 	$(MAKE) -C examples clean
 
-tests/unit_tests: $(TEST_OBJ_FILES) lib/libmango.a
+tests/unit_tests: $(TEST_OBJ_FILES) $(ALGORITHM_TEST_OBJ_FILES) lib/libmango.a
 	$(CLINKER) -o $@ $^ $(EXTRA_C_LINK_FLAGS)
 # Also we have a unit_tests target without "tests/" in front so you don't have to type tests/unit_tests all the time.
 unit_tests: tests/unit_tests
@@ -162,17 +178,24 @@ test_make:
 	@echo MANGO_NLOPT_AVAILABLE is $(MANGO_NLOPT_AVAILABLE)
 	@echo MANGO_GSL_AVAILABLE is $(MANGO_GSL_AVAILABLE)
 	@echo MANGO_DAKOTA_AVAILABLE is $(MANGO_DAKOTA_AVAILABLE)
+	@echo MANGO_EIGEN_AVAILABLE is $(MANGO_EIGEN_AVAILABLE)
 	@echo MANGO_AVAILABLE_PACKAGES is $(MANGO_AVAILABLE_PACKAGES)
 	@echo EXTRA_F_COMPILE_FLAGS is $(EXTRA_F_COMPILE_FLAGS)
 	@echo EXTRA_C_COMPILE_FLAGS is $(EXTRA_C_COMPILE_FLAGS)
 	@echo EXTRA_LINK_FLAGS is $(EXTRA_LINK_FLAGS)
 	@echo EXTRA_F_LINK_FLAGS is $(EXTRA_F_LINK_FLAGS)
 	@echo EXTRA_C_LINK_FLAGS is $(EXTRA_C_LINK_FLAGS)
+	@echo F_SRC_FILES is $(F_SRC_FILES)
 	@echo F_OBJ_FILES is $(F_OBJ_FILES)
-	@echo C_OBJ_FILES is $(C_OBJ_FILES)
+	@echo CPP_SRC_FILES is $(CPP_SRC_FILES)
+	@echo CPP_OBJ_FILES is $(CPP_OBJ_FILES)
+	@echo ALGORITHM_SRC_FILES is $(ALGORITHM_SRC_FILES)
+	@echo ALGORITHM_OBJ_FILES is $(ALGORITHM_OBJ_FILES)
 	@echo HEADER_FILES is $(HEADER_FILES)
 	@echo TEST_SRC_FILES is $(TEST_SRC_FILES)
 	@echo TEST_OBJ_FILES is $(TEST_OBJ_FILES)
+	@echo ALGORITHM_TEST_SRC_FILES is $(ALGORITHM_TEST_SRC_FILES)
+	@echo ALGORITHM_TEST_OBJ_FILES is $(ALGORITHM_TEST_OBJ_FILES)
 	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_CPP_SRC_FILES)
 	@echo HOPSPACK_CPP_SRC_FILES is $(HOPSPACK_C_SRC_FILES)
 	@echo HOPSPACK_C_OBJ_FILES is $(HOPSPACK_CPP_OBJ_FILES)

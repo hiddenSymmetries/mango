@@ -25,7 +25,7 @@
 
 // Constructor for least-squares problems
 mango::Least_squares_problem::Least_squares_problem(int N_parameters_in, double* state_vector_in, int N_terms_in, double* targets_in, double* sigmas_in, 
-			double* best_residual_function_in, residual_function_type residual_function_in, int argc_in, char* argv_in[]) 
+			double* best_residual_function_in, vector_function_type residual_function_in, int argc_in, char* argv_in[]) 
   : Problem(N_parameters_in, state_vector_in, NULL, argc_in, argv_in) // Call constructor of base class.
 {
   // Replace Solver with a Least_squares_solver

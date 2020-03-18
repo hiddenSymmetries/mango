@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
   myprob.mpi_init(MPI_COMM_WORLD);
   myprob.set_centered_differences(true);
   myprob.set_max_function_evaluations(2000);
+  myprob.set_N_line_search(3); // To make results independent of the # of MPI processes, N_line_search must be set to any positive integer.
 
   // Pass some data to the objective function
   int data = 7;

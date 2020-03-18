@@ -23,9 +23,9 @@
 #include <ctime>
 #include "mpi.h"
 #include "mango.hpp"
-#include "Least_squares_solver.hpp"
+#include "Solver.hpp"
 
-void mango::Least_squares_solver::finite_difference_Jacobian(const double* state_vector, double* base_case_residual_function, double* Jacobian) {
+void mango::Solver::finite_difference_Jacobian(vector_function_type vector_function, int N_terms, const double* state_vector, double* base_case_residual_function, double* Jacobian) {
 
   // base_case_residual_function should have been allocated already, with size N_terms.
   // Jacobian should have been allocated already, with size N_parameters * N_terms.
@@ -34,8 +34,6 @@ void mango::Least_squares_solver::finite_difference_Jacobian(const double* state
   MPI_Comm mpi_comm_group_leaders = mpi_partition->get_comm_group_leaders();
   bool proc0_world = mpi_partition->get_proc0_world();
   int mpi_rank_world = mpi_partition->get_rank_world();
-  int mpi_rank_group_leaders = mpi_partition->get_rank_group_leaders();
-  int N_worker_groups = mpi_partition->get_N_worker_groups();
 
   int data;
   int j_evaluation, j_parameter;
@@ -95,53 +93,10 @@ void mango::Least_squares_solver::finite_difference_Jacobian(const double* state
   }
 
   // Each proc now evaluates the residual function for its share of the perturbed state vectors.
-  int failed_int;
-  for(j_evaluation=0; j_evaluation < N_evaluations; j_evaluation++) {
-    if ((j_evaluation % N_worker_groups) == mpi_rank_group_leaders) {
-      // Note that the use of &residual_functions[j_evaluation*N_terms] in the next line means that j_terms must be the least-signficiant dimension in residual_functions.
-      residual_function(&N_parameters, &state_vectors[j_evaluation*N_parameters], &N_terms, &residual_functions[j_evaluation*N_terms], &failed_int, problem, original_user_data);
-    }
-  }
+  bool* failures = new bool[N_evaluations];
+  evaluate_set_in_parallel(vector_function, N_terms, N_evaluations, state_vectors, residual_functions, failures);
+  delete failures; // Eventually do something smarter with the failure data.
 
-  // Send results back to the world master.
-  // Make sure not to reduce over MPI_COMM_WORLD, since then the residual function values will be multiplied by # of workers per worker group.
-  if (proc0_world) {
-    MPI_Reduce(MPI_IN_PLACE, residual_functions, N_evaluations * N_terms, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
-  } else {
-    MPI_Reduce(residual_functions, residual_functions, N_evaluations * N_terms, MPI_DOUBLE, MPI_SUM, 0, mpi_comm_group_leaders);
-  }
-
-  // Record the results in order in the output file. At the same time, check for any best-yet values of the
-  // objective function.
-  double total_objective_function;
-  bool failed = false;
-  clock_t now;
-  if (proc0_world) {
-    for(j_evaluation=0; j_evaluation<N_evaluations; j_evaluation++) {
-      //current_residuals = &residual_functions[j_evaluation*N_terms];
-      //total_objective_function = residuals_to_single_objective(current_residuals);
-      record_function_evaluation(&state_vectors[j_evaluation*N_parameters], &residual_functions[j_evaluation*N_terms], failed);
-      /*
-      function_evaluations += 1;
-      now = clock();
-      current_residuals = &residual_functions[j_evaluation*N_terms];
-      total_objective_function = residuals_to_single_objective(current_residuals);
-      recorder->record_function_evaluation(function_evaluations, now, &state_vectors[j_evaluation*N_parameters], total_objective_function);
-      //write_least_squares_file_line(now, &state_vectors[j_evaluation*N_parameters], total_objective_function, &residual_functions[j_evaluation*N_terms]);
-
-      failed = false;
-      if (!failed && (!at_least_one_success || total_objective_function < best_objective_function)) {
-	// This next stuff is duplicated in residual_function_wrapper. There should be a more elegant solution.
-        at_least_one_success = true;
-        best_objective_function = total_objective_function;
-        best_function_evaluation = function_evaluations;
-        memcpy(best_state_vector, &state_vectors[j_evaluation*N_parameters], N_parameters * sizeof(double));
-        memcpy(best_residual_function, &residual_functions[j_evaluation*N_terms], N_terms * sizeof(double));
-	best_time = now;
-      }
-      */
-    }
-  }
   
   // Finally, evaluate the finite difference derivatives.
   memcpy(base_case_residual_function, residual_functions, N_terms*sizeof(double));

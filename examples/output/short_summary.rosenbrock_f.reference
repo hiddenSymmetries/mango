@@ -3,6 +3,7 @@ yes
 N_parameters:
 2
 algorithm,last_function_evaluation,last_seconds,best_function_evaluation,best_seconds,x(1),x(2),objective_function,abs_tolerance_x,abs_tolerance_f
+mango_levenberg_marquardt,              1,  0.0000e+01,     1,  0.0000e+01,  1.0000000000000000e+00,  1.0000000000000000e+00,  0.0000000000000000e+00, 1e-13, 1e-23
 hopspack,                            2000,  1.8298e+00,  1999,  1.8269e+00,  9.0454101562500000e-01,  8.1787109375000000e-01,  9.1228735563078089e-03, 1e-3,  1e-4
 nlopt_ln_bobyqa,                      295,  9.8170e-03,   152,  5.7520e-03,  9.9999999999999967e-01,  9.9999999999999933e-01,  1.1093356479670479e-31, 1e-13, 1e-30
 nlopt_ln_sbplx,                       490,  7.7070e-03,   487,  7.6760e-03,  9.9999999999593059e-01,  9.9999999999204903e-01,  2.0088862071232508e-23, 1e-13, 1e-30
