@@ -31,12 +31,46 @@ module mango_mod
 
   use, intrinsic :: ISO_C_Binding
   implicit none
-  private
+
+!  private
+!  public :: mango_problem, objective_function_interface
+!  public :: mango_problem_create, mango_problem_create_least_squares, &
+!       mango_problem_destroy, &
+!       mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
+!       mango_mpi_init, mango_mpi_partition_set_custom, mango_optimize, &
+!       mango_get_mpi_rank_world, mango_get_mpi_rank_worker_groups, mango_get_mpi_rank_group_leaders, &
+!       mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
+!       mango_get_proc0_world, mango_get_proc0_worker_groups, &
+!       mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
+!       mango_get_N_parameters, mango_get_N_terms, &
+!       mango_get_worker_group, mango_get_best_function_evaluation, &
+!       mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
+!       mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
+!       mango_set_verbose, mango_set_print_residuals_in_output_file, &
+!       mango_set_user_data, &
+!       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write, &
+!       mango_set_relative_bound_constraints
+
+!  private :: C_mango_problem_create, C_mango_problem_create_least_squares, &
+!       C_mango_problem_destroy, &
+!       C_mango_set_algorithm, C_mango_set_algorithm_from_string, C_mango_read_input_file, C_mango_set_output_filename, &
+!       C_mango_mpi_init, C_mango_mpi_partition_set_custom, C_mango_optimize, &
+!       C_mango_get_mpi_rank_world, C_mango_get_mpi_rank_worker_groups, C_mango_get_mpi_rank_group_leaders, &
+!       C_mango_get_N_procs_world, C_mango_get_N_procs_worker_groups, C_mango_get_N_procs_group_leaders, &
+!       C_mango_get_proc0_world, C_mango_get_proc0_worker_groups, &
+!       C_mango_get_mpi_comm_world, C_mango_get_mpi_comm_worker_groups, C_mango_get_mpi_comm_group_leaders, &
+!       C_mango_get_N_parameters, C_mango_get_N_terms, &
+!       C_mango_get_worker_group, C_mango_get_best_function_evaluation, &
+!       C_mango_get_function_evaluations, C_mango_set_max_function_evaluations, C_mango_set_centered_differences, &
+!       C_mango_does_algorithm_exist, C_mango_set_finite_difference_step_size, C_mango_set_bound_constraints, &
+!       C_mango_set_verbose, C_mango_set_print_residuals_in_output_file, &
+!       C_mango_set_user_data, &
+!       C_mango_stop_workers, C_mango_mobilize_workers, C_mango_continue_worker_loop, C_mango_mpi_partition_write, &
+!       C_mango_set_relative_bound_constraints
 
   !> An object that represents an optimization problem.
   type mango_problem
-     private
-     type(C_ptr) :: object = C_NULL_ptr !< This pointer points to a C++ mango::Problem object.
+     type(C_ptr), private :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
   end type mango_problem
 
   interface
@@ -249,45 +283,49 @@ module mango_mod
        integer(C_int) :: preserve_sign
      end subroutine C_mango_set_relative_bound_constraints
   end interface
-
-  public :: mango_problem
-  public :: mango_problem_create, mango_problem_create_least_squares, &
-       mango_problem_destroy, &
-       mango_set_algorithm, mango_set_algorithm_from_string, mango_read_input_file, mango_set_output_filename, &
-       mango_mpi_init, mango_mpi_partition_set_custom, mango_optimize, &
-       mango_get_mpi_rank_world, mango_get_mpi_rank_worker_groups, mango_get_mpi_rank_group_leaders, &
-       mango_get_N_procs_world, mango_get_N_procs_worker_groups, mango_get_N_procs_group_leaders, &
-       mango_get_proc0_world, mango_get_proc0_worker_groups, &
-       mango_get_mpi_comm_world, mango_get_mpi_comm_worker_groups, mango_get_mpi_comm_group_leaders, &
-       mango_get_N_parameters, mango_get_N_terms, &
-       mango_get_worker_group, mango_get_best_function_evaluation, &
-       mango_get_function_evaluations, mango_set_max_function_evaluations, mango_set_centered_differences, &
-       mango_does_algorithm_exist, mango_set_finite_difference_step_size, mango_set_bound_constraints, &
-       mango_set_verbose, mango_set_print_residuals_in_output_file, &
-       mango_set_user_data, &
-       mango_stop_workers, mango_mobilize_workers, mango_continue_worker_loop, mango_mpi_partition_write, &
-       mango_set_relative_bound_constraints
   
-
   abstract interface
-  !> Blah blah
-  subroutine objective_function_interface(N_parameters, state_vector, f, failed, this, user_data)
+
+  !> Format for the user-supplied subroutine that computes the objective function for a general (non least-squares) optimization problem
+  !>
+  !> @param N_parameters The number of independent variables, i.e. the dimension of the search space.
+  !> @param state_vector An array of size <span class="paramname">N_parameters</span> containing the values of the indpendent variables.
+  !> @param objective_value The subroutine must set this variable to the value of the objective function.
+  !> @param failed Set the value pointed to by this variable to 1 if the calculation of the objective function fails for some reason.
+  !>                    Otherwise the value should be 0.
+  !> @param problem A pointer to the class representing this optimization problem. This pointer can be useful for
+  !>        getting information about the MPI communicators.
+  !> @param user_data Pointer to user-supplied data, which can be set by mango::Problem::set_user_data().
+  subroutine objective_function_interface(N_parameters, state_vector, objective_value, failed, problem, user_data)
     import
     integer(C_int), intent(in) :: N_parameters
     real(C_double), intent(in) :: state_vector(N_parameters)
-    real(C_double), intent(out) :: f
+    real(C_double), intent(out) :: objective_value
     integer(C_int), intent(out) :: failed
-    type(mango_problem), value, intent(in) :: this
+    type(mango_problem), value, intent(in) :: problem
     type(C_ptr), value, intent(in) :: user_data
   end subroutine objective_function_interface
-  subroutine residual_function_interface(N_parameters, state_vector, N_terms, f, failed, this, user_data)
+
+  !> Format for the user-supplied subroutine that computes the residuals for a least-squares optimization problem
+  !>
+  !> @param N_parameters The number of independent variables, i.e. the dimension of the search space.
+  !> @param state_vector An array of size <span class="paramname">N_parameters</span> containing the values of the indpendent variables.
+  !> @param N_terms The number of least-squares terms that are summed in the total objective function, i.e. the number of residuals.
+  !> @param residuals An array of size <span class="paramname">N_terms</span> which must be set to the residuals, denoted \f$ R_j \f$ 
+  !>            on @ref concepts.
+  !> @param failed Set the value pointed to by this variable to 1 if the calculation of the residuals fails for some reason.
+  !>                    Otherwise the value should be 0.
+  !> @param problem A pointer to the class representing this optimization problem. This pointer can be useful for
+  !>        getting information about the MPI communicators.
+  !> @param user_data Pointer to user-supplied data, which can be set by mango::Problem::set_user_data().
+  subroutine residual_function_interface(N_parameters, state_vector, N_terms, residuals, failed, problem, user_data)
     import
     integer(C_int), intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(N_parameters)
     !double precision, intent(in) :: state_vector(:)
-    real(C_double), intent(out) :: f(N_terms)
+    real(C_double), intent(out) :: residuals(N_terms)
     integer(C_int), intent(out) :: failed
-    type(mango_problem), value, intent(in) :: this
+    type(mango_problem), value, intent(in) :: problem
     type(C_ptr), value, intent(in) :: user_data
   end subroutine residual_function_interface
   end interface

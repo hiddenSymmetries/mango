@@ -404,8 +404,34 @@ namespace mango {
   // Items specific to an optimization problem
 
   class Problem;
-  typedef void (*objective_function_type)(int*, const double*, double*, int*, mango::Problem*, void*);
-  typedef void (*residual_function_type)(int*, const double*, int*, double*, int*, mango::Problem*, void*);
+
+  //! Format for the user-supplied subroutine that computes the objective function for a general (non least-squares) optimization problem
+  /**
+   * @param[in] N_parameters The number of independent variables, i.e. the dimension of the search space.
+   * @param[in] state_vector An array of size <span class="paramname">N_parameters</span> containing the values of the indpendent variables.
+   * @param[out] objective_value The subroutine must set this variable to the value of the objective function.
+   * @param[out] failed Set the value pointed to by this variable to 1 if the calculation of the objective function fails for some reason.
+   *                    Otherwise the value should be 0.
+   * @param[in] problem A pointer to the class representing this optimization problem. This pointer can be useful for
+   *        getting information about the MPI communicators.
+   * @param[in] user_data Pointer to user-supplied data, which can be set by mango::Problem::set_user_data().
+   */
+  typedef void (*objective_function_type)(int* N_parameters, const double* state_vector, double* objective_value, int* failed, mango::Problem* problem, void* user_data);
+
+  //! Format for the user-supplied subroutine that computes the residuals for a least-squares optimization problem
+  /**
+   * @param[in] N_parameters The number of independent variables, i.e. the dimension of the search space.
+   * @param[in] state_vector An array of size <span class="paramname">N_parameters</span> containing the values of the indpendent variables.
+   * @param[in] N_terms The number of least-squares terms that are summed in the total objective function, i.e. the number of residuals.
+   * @param[in] residuals An array of size <span class="paramname">N_terms</span> which must be set to the residuals, denoted \f$ R_j \f$ 
+   *            on @ref concepts.
+   * @param[out] failed Set the value pointed to by this variable to 1 if the calculation of the residuals fails for some reason.
+   *                    Otherwise the value should be 0.
+   * @param[in] problem A pointer to the class representing this optimization problem. This pointer can be useful for
+   *        getting information about the MPI communicators.
+   * @param[in] user_data Pointer to user-supplied data, which can be set by mango::Problem::set_user_data().
+   */
+  typedef void (*residual_function_type)(int* N_parameters, const double* state_vector, int* N_terms, double* residuals, int* failed, mango::Problem* problem, void* user_data);
 
   class Solver;
   class Problem {
