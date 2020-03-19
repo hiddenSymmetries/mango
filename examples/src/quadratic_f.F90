@@ -73,6 +73,7 @@ program quadratic
   call mango_set_centered_differences(problem, .true.)
   call mango_set_max_function_evaluations(problem, 2000)
   call mango_set_user_data(problem, c_loc(my_data))
+  call mango_set_N_line_search(problem, 3) ! To make results independent of the # of MPI processes, N_line_search must be set to any positive integer.
 
   lower_bounds = -5.0d+0
   upper_bounds =  5.0d+0

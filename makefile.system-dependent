@@ -51,6 +51,7 @@ MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
 MANGO_GSL_AVAILABLE = F
 MANGO_DAKOTA_AVAILABLE = F
+MANGO_EIGEN_AVAILABLE = T
 
 CC = mpicc
 FC = mpif90
@@ -75,6 +76,7 @@ MANGO_HOPSPACK_AVAILABLE = T
 MANGO_NLOPT_AVAILABLE = T
 MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
+MANGO_EIGEN_AVAILABLE = T
 
 #ifeq ($(PETSC_DIR),)
 #$(error PETSC_DIR is not defined. This probably means you have not loaded the petsc-real module.)
@@ -104,6 +106,8 @@ ifeq ($(MANGO_PETSC_AVAILABLE),T)
   EXTRA_F_LINK_FLAGS += -L $(GSL_HOME)/lib -lgsl
 endif
 
+EXTRA_C_COMPILE_FLAGS += -I external_packages/eigen/eigen-3.3.7
+
 #PETSC_DIR=/opt/local/lib/petsc
 #
 #EXTRA_C_COMPILE_FLAGS = -I${PETSC_DIR}/include -O0 -g
@@ -130,6 +134,7 @@ MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
 MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
+MANGO_EIGEN_AVAILABLE = T
 
 # Locations of PETSc files as they will be located in travis's Ubuntu filesystem can be found at
 # https://packages.ubuntu.com/bionic/amd64/libpetsc3.7.7-dev/filelist
@@ -157,6 +162,10 @@ EXTRA_C_LINK_FLAGS += -lgsl
 EXTRA_F_LINK_FLAGS += -lgsl 
 endif
 
+ifeq ($(MANGO_EIGEN_AVAILABLE),T)
+EXTRA_C_COMPILE_FLAGS += -I /usr/include/eigen3
+endif
+
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
 MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS --mca btl_base_warn_component_unused 0 --mca orte_base_help_aggregate 0
 # In the above line, the "mca" flags suppress warning messages from MPI about "transport being slow", which is probably
@@ -173,6 +182,7 @@ MANGO_HOPSPACK_AVAILABLE = F
 MANGO_NLOPT_AVAILABLE = T
 MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
+MANGO_EIGEN_AVAILABLE = T
 
 CC = mpicxx
 FC = mpif90
@@ -205,6 +215,8 @@ MANGO_HOPSPACK_AVAILABLE = T
 MANGO_NLOPT_AVAILABLE = T
 MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
+MANGO_EIGEN_AVAILABLE = T
+
 # This next parameter matters only if MANGO_PETSC_AVAILABLE == T
 MANGO_USE_MACPORTS_PETSC = F
 
@@ -251,6 +263,8 @@ EXTRA_C_COMPILE_FLAGS += -I/opt/local/include
 EXTRA_C_LINK_FLAGS += -L/opt/local/lib -lgsl -lgslcblas
 EXTRA_F_LINK_FLAGS += -L/opt/local/lib -lgsl -lgslcblas
 endif
+
+EXTRA_C_COMPILE_FLAGS += -I external_packages/eigen/eigen-3.3.7
 
 # For batch systems, set the following variable to the command used to run jobs. This variable is used by 'make test'.
 MANGO_COMMAND_TO_SUBMIT_JOB = mpiexec -n NUM_PROCS

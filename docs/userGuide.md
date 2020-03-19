@@ -2,3 +2,4 @@
 
 * @subpage gettingStarted
 * @subpage concepts
+* @subpage algorithms
