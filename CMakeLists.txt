@@ -1,173 +1,36 @@
 #---- specify version of cmake (this version is random as of 02/19/20)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.8)
-SET (CMAKE_CXX_COMPILER $ENV{CXX})
-SET (CMAKE_C_COMPILER $ENV{CC})
+
+# For now it is safer to set the compiler using environment variables or when cmake is called (i.e. "cmake -DCMAKE_CXX_COMPILER=ftn ..")
+# But these might be useful in some cases
+#SET (CMAKE_CXX_COMPILER $ENV{CRAYPE_DIR}/bin/CC)
+#SET (CMAKE_C_COMPILER $ENV{CRAYPE_DIR}/bin/cc)
+#SET (CMAKE_C_COMPILER $ENV{CRAYPE_DIR}/bin/ftn)
+
+INCLUDE (User_Inputs.cmake)
 #---- declaring this project name defines ${mango_source_dir} to be the path
 #---- where this source file exists
 PROJECT (MANGO CXX C Fortran)
-SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MANGO_SOURCE_DIR})
-#---- Flags to include MPI headers
-#SET (CMAKE_C_FLAGS "-I $ENV{CRAY_MPICH_DIR}/include")
-#SET (CMAKE_CXX_FLAGS "-I $ENV{CRAY_MPICH_DIR}/include")
-#SET (CMAKE_Fortran_FLAGS "-I $ENV{CRAY_MPICH_DIR}/include")
-#SET (MPI_LIB_DIR "-L $ENV{CRAY_MPICH_DIR}/lib/libmpichcxx.a -lfmpich -lmpichcxx -lmpl -lmpichf90")
-#SET (MPI_C_HEADER_DIR $ENV{CRAY_MPICH_DIR}/include)
 
-#SET (MPIEXEC_EXECUTABLE /usr/common/software/mpich/3.3.1-debug/gcc/7.3.0/bin/mpiexec)
-#SET (MPIEXEC_EXECUTABLE /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin/mpiexec)
-#SET (MPIEXEC_EXECUTABLE ${CRAY_MPICH_DIR}/bin/mpiexec)
-#FIND_PACKAGE (MPI REQUIRED)
-
-INCLUDE_DIRECTORIES (SYSTEM ${MPI_C_INCLUDE_PATH})
-INCLUDE_DIRECTORIES (SYSTEM ${MPI_CXX_INCLUDE_PATH})
-INCLUDE_DIRECTORIES (SYSTEM ${MPI_Fortran_INCLUDE_PATH})
-#---- the find_package command sets '<package>_found' to true if it's successful
-
-#IF (NOT MPI_C_COMPILER)
-#   IF (NOT MPI_C_FOUND)
-#      MESSAGE (FATAL_ERROR "mango: unable to find MPI_C compiler")
-#   ELSE ()
-#      MESSAGE (FATAL_ERROR "Found MPI_C ??")
-#   ENDIF ()
-#ENDIF (NOT MPI_C_COMPILER)
-
-
-#---- Empty vector to be filled with -D flags depending on which packages are used
-SET (COMPILE_DEF_LIST "")
-
-INCLUDE (FindPkgConfig)
-INCLUDE_DIRECTORIES ($ENV{CRAY_HDF5_PREFIX}/include)
-INCLUDE_DIRECTORIES ($ENV{CRAY_HDF5_PARALLEL_PREFIX}/include)
-#INCLUDE_DIRECTORIES ($ENV{CRAY_HDF5_DIR}/include)
-SET (ENV{PKG_CONFIG_PATH} $ENV{PKG_CONFIG_PATH}:$ENV{CRAY_PETSC_PREFIX_DIR}/lib/pkgconfig)
-MESSAGE ("pkg configs --> $ENV{PKG_CONFIG_PATH}")
-SET (PKG_CONFIG_EXECUTABLE ${PKG_CONFIG_PATH})
-
-#INCLUDE (LibrarySearch.cmake)
-PKG_CHECK_MODULES (CRAY_PETSC PETSc)
-PKG_CHECK_MODULES (GSL gsl)
-FIND_PATH (CRAY_PETSC_INCLUDE_DIR petsc.h
-	  HINTS ${CRAY_PETSC_INCLUDEDIR} ${CRAY_PETSC_INCLUDE_DIR})
-MESSAGE ("petsc include --> ${CRAY_PETSC_INCLUDE_DIR}")
-FIND_LIBRARY (CRAY_PETSC_LIBRARY
-	  NAMES libcraypetsc_crayclang_real.so libcraypetsc_crayclang_real.a
-	  HINTS ${CRAY_PETSC_LIBDIR} ${CRAY_PETSC_LIBRARY_DIRS} ${CRAY_PETSC_PREFIX_DIR}/lib)
-MESSAGE ("petsc library --> ${CRAY_PETSC_LIBRARY}")
-FIND_PACKAGE (GSL)
-IF (FOUND_GSL)
-  MESSAGE ("found gsl library --> ${GSL_LIBRARY}")
-  SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_GSL_AVAILABLE)
-ENDIF ()
-MESSAGE ("found petsc --> ${CRAY_PETSC_FOUND}")
-IF (${CRAY_PETSC_FOUND})
-   MESSAGE ("found petsc")
-   SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_PETSC_AVAILABLE)
-   INCLUDE_DIRECTORIES (SYSTEM ${CRAY_PETSC_INCLUDE_DIR})
-   SET (PETSC_HDF5_PARALLEL_LIB $ENV{CRAY_HDF5_PARALLEL_PREFIX}/lib/libhdf5_parallel.a)
-   SET (PETSC_SCI_CRAY_MPI_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mpi_mp.a)
-   SET (PETSC_SCI_CRAY_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mp.a)
-   SET (PETSC_FMPICH_LIB $ENV{CRAY_MPICH_DIR}/lib/libfmpich.a)
-   INCLUDE ($ENV{CRAY_PETSC_PREFIX_DIR}/lib/petsc/conf/PETScBuildInternal.cmake)
-   INCLUDE_DIRECTORIES (SYSTEM ${PETSC_PACKAGE_INCLUDES})
-ENDIF ()
-
-FOREACH (i IN LISTS COMPILE_DEF_LIST)
-	MESSAGE ("list output --> ${i}")
-ENDFOREACH ()
 #---- set location of mango source files
 SET (MANGO_API_DIR ${MANGO_SOURCE_DIR}/src/api)
 #---- the location of binaries is the directory where ccmake is invoked, which
 #---- is defined by ${mango_binary_dir} when project is declared
 SET (MANGO_BINARY_DIR_SRC ${MANGO_SOURCE_DIR}/obj)
 
-#------------------------------------------------------------------------------
-#---- Compiler/MPI Verification
-#
+SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MANGO_SOURCE_DIR}/lib)
+SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MANGO_SOURCE_DIR}/lib)
+SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MANGO_SOURCE_DIR}/tests)
 
-IF (NOT CMAKE_C_COMPILER)
-   MESSAGE (FATAL_ERROR "C compiler not found. Either the compiler is not installed, or CMake does not recognize it. Add absoulte path to the compiler 'export CC=compiler_path' in the latter case")
-ENDIF (NOT CMAKE_C_COMPILER)
+# IF STATEMENT depending on whether MPI compiler wrappers exist on given PrgEnv
+#INCLUDE (Init_MPI.cmake)
+# ENDIF ()
 
-IF (NOT CMAKE_CXX_COMPILER)
-   MESSAGE (FATAL_ERROR "CXX compiler not found. Either the compiler is not installed, or CMake does not recognize it. Add absoulte path to the compiler 'export CXX=compiler_path' in the latter case")
-ENDIF (NOT CMAKE_CXX_COMPILER)
+#---- Runs the following .cmake files that should be located in the same directory as this file
+INCLUDE (Package_Search.cmake)
+INCLUDE (Install_External_Packages.cmake)
 
-IF (NOT CMAKE_Fortran_COMPILER)
-   MESSAGE (FATAL_ERROR "Fortran compiler not found. Either the compiler is not installed, or CMake does not recognize it. Add absoulte path to the compiler 'export FC=compiler_path' in the latter case")
-ENDIF (NOT CMAKE_Fortran_COMPILER)
-
-INCLUDE_DIRECTORIES(SYSTEM /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin)
-
-#SET (MPI_C_COMPILER /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin/mpicc)
-#SET (MPI_CXX_COMPILER /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin/mpicc)
-#SET (MPI_Fortran_COMPILER /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/bin/mpif90)
-
-#IF (NOT MPI_C_COMPILER)
-#   MESSAGE (FATAL_ERROR "BLAHHH")
-#ENDIF ()
-
-#SET (MPI_GUESS_LIBRARY_NAME MPICH)
-
-#IF (NOT MPI_CXX_COMPILER)
-#   IF (NOT MPI_CXX_FOUND)
-#      MESSAGE (FATAL_ERROR "mango: unable to find MPI_CXX compiler")
-#   ENDIF ()
-#ELSE ()
-   #---- when running make on OSX, cmake can't find "mpi.h". Needed to hardcode it in
-#INCLUDE_DIRECTORIES(SYSTEM /usr/common/software/mpich/3.3.2/cce/9.1.0/cgpu/include)
-#ENDIF ()
-
-#IF (NOT MPI_Fortran_COMPILER)
-#   IF (NOT MPI_Fortran_FOUND)
-#      MESSAGE (FATAL_ERROR "mango: unable to find MPI_Fortran compiler")
-#   ENDIF ()
-#ENDIF (NOT MPI_Fortran_FOUND)
-#
-#---- End of Compiler Verification
-#------------------------------------------------------------------------------
-
-#---- Install HOPSPACK
-EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_hopspack.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages RESULT_VARIABLE ierr)
-MESSAGE ("ierr hops --> ${ierr}")
-IF (${ierr})
-   MESSAGE (FATAL_ERROR "Unsuccessful HOPSPACK Installation. Exiting...")
-ELSE ()
-   SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_HOPSPACK_AVAILABLE)
-ENDIF ()
-
-#---- Install nlopt
-IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/nlopt)
-   MESSAGE ("nlopt directory already exists. Checking for required files...")
-   IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib64/libnlopt.a)
-      MESSAGE ("nlopt is already installed on this system")
-   ELSE ()
-      MESSAGE ("nlopt was not correctly installed. Continuing without...")
-   ENDIF ()
-ELSE ()
-   EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_nlopt.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages RESULT_VARIABLE ierr)
-   MESSAGE ("ierr nlopt --> ${ierr}")
-   IF (${ierr})
-      MESSAGE ("Unsuccessful NLOPT Installation. Continuing without NLOPT")
-   ELSE ()
-      SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_NLOPT_AVAILABLE)
-   ENDIF ()
-ENDIF ()
-
-#---- Install Catch2
-IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/catch2)
-   MESSAGE ("catch2 directory already exists. Checking for required files...")
-   IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/catch2/catch.hpp)
-      MESSAGE ("catch2 is already installed on this system")
-   ELSE ()
-      MESSAGE (FATAL_ERROR "catch2 was not correctly installed. Exiting...")
-   ENDIF ()
-ELSE ()
-   EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_catch2.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages)
-   IF (${ierr})
-      MESSAGE (FATAL_ERROR "Unsuccessful Catch2 Installation. Exiting...")
-   ENDIF ()
-ENDIF ()
-
+#---- Directories containing headers or source files
 INCLUDE_DIRECTORIES (src/api)
 INCLUDE_DIRECTORIES (external_packages/hopspack/src)
 INCLUDE_DIRECTORIES (src/api/tests)
@@ -214,6 +77,8 @@ MESSAGE ("Petsc package libs --> ${PETSC_PACKAGE_LIBS}")
 TARGET_COMPILE_DEFINITIONS (unit_tests PUBLIC ${COMPILE_DEF_LIST})
 INSTALL (TARGETS unit_tests DESTINATION ${MANGO_SOURCE_DIR}/tests)
 
+#-----------------------------------------------------------------------
+#---- Remaining to be done
 
 # Creating objects for the examples
 #FILE (GLOB F_SRC_EXAMPLES_FILES examples/src/*.F90)
