@@ -1,6 +1,7 @@
 IF (${PLATFORM} MATCHES NERSC_Cori)
   #---- "Allocating" empty vector to be filled with -D flags depending on which packages are used
   SET (COMPILE_DEF_LIST "")
+  SET (LIBRARY_LINK_LIST "")
 
   #---- Built-in module FindPkgConfig.cmake to detect *.pc files
   INCLUDE (FindPkgConfig)
@@ -36,6 +37,7 @@ IF (${PLATFORM} MATCHES NERSC_Cori)
     SET (PETSC_SCI_CRAY_MPI_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mpi_mp.a)
     SET (PETSC_SCI_CRAY_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mp.a)
     SET (PETSC_FMPICH_LIB $ENV{CRAY_MPICH_DIR}/lib/libfmpich.a)
+    SET (LIBRARY_LINK_LIST ${LIBRARY_LINK_LIST};${CRAY_PETSC_LIBRARY};${PETSC_PACKAGE_LIBS})
     INCLUDE ($ENV{CRAY_PETSC_PREFIX_DIR}/lib/petsc/conf/PETScBuildInternal.cmake)
     INCLUDE_DIRECTORIES (SYSTEM ${PETSC_PACKAGE_INCLUDES})
   ENDIF ()
