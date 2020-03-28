@@ -28,6 +28,8 @@ print()
 print("usage: " + os.path.basename(__file__) + " <1 or more examples to run>")
 print("Wildcards (*) are accepted in the example names. For a wildcard as a first character, enclose the string in single or double quotes. Do not include bin/ in the example names. If no examples are specified, all examples will be run")
 
+os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"] = "srun -n 1"
+
 #####################################################################
 # Detect which packages mango was built with:
 #####################################################################
