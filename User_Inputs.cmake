@@ -13,7 +13,7 @@
 #---- Choose system to build on
 #---- Options: "NERSC_Cori", "Travis_CI"
 #---- Syntax: SET (PLATFORM Enter_system_name_here)
-SET (PLATFORM NERSC_Cori)
+SET (PLATFORM Travis_CI)
 MESSAGE ("Platform is ${PLATFORM}")
 
 #---- Choose packages to be included in the MANGO build
