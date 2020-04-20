@@ -9,12 +9,13 @@ IF (${PLATFORM} MATCHES NERSC_Cori)
   INCLUDE (FindPkgConfig)
 
   #---- For most modules loaded on the Cray system, a path will be added to the PKG_CONFIG_PATH environment variable pointing to the *.pc file. If it is not included for some reason, it can be appended to the following command with ":/path/to/*.pc"
-  SET (ENV{PKG_CONFIG_PATH} $ENV{PKG_CONFIG_PATH}:$ENV{CRAY_PETSC_PREFIX_DIR}/lib/pkgconfig)
+  SET (ENV{PKG_CONFIG_PATH} $ENV{PKG_CONFIG_PATH}:$ENV{CRAY_PETSC_PREFIX_DIR}/lib/pkgconfig:$ENV{PYTHON_DIR}/lib/pkgconfig)
   MESSAGE ("pkg configs --> $ENV{PKG_CONFIG_PATH}")
 
   # Checks PKG_CONFIG paths to find *.pc file with name of second argument
   PKG_CHECK_MODULES (CRAY_PETSC PETSc)
   PKG_CHECK_MODULES (GSL gsl)
+  PKG_CHECK_MODULES (Python3 python3)
 
   FIND_PATH (CRAY_PETSC_INCLUDE_DIR petsc.h
     HINTS ${CRAY_PETSC_INCLUDEDIR} ${CRAY_PETSC_INCLUDE_DIR})
@@ -28,27 +29,42 @@ IF (${PLATFORM} MATCHES NERSC_Cori)
   IF (GSL_FOUND)
     MESSAGE ("found gsl library --> ${GSL_LIBRARY}")
     MESSAGE ("gsl include --> ${GSL_INCLUDE_DIR}")
-    SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_GSL_AVAILABLE)
-    INCLUDE_DIRECTORIES (SYSTEM ${GSL_INCLUDE_DIR})
-    SET (LIBRARY_LINK_LIST ${LIBRARY_LINK_LIST};${GSL_LIBRARY})
+    LIST (APPEND COMPILE_DEF_LIST MANGO_GSL_AVAILABLE)
+    LIST (APPEND INCLUDE_LIST ${GSL_INCLUDE_DIR})
+    LIST (APPEND LIBRARY_LINK_LIST ${GSL_LIBRARY})
     FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "gsl ")
   ENDIF ()
 
   IF (${CRAY_PETSC_FOUND})
     MESSAGE ("found petsc")
     FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "petsc ")
-    SET (COMPILE_DEF_LIST ${COMPILE_DEF_LIST};MANGO_PETSC_AVAILABLE)
-    #INCLUDE_DIRECTORIES (SYSTEM ${CRAY_PETSC_INCLUDE_DIR})
-    #INCLUDE_DIRECTORIES ($ENV{CRAY_HDF5_PARALLEL_PREFIX}/include)
-    SET (PETSC_HDF5_PARALLEL_LIB $ENV{CRAY_HDF5_PARALLEL_PREFIX}/lib/libhdf5_parallel.a)
-    SET (PETSC_SCI_CRAY_MPI_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mpi_mp.a)
-    SET (PETSC_SCI_CRAY_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mp.a)
-    SET (PETSC_FMPICH_LIB $ENV{CRAY_MPICH_DIR}/lib/libfmpich.a)
-    SET (LIBRARY_LINK_LIST ${LIBRARY_LINK_LIST};${CRAY_PETSC_LIBRARY};${PETSC_PACKAGE_LIBS})
+    LIST (APPEND COMPILE_DEF_LIST MANGO_PETSC_AVAILABLE)
+
+    # cray-petsc was throwing errors at one point if the following libraries were not included
+    #SET (PETSC_HDF5_PARALLEL_LIB $ENV{CRAY_HDF5_PARALLEL_PREFIX}/lib/libhdf5_parallel.a)
+    #SET (PETSC_SCI_CRAY_MPI_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mpi_mp.a)
+    #SET (PETSC_SCI_CRAY_MP_LIB $ENV{CRAY_LIBSCI_PREFIX_DIR}/lib/libsci_cray_mp.a)
+    #SET (PETSC_FMPICH_LIB $ENV{CRAY_MPICH_DIR}/lib/libfmpich.a)
+    #Put all these into PETSC_PACKAGE_LIBS
+    
+    LIST (APPEND LIBRARY_LINK_LIST ${CRAY_PETSC_LIBRARY})
     INCLUDE ($ENV{CRAY_PETSC_PREFIX_DIR}/lib/petsc/conf/PETScBuildInternal.cmake)
-    #INCLUDE_DIRECTORIES (SYSTEM ${PETSC_PACKAGE_INCLUDES})
-    SET (INCLUDE_LIST ${INCLUDE_LIST};${CRAY_PETSC_INCLUDE_DIR};$ENV{CRAY_HDF5_PARALLEL_PREFIX}/include;${PETSC_PACKAGES_INCLUDES})
+    LIST(APPEND INCLUDE_LIST ${CRAY_PETSC_INCLUDE_DIR};$ENV{CRAY_HDF5_PARALLEL_PREFIX}/include)
   ENDIF ()
+
+#  FIND_PACKAGE(Python3 COMPONENTS Interpreter Development)
+#  IF (Python3_FOUND)
+#    MESSAGE ("found python library --> ${Python3_LIBRARY_DIRS}${Python3_LIBRARIES}")
+#    MESSAGE ("python include --> ${Python3_INCLUDE_DIRS}")
+#    INCLUDE_DIRECTORIES (SYSTEM ${PYTHON_INCLUDE_DIRS})
+#    SET (LIBRARY_LINK_LIST ${LIBRARY_LINK_LIST};${PYTHON_LIBRARY_DIRS}${PYTHON_LIBRARIES})
+#    #FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "gsl ")
+#  ENDIF ()
+#  IF (Python3_Development_FOUND)
+#    MESSAGE ("found development packages")
+#  ENDIF ()
+  
+  
 ELSEIF (${PLATFORM} MATCHES Macports)
   # do stuff
 ENDIF ()

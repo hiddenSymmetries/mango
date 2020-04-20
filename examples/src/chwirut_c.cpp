@@ -411,6 +411,6 @@ void partition_work(int j, int N_procs, int* start_index, int* stop_index) {
   // start_index and stop_index are 0-based (not 1-based).
   // Each given proc should process elements through stop_index inclusive, rather than stopping after element stop_index-1.
 
-  *start_index = (int)std::floor(N_terms*(j+0.0d+0)/N_procs);
-  *stop_index  = (int)std::floor(N_terms*(j+1.0d+0)/N_procs) - 1;
+  *start_index = (int)std::floor(N_terms*(j+0.0e+0)/N_procs);
+  *stop_index  = (int)std::floor(N_terms*(j+1.0e+0)/N_procs) - 1;
 }

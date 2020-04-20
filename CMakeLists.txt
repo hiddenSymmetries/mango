@@ -12,19 +12,20 @@ INCLUDE (User_Inputs.cmake)
 #---- declaring this project name defines ${mango_source_dir} to be the path
 #---- where this source file exists
 PROJECT (MANGO CXX C Fortran)
+SET (CMAKE_CXX_STANDARD_LIBRARIES -lstdc++)
 
 #---- set location of mango source files
 SET (MANGO_API_DIR ${MANGO_SOURCE_DIR}/src/api)
 #---- the location of binaries is the directory where ccmake is invoked, which
 #---- is defined by ${mango_binary_dir} when project is declared
-SET (MANGO_BINARY_DIR_SRC ${MANGO_SOURCE_DIR}/obj)
+SET (MANGO_BINARY_DIR_SRC ${MANGO_SOURCE_DIR}/build)
 
 #---- Find MPI compiler for desired platform
 INCLUDE (Init_MPI.cmake)
 
 #---- Runs the following .cmake files that should be located in the same directory as this file
 INCLUDE (Package_Search.cmake)
-INCLUDE (Install_External_Packages.cmake)
+INCLUDE (external_packages/Install_External_Packages.cmake)
 
 #---- Directories containing headers or source files
 INCLUDE_DIRECTORIES (src/api)
@@ -33,19 +34,25 @@ INCLUDE_DIRECTORIES (src/api/tests)
 INCLUDE_DIRECTORIES (external_packages/catch2)
 INCLUDE_DIRECTORIES (examples)
 INCLUDE_DIRECTORIES (examples/src)
+#INCLUDE_DIRECTORIES (pybind11/include)
+#INCLUDE_DIRECTORIES ($ENV{PYTHON_DIR}/include/python3.7m)
 
 #ADD_CUSTOM_TARGET (library_type ALL export CRAYPE_LINK_TYPE=static)
 #ADD_CUSTOM_TARGET (blah COMMAND -E env CRAY_LINK_TYPE=static export)
 #add_custom_target(... COMMAND ${CMAKE_COMMAND} -E env "PATH=C:/Some/Path;$ENV{PATH}" <real_command> args...)
 
+#ADD_SUBDIRECTORY(pybind11)
+#pybind11_add_module(example ${MANGO_SOURCE_DIR}/src/api/Solver.cpp)
+
 # Creating objects from source files in src/api
 FILE (GLOB F_SRC_FILES src/api/*.F90)
 ADD_LIBRARY (F_OBJ_FILES OBJECT ${F_SRC_FILES})
 TARGET_COMPILE_DEFINITIONS (F_OBJ_FILES PUBLIC ${COMPILE_DEF_LIST})
+TARGET_INCLUDE_DIRECTORIES (F_OBJ_FILES PUBLIC ${INCLUDE_LIST})
 FILE (GLOB CPP_SRC_FILES src/api/*.cpp)
 FILE (GLOB HEADER_FILES src/api/*.hpp)
 ADD_LIBRARY (CPP_OBJ_FILES OBJECT ${CPP_SRC_FILES} ${HEADER_FILES})
-TARGET_INCLUDE_DIRECTORIES (CPP_OBJ_FILES PUBLIC $ENV{CRAY_HDF5_PREFIX}/include)
+TARGET_INCLUDE_DIRECTORIES (CPP_OBJ_FILES PUBLIC $ENV{CRAY_HDF5_PREFIX}/include PUBLIC ${INCLUDE_LIST})
 TARGET_COMPILE_DEFINITIONS (CPP_OBJ_FILES PUBLIC ${COMPILE_DEF_LIST})
 
 # Creating objects from source files in hopspack
@@ -61,7 +68,8 @@ TARGET_INCLUDE_DIRECTORIES (HOPSPACK_C_OBJ_FILES PUBLIC $ENV{CRAY_HDF5_PREFIX}/i
 TARGET_COMPILE_DEFINITIONS (HOPSPACK_C_OBJ_FILES PUBLIC ${COMPILE_DEF_LIST})
 
 FILE (GLOB TEST_SRC_FILES src/api/tests/*.cpp)
-ADD_LIBRARY (TEST_OBJ_FILES OBJECT ${TEST_SRC_FILES} ${HEADER_FILES})
+ADD_LIBRARY (TEST_OBJ_FILES OBJECT ${TEST_SRC_FILES} ${HEADER_FILES} ${MANGO_SOURCE_DIR}/external_packages/catch2)
+TARGET_INCLUDE_DIRECTORIES (TEST_OBJ_FILES PUBLIC ${INCLUDE_LIST})
 
 ADD_LIBRARY (mango STATIC $<TARGET_OBJECTS:F_OBJ_FILES> $<TARGET_OBJECTS:CPP_OBJ_FILES> $<TARGET_OBJECTS:HOPSPACK_C_OBJ_FILES> $<TARGET_OBJECTS:HOPSPACK_CPP_OBJ_FILES>)
 TARGET_LINK_LIBRARIES (mango PUBLIC ${LIBRARY_LINK_LIST})
@@ -70,25 +78,28 @@ TARGET_INCLUDE_DIRECTORIES(mango PUBLIC ${INCLUDE_LIST})
 SET_TARGET_PROPERTIES(mango PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${MANGO_SOURCE_DIR}/lib")
 
 # Create executable for unit_tests
-ADD_EXECUTABLE (unit_tests ${TEST_SRC_FILES} ${HEADER_FILES})
+ADD_EXECUTABLE (unit_tests ${TEST_SRC_FILES} ${HEADER_FILES} ${MANGO_SOURCE_DIR}/external_packages/catch2)
 TARGET_LINK_LIBRARIES (unit_tests PUBLIC mango)
+TARGET_INCLUDE_DIRECTORIES(unit_tests PUBLIC ${INCLUDE_LIST})
 SET_TARGET_PROPERTIES(unit_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${MANGO_SOURCE_DIR}/tests")
 
-# Creating objects for the examples
 FILE (GLOB F_SRC_EXAMPLES_FILES examples/src/*.F90)
 FILE (GLOB C_SRC_EXAMPLES_FILES examples/src/*.cpp)
 
-#---- Generate executables from the *.F90 and *.cpp algorithm files
+#---- Generate executables for *.F90 algorithm examples
 FOREACH (F_ALGORITHM_FILES ${F_SRC_EXAMPLES_FILES})
+  MESSAGE ("this is file --> ${F_ALGORITHM_FILES}")
   GET_FILENAME_COMPONENT (F_ALGORITHM_NAME ${F_ALGORITHM_FILES} NAME_WE) # Removes algorithm src file extension
-  ADD_EXECUTABLE (${F_ALGORITHM_NAME} ${TEST_SRC_FILES} ${HEADER_FILES})
+  ADD_EXECUTABLE (${F_ALGORITHM_NAME} ${F_ALGORITHM_FILES} ${HEADER_FILES} ${MANGO_SOURCE_DIR}/include)
   TARGET_LINK_LIBRARIES (${F_ALGORITHM_NAME} PUBLIC mango)
   SET_TARGET_PROPERTIES(${F_ALGORITHM_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${MANGO_SOURCE_DIR}/examples/bin")
 ENDFOREACH ()
 
+#---- Generate executables for *.cpp algorithm examples
 FOREACH (C_ALGORITHM_FILES ${C_SRC_EXAMPLES_FILES})
+  MESSAGE ("this is file --> ${C_ALGORITHM_FILES}")
   GET_FILENAME_COMPONENT (C_ALGORITHM_NAME ${C_ALGORITHM_FILES} NAME_WE)
-  ADD_EXECUTABLE (${C_ALGORITHM_NAME} ${TEST_SRC_FILES} ${HEADER_FILES})
+  ADD_EXECUTABLE (${C_ALGORITHM_NAME} ${C_ALGORITHM_FILES} ${HEADER_FILES} ${MANGO_SOURCE_DIR}/include)
   TARGET_LINK_LIBRARIES (${C_ALGORITHM_NAME} PUBLIC mango)
   SET_TARGET_PROPERTIES(${C_ALGORITHM_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${MANGO_SOURCE_DIR}/examples/bin")
 ENDFOREACH ()
