@@ -10,10 +10,11 @@
 # module load gsl
 # also set the environment variable "export CRAYPE_LINK_TYPE=static"
 
-#---- Choose system to build on (only NERSC Cori is available now)
+#---- Choose system to build on
+#---- Options: "NERSC_Cori", "Travis_CI"
+#---- Syntax: SET (PLATFORM Enter_system_name_here)
 SET (PLATFORM NERSC_Cori)
-MESSAGE ("Platform is NERSC Cori")
-#SET (PLATFORM PLATFORM_NAME_HERE)
+MESSAGE ("Platform is ${PLATFORM}")
 
 #---- Choose packages to be included in the MANGO build
 SET (MANGO_INCLUDE_HOPSPACK true)

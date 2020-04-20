@@ -25,7 +25,9 @@ INCLUDE (Init_MPI.cmake)
 
 #---- Runs the following .cmake files that should be located in the same directory as this file
 INCLUDE (Package_Search.cmake)
-INCLUDE (external_packages/Install_External_Packages.cmake)
+IF (NOT ${PLATFORM} MATCHES Travis_CI)
+  INCLUDE (external_packages/Install_External_Packages.cmake)
+ENDIF ()
 
 #---- Directories containing headers or source files
 INCLUDE_DIRECTORIES (src/api)

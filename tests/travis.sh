@@ -18,12 +18,12 @@ cd external_packages
 ./install_catch2.sh
 ./install_nlopt.sh
 #./install_hopspack.sh
-cd ../obj
-
-cmake -DPLATFORM:STRING=TRAVIS_CI ../
+cd ../build
 
 # Executables need to know where to find the nlopt shared library:
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/landreman/mango/external_packages/nlopt/nlopt-2.6.1/install/lib
+
+cmake -DPLATFORM:STRING=TRAVIS_CI ../
 
 make -j
 
