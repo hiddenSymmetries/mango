@@ -20,10 +20,10 @@ IF (MANGO_INCLUDE_PETSC)
   IF (${PETSC_FOUND})
     MESSAGE ("found petsc")
     FIND_LIBRARY (PETSC_LIBRARY
-      NAMES libcraypetsc_crayclang_real.so libcraypetsc_crayclang_real.a
+      NAMES libcraypetsc_crayclang_real.so libcraypetsc_crayclang_real.a libpetsc.a libpetsc.so libpetsc_real.a libpetsc_real.so
       HINTS ${PETSC_LIBDIR} ${PETSC_LIBRARY_DIRS} ${CRAY_PETSC_PREFIX_DIR}/lib ${PETSC_LIBRARIES}) 
     MESSAGE ("petsc include --> ${PETSC_INCLUDE_DIRS}")
-    MESSAGE ("petsc include --> ${PETSC_LIBRARY}")
+    MESSAGE ("petsc library --> ${PETSC_LIBRARY}")
     FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "petsc ")
     LIST (APPEND COMPILE_DEF_LIST MANGO_PETSC_AVAILABLE)
   
