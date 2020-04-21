@@ -6,7 +6,6 @@ FILE (WRITE ${MANGO_SOURCE_DIR}/examples/packages_available "mango ")
 
 #---- Built-in module FindPkgConfig.cmake to detect *.pc files
 INCLUDE (FindPkgConfig)
-
 #---- For most modules loaded on the Cray system, a path will be added to the PKG_CONFIG_PATH environment variable pointing to the *.pc file. If it is not included for some reason, it can be appended to the following command with ":/path/to/*.pc"
 
 IF (MANGO_INCLUDE_PETSC)
@@ -17,6 +16,7 @@ IF (MANGO_INCLUDE_PETSC)
   ENDIF ()
     
   PKG_CHECK_MODULES (PETSC PETSc)
+  FIND_PACKAGE (PETSc)
   IF (${PETSC_FOUND})
     MESSAGE ("found petsc")
     FIND_LIBRARY (PETSC_LIBRARY
@@ -24,6 +24,8 @@ IF (MANGO_INCLUDE_PETSC)
       HINTS ${PETSC_LIBDIR} ${PETSC_LIBRARY_DIRS} ${CRAY_PETSC_PREFIX_DIR}/lib ${PETSC_LIBRARIES}) 
     MESSAGE ("petsc include --> ${PETSC_INCLUDE_DIRS}")
     MESSAGE ("petsc library --> ${PETSC_LIBRARY}")
+    INCLUDE (${PETSC_LIBRARY_DIRS}/petsc/conf/variables)
+    INCLUDE (${PETSC_LIBRARY_DIRS}/petsc/conf/petscvariables)
     FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "petsc ")
     LIST (APPEND COMPILE_DEF_LIST MANGO_PETSC_AVAILABLE)
   

@@ -1,11 +1,16 @@
 IF (${PLATFORM} MATCHES NERSC_Cori)
   
   MESSAGE ("NERSC Cori selected as platform")
+  MESSAGE ("=========================================================")
+  MESSAGE ("Please run the following to ensure that the build is done")
+  MESSAGE ("with NERSC compiler wrappers")
+  MESSAGE ("=========================================================")
+  MESSAGE ("cmake -DCMAKE_CXX_COMPILER=CC ..")
   # The following Cray compiler wrappers include MPI headers/libraries
-  SET (CMAKE_C_COMPILER "cc")
-  SET (CMAKE_CXX_COMPILER "CC")
-  SET (CMAKE_Fortran_COMPILER "ftn")
-  
+  #SET ($ENV{CC} "cc")
+  #SET ($ENV{CXX} "CC")
+  #SET ($ENV{Fortran} "ftn")
+
 ELSE ()
   
   MESSAGE ("${PLATFORM} selected as platform")
