@@ -1,7 +1,4 @@
 #---- "Allocating" empty vector to be filled with -D flags depending on which packages are used
-SET (INCLUDE_LIST "")
-SET (COMPILE_DEF_LIST "")
-SET (LIBRARY_LINK_LIST "")
 FILE (WRITE ${MANGO_SOURCE_DIR}/examples/packages_available "mango ")
 
 #---- Built-in module FindPkgConfig.cmake to detect *.pc files
@@ -36,10 +33,10 @@ IF (MANGO_INCLUDE_PETSC)
     
     LIST (APPEND LIBRARY_LINK_LIST "-L${PETSC_LIBRARY_DIRS} -l${PETSC_LIBRARIES}")
     LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIRS})
-    IF (${PLATFORM} MATCHES Travis_CI)
+    #IF (${PLATFORM} MATCHES Travis_CI)
       # Some headers could not be found on Travis (specifically petsctao.h) with the main include directory 
-      LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIR}/petsc/finclude)
-    ENDIF ()
+    #  LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIR}/petsc/finclude)
+    #ENDIF ()
     IF (${PLATFORM} MATCHES NERSC_Cori)
       INCLUDE ($ENV{CRAY_PETSC_PREFIX_DIR}/lib/petsc/conf/PETScBuildInternal.cmake)
       LIST(APPEND INCLUDE_LIST $ENV{CRAY_HDF5_PARALLEL_PREFIX}/include)
