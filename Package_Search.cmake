@@ -35,7 +35,7 @@ IF (MANGO_INCLUDE_PETSC)
     #Put all these into PETSC_PACKAGE_LIBS
     
     LIST (APPEND LIBRARY_LINK_LIST "-L${PETSC_LIBRARY_DIRS} -l${PETSC_LIBRARIES}")
-    LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIR})
+    LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIRS})
     IF (${PLATFORM} MATCHES Travis_CI)
       # Some headers could not be found on Travis (specifically petsctao.h) with the main include directory 
       LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIR}/petsc/finclude)
