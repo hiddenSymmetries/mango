@@ -1,7 +1,7 @@
 #---- specify version of cmake (this version is random as of 02/19/20)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.8)
 
-INCLUDE (User_Inputs.cmake)
+INCLUDE (Detect_System.cmake)
 
 #---- declaring this project name defines ${mango_source_dir} to be the path
 #---- where this source file exists
