@@ -17,7 +17,7 @@ SET (MANGO_BINARY_DIR_SRC ${MANGO_SOURCE_DIR}/build)
 
 #---- Runs the following .cmake files that should be located in the same directory as this file
 INCLUDE (Package_Search.cmake)
-IF (NOT ${PLATFORM} MATCHES Travis_CI)
+IF (NOT ${PLATFORM} MATCHES travis)
   INCLUDE (external_packages/Install_External_Packages.cmake)
 ENDIF ()
 
