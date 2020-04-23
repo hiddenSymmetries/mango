@@ -11,10 +11,7 @@ IF (${PLATFORM} MATCHES NERSC_Cori)
   MESSAGE ("with NERSC compiler wrappers")
   MESSAGE ("=========================================================")
   MESSAGE ("cmake -DCMAKE_CXX_COMPILER=CC ..")
-  # The following Cray compiler wrappers include MPI headers/libraries
-  #SET ($ENV{CC} "cc")
-  #SET ($ENV{CXX} "CC")
-  #SET ($ENV{Fortran} "ftn")
+  MESSAGE ("=========================================================")
 
 ELSE ()
   

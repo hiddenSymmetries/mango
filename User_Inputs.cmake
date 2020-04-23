@@ -10,10 +10,13 @@
 # module load gsl
 # also set the environment variable "export CRAYPE_LINK_TYPE=static"
 
+CMAKE_HOST_SYSTEM_INFORMATION (RESULT system_name QUERY HOSTNAME)
+CMAKE_HOST_SYSTEM_INFORMATION (RESULT fully_qdn QUERY FQDN)
+MESSAGE (FATAL_ERROR "the host is ${system_name} and the fully qualified domain name is ${fully_qdn}")
 #---- Choose system to build on
 #---- Options: "NERSC_Cori", "Travis_CI"
 #---- Syntax: SET (PLATFORM Enter_system_name_here)
-SET (PLATFORM Travis_CI)
+SET (PLATFORM NERSC_Cori)
 MESSAGE ("Platform is ${PLATFORM}")
 
 #---- Choose packages to be included in the MANGO build
