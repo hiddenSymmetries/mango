@@ -3,7 +3,7 @@ SET (INCLUDE_LIST "")
 SET (COMPILE_DEF_LIST "")
 SET (LIBRARY_LINK_LIST "")
 
-IF (${PLATFORM} MATCHES NERSC_Cori)
+IF (${PLATFORM} MATCHES cori)
   
   MESSAGE ("NERSC Cori selected as platform")
   MESSAGE ("=========================================================")
@@ -15,7 +15,6 @@ IF (${PLATFORM} MATCHES NERSC_Cori)
 
 ELSE ()
   
-  MESSAGE ("${PLATFORM} selected as platform")
   FIND_PACKAGE (MPI REQUIRED)
   
   #---- the find_package command sets '<package>_found' to true if it's successful

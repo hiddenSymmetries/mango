@@ -7,7 +7,7 @@ INCLUDE (FindPkgConfig)
 
 IF (MANGO_INCLUDE_PETSC)
   
-  IF (${PLATFORM} MATCHES NERSC_Cori)
+  IF (${PLATFORM} MATCHES cori)
     # Cori had problems detecting the .pc files for cray-petsc
     SET (ENV{PKG_CONFIG_PATH} $ENV{PKG_CONFIG_PATH}:$ENV{CRAY_PETSC_PREFIX_DIR}/lib/pkgconfig:$ENV{PYTHON_DIR}/lib/pkgconfig)
   ENDIF ()
@@ -37,7 +37,7 @@ IF (MANGO_INCLUDE_PETSC)
       # Some headers could not be found on Travis (specifically petsctao.h) with the main include directory 
     #  LIST (APPEND INCLUDE_LIST ${PETSC_INCLUDE_DIR}/petsc/finclude)
     #ENDIF ()
-    IF (${PLATFORM} MATCHES NERSC_Cori)
+    IF (${PLATFORM} MATCHES cori)
       INCLUDE ($ENV{CRAY_PETSC_PREFIX_DIR}/lib/petsc/conf/PETScBuildInternal.cmake)
       LIST(APPEND INCLUDE_LIST $ENV{CRAY_HDF5_PARALLEL_PREFIX}/include)
     ENDIF ()

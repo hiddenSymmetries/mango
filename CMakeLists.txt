@@ -1,12 +1,6 @@
 #---- specify version of cmake (this version is random as of 02/19/20)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.8)
 
-# For now it is safer to set the compiler using environment variables or when cmake is called (i.e. "cmake -DCMAKE_CXX_COMPILER=ftn ..")
-# But these might be useful in some cases
-#SET (CMAKE_CXX_COMPILER $ENV{CRAYPE_DIR}/bin/CC)
-#SET (CMAKE_C_COMPILER $ENV{CRAYPE_DIR}/bin/cc)
-#SET (CMAKE_C_COMPILER $ENV{CRAYPE_DIR}/bin/ftn)
-
 INCLUDE (User_Inputs.cmake)
 
 #---- declaring this project name defines ${mango_source_dir} to be the path
