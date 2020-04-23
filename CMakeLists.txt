@@ -1,13 +1,13 @@
 #---- specify version of cmake (this version is random as of 02/19/20)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.8)
 
-#---- Detects system and MPI Libraries, and sets up job submit commands for the executables
-INCLUDE (Host_System_Setup.cmake)
-
 #---- declaring this project name defines ${mango_source_dir} to be the path
 #---- where this source file exists
 PROJECT (MANGO CXX C Fortran)
 SET (CMAKE_CXX_STANDARD_LIBRARIES -lstdc++)
+
+#---- Detects system and MPI Libraries, and sets up job submit commands for the executables
+INCLUDE (Host_System_Setup.cmake)
 
 #---- set location of mango source files
 SET (MANGO_API_DIR ${MANGO_SOURCE_DIR}/src/api)
