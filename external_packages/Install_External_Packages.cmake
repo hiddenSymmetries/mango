@@ -21,7 +21,7 @@ ELSE ()
 ENDIF ()
 
 #---- nlopt
-IF (MANGO_INCLUDE_NLOPT)
+IF (NOT IGNORE_NLOPT)
   SET (NLOPT_LIBRARY ${MANGO_SOURCE_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib64/libnlopt.a)
   SET (NLOPT_INCLUDE_DIR ${MANGO_SOURCE_DIR}/external_packages/nlopt/nlopt-2.6.1/install/include)
   IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/nlopt)

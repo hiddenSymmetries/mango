@@ -9,7 +9,7 @@ import subprocess
 import sys
 import os
 
-os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"] = "srun -n 1"
+#os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"] = "srun -n NUM_PROCS"
 
 #####################################################################
 # Make sure unit_tests exists

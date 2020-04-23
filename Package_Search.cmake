@@ -51,11 +51,14 @@ ENDIF ()
 PKG_CHECK_MODULES (GSL gsl)
 FIND_PACKAGE (GSL) # Built-in CMake module
 IF (GSL_FOUND)
-  MESSAGE ("found gsl library --> ${GSL_LIBRARY}")
   MESSAGE ("gsl include --> ${GSL_INCLUDE_DIR}")
+  MESSAGE ("gsl libraries --> ${GSL_LIBRARIES}")
   LIST (APPEND COMPILE_DEF_LIST MANGO_GSL_AVAILABLE)
   LIST (APPEND INCLUDE_LIST ${GSL_INCLUDE_DIR})
-  LIST (APPEND LIBRARY_LINK_LIST ${GSL_LIBRARY})
+  FOREACH (GSL_LIB_IND ${GSL_LIBRARIES})
+    # This links to both -lgsl and -lgslcblas
+    LIST (APPEND LIBRARY_LINK_LIST ${GSL_LIB_IND})
+  ENDFOREACH ()
   FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "gsl ")
 ENDIF ()
 

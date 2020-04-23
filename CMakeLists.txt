@@ -1,7 +1,8 @@
 #---- specify version of cmake (this version is random as of 02/19/20)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.8)
 
-INCLUDE (Detect_System.cmake)
+#---- Detects system and MPI Libraries, and sets up job submit commands for the executables
+INCLUDE (Host_System_Setup.cmake)
 
 #---- declaring this project name defines ${mango_source_dir} to be the path
 #---- where this source file exists
@@ -13,9 +14,6 @@ SET (MANGO_API_DIR ${MANGO_SOURCE_DIR}/src/api)
 #---- the location of binaries is the directory where ccmake is invoked, which
 #---- is defined by ${mango_binary_dir} when project is declared
 SET (MANGO_BINARY_DIR_SRC ${MANGO_SOURCE_DIR}/build)
-
-#---- Find MPI compiler for desired platform
-INCLUDE (Init_MPI.cmake)
 
 #---- Runs the following .cmake files that should be located in the same directory as this file
 INCLUDE (Package_Search.cmake)
