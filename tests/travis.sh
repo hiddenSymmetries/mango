@@ -26,4 +26,6 @@ cmake -DPLATFORM:STRING=TRAVIS_CI ../
 
 make -j
 
+pwd
+cd ../tests
 ./run_mpi_unit_tests
