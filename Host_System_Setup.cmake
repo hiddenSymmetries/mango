@@ -3,24 +3,25 @@
 #---- SET THESE VARIABLES BEFORE RUNNING CMAKE! ------------
 #-----------------------------------------------------------
 # Cori modules to load:
-# module load PrgEnv-cray
+# module swap PrgEnv-intel PrgEnv-cray
 # module load cray-petsc
-# module load cray-hdf5-parallel
 # module load gsl
+#
+
 SET (AVAILABLE_SYSTEMS cori;travis)
 CMAKE_HOST_SYSTEM_INFORMATION (RESULT SYSTEM_NAME QUERY HOSTNAME)
 
 FOREACH (AVAILABLE_SYSTEM_ID ${AVAILABLE_SYSTEMS})
   STRING (FIND ${SYSTEM_NAME} ${AVAILABLE_SYSTEM_ID} STRING_LOCATION)
   IF (NOT ${STRING_LOCATION} EQUAL -1)
-    MESSAGE ("************************************************************")
-    MESSAGE ("CMake has detected ${AVAILABLE_SYSTEM_ID} as the system host")
-    SET (PLATFORM ${AVAILABLE_SYSTEM_ID})
+    #MESSAGE ("************************************************************")
+    #MESSAGE ("CMake has detected ${AVAILABLE_SYSTEM_ID} as the system host")
+    SET (HOST_SYSTEM ${AVAILABLE_SYSTEM_ID})
     BREAK ()
   ENDIF ()
 ENDFOREACH ()
 
-IF (NOT PLATFORM)
+IF (NOT HOST_SYSTEM)
   MESSAGE (FATAL_ERROR "CMake was not able to detect a known host system. Exiting...")
 ENDIF ()
 
@@ -29,17 +30,24 @@ SET (INCLUDE_LIST "")
 SET (COMPILE_DEF_LIST "")
 SET (LIBRARY_LINK_LIST "")
 
-IF (${PLATFORM} MATCHES cori)
-  
-  MESSAGE ("NERSC Cori selected as platform")
+IF (${HOST_SYSTEM} MATCHES cori)
+
+  MESSAGE ("")
+  MESSAGE ("")
   MESSAGE ("=========================================================")
+  MESSAGE ("NERSC Cori selected as host system")
   MESSAGE ("Please run the following to ensure that the build is done")
   MESSAGE ("with NERSC compiler wrappers")
-  MESSAGE ("=========================================================")
+  MESSAGE ("")
   MESSAGE ("cmake -DCMAKE_CXX_COMPILER=CC ..")
   MESSAGE ("=========================================================")
 
 ELSE ()
+  
+  IF (${HOST_SYSTEM} MATCHES travis)
+    MESSAGE ("Travis CI selected as host system")
+    MESSAGE ("=========================================================")
+  ENDIF ()
   
   FIND_PACKAGE (MPI REQUIRED)
   
@@ -58,9 +66,9 @@ ENDIF ()
 
 # Detect whether host uses SLURM batch system
 EXECUTE_PROCESS (COMMAND sinfo RESULT_VARIABLE SINFO_RESULT OUTPUT_QUIET ERROR_QUIET)
-MESSAGE ("result of sinfo --> ${SINFO_RESULT}")
+#MESSAGE ("result of sinfo --> ${SINFO_RESULT}")
 EXECUTE_PROCESS (COMMAND mpiexec --version RESULT_VARIABLE MPIEXEC_RESULT OUTPUT_QUIET ERROR_QUIET)
-MESSAGE ("result of mpiexec --> ${MPIEXEC_RESULT}")
+#MESSAGE ("result of mpiexec --> ${MPIEXEC_RESULT}")
 
 IF (SINFO_RESULT EQUAL 0)
   SET (MANGO_COMMAND_TO_SUBMIT_JOB "srun -n NUM_PROCS")
@@ -68,7 +76,7 @@ IF (SINFO_RESULT EQUAL 0)
   MESSAGE (STATUS "MANGO_COMMAND_TO_SUBMIT_JOB=${MANGO_COMMAND_TO_SUBMIT_JOB}\n")
 ELSEIF (MPIEXEC_RESULT EQUAL 0)
   SET (MANGO_COMMAND_TO_SUBMIT_JOB "mpiexec -n NUM_PROCS")
-  IF (${PLATFORM} MATCHES travis)
+  IF (${HOST_SYSTEM} MATCHES travis)
     STRING (APPEND MANGO_COMMAND_TO_SUBMIT_JOB " --mca btl_base_warn_component_unused 0 --mca orte_base_help_aggregate 0")
     MESSAGE (STATUS "MANGO_COMMAND_TO_SUBMIT_JOB=${MANGO_COMMAND_TO_SUBMIT_JOB}\n")
   ELSE ()
