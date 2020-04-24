@@ -6,6 +6,7 @@
 max_N_procs = 5
 
 import subprocess
+from subprocess import PIPE
 import sys
 import os
 import shutil
@@ -37,7 +38,7 @@ if submitCommand == "":
         shutil.rmtree(os.getcwd()+"/build")
     os.mkdir(os.getcwd()+"/build")
     os.chdir(os.getcwd()+"/build")
-    make_results = subprocess.run(['cmake','..'],capture_output=True, universal_newlines=True)
+    make_results = subprocess.run(['cmake','..'],stdout=PIPE, universal_newlines=True)
     result_string = make_results.stdout.split("MANGO_COMMAND_TO_SUBMIT_JOB=")[1]
     submitCommand = result_string.split("\n")[0]
     os.chdir("..")
