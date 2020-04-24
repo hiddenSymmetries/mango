@@ -8,8 +8,7 @@ max_N_procs = 5
 import subprocess
 import sys
 import os
-
-#os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"] = "srun -n NUM_PROCS"
+import shutil
 
 #####################################################################
 # Make sure unit_tests exists
@@ -31,13 +30,24 @@ except:
 
 # If MANGO_COMMAND_TO_SUBMIT_JOB is not set, try getting it by running make in the parent directory:
 if submitCommand == "":
-    print('Running make to try to get MANGO_COMMAND_TO_SUBMIT_JOB')
-    make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
+    print('Running CMake to try to get MANGO_COMMAND_TO_SUBMIT_JOB')
+
+    #---- Commands when using CMake build
+    if os.path.exists(os.getcwd()+"/build"):
+        shutil.rmtree(os.getcwd()+"/build")
+    os.mkdir(os.getcwd()+"/build")
+    os.chdir(os.getcwd()+"/build")
+    make_results = subprocess.run(['cmake','..'],capture_output=True, universal_newlines=True)
+    result_string = make_results.stdout.split("MANGO_COMMAND_TO_SUBMIT_JOB=")[1]
+    submitCommand = result_string.split("\n")[0]
+    os.chdir("..")
+    shutil.rmtree(os.getcwd()+"/build")
+    #---- Commands when using makefile build
+    #make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
     # The 'decode' in the next line is needed to convert the byte sequence returned by subprocess into a regular python string.
-    submitCommand = make_results.stdout.decode('utf-8').strip()
+    #submitCommand = make_results.stdout.decode('utf-8').strip()
 
 print("MANGO_COMMAND_TO_SUBMIT_JOB=",submitCommand)
-
 #####################################################################
 # Loop over N_procs, calling unit_tests each time
 #####################################################################

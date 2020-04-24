@@ -64,15 +64,16 @@ MESSAGE ("result of mpiexec --> ${MPIEXEC_RESULT}")
 
 IF (SINFO_RESULT EQUAL 0)
   SET (MANGO_COMMAND_TO_SUBMIT_JOB "srun -n NUM_PROCS")
+  # Message with "STATUS" tag prints to stdout, which the Python script "run_mpi_unit_tests" uses to set the submit command for each system 
+  MESSAGE (STATUS "MANGO_COMMAND_TO_SUBMIT_JOB=${MANGO_COMMAND_TO_SUBMIT_JOB}\n")
 ELSEIF (MPIEXEC_RESULT EQUAL 0)
   SET (MANGO_COMMAND_TO_SUBMIT_JOB "mpiexec -n NUM_PROCS")
+  IF (${PLATFORM} MATCHES travis)
+    STRING (APPEND MANGO_COMMAND_TO_SUBMIT_JOB " --mca btl_base_warn_component_unused 0 --mca orte_base_help_aggregate 0")
+    MESSAGE (STATUS "MANGO_COMMAND_TO_SUBMIT_JOB=${MANGO_COMMAND_TO_SUBMIT_JOB}\n")
+  ELSE ()
+    MESSAGE (STATUS "MANGO_COMMAND_TO_SUBMIT_JOB=${MANGO_COMMAND_TO_SUBMIT_JOB}\n")
+  ENDIF ()
 ELSE ()
   MESSAGE (FATAL_ERROR "WARNING!! Neither slurm nor mpiexec was detected. Exiting...")
 ENDIF ()
-
-IF (${PLATFORM} MATCHES travis)
-  STRING (APPEND MANGO_COMMAND_TO_SUBMIT_JOB " --mca btl_base_warn_component_unused 0 --mca orte\
-_base_help_aggregate 0")
-  MESSAGE ("Travis CI submit command --> ${MANGO_COMMAND_TO_SUBMIT_JOB}")
-ENDIF ()
-

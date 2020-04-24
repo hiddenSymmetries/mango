@@ -26,7 +26,5 @@ cmake -DPLATFORM:STRING=TRAVIS_CI ../
 
 make -j
 
-echo $MANGO_COMMAND_TO_SUBMIT_JOB
-#pwd
-#cd ../tests
-#./run_mpi_unit_tests
+cd ../tests
+./run_mpi_unit_tests
