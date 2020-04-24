@@ -21,14 +21,13 @@
 import glob
 import os
 import subprocess
+from subprocess import PIPE
 import sys
 import shutil
 
 print()
 print("usage: " + os.path.basename(__file__) + " <1 or more examples to run>")
 print("Wildcards (*) are accepted in the example names. For a wildcard as a first character, enclose the string in single or double quotes. Do not include bin/ in the example names. If no examples are specified, all examples will be run")
-
-os.environ["MANGO_COMMAND_TO_SUBMIT_JOB"] = "srun -n 1"
 
 #####################################################################
 # Detect which packages mango was built with:
@@ -60,10 +59,23 @@ except:
 # If MANGO_COMMAND_TO_SUBMIT_JOB is not set, try getting it by running make in the parent directory:
 if submitCommand == "":
     print('Running make to try to get MANGO_COMMAND_TO_SUBMIT_JOB')
-    make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
-    print(make_results)
+
+    #---- Commands when using CMake build                                                                   
+    if os.path.exists(os.getcwd()+"/build"):
+        shutil.rmtree(os.getcwd()+"/build")
+    os.mkdir(os.getcwd()+"/build")
+    os.chdir(os.getcwd()+"/build")
+    make_results = subprocess.run(['cmake','..'],stdout=PIPE, universal_newlines=True)
+    result_string = make_results.stdout.split("MANGO_COMMAND_TO_SUBMIT_JOB=")[1]
+    submitCommand = result_string.split("\n")[0]
+    os.chdir("..")
+    shutil.rmtree(os.getcwd()+"/build")
+
+    #---- Commands when using CMake build
+    #make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
+    #print(make_results)
     # The 'decode' in the next line is needed to convert the byte sequence returned by subprocess into a regular python string.
-    submitCommand = make_results.stdout.decode('utf-8').strip()
+    #submitCommand = make_results.stdout.decode('utf-8').strip()
 
 print("MANGO_COMMAND_TO_SUBMIT_JOB=",submitCommand)
 
@@ -267,7 +279,7 @@ for example in examples:
             output_filename = 'output/mango_out.'+example
             if os.path.isfile(output_filename):
                 os.remove(output_filename)
-
+            
             # Run example
             try:
                 os.chdir('bin')
@@ -276,8 +288,10 @@ for example in examples:
                 raise
             command = submitCommand + " ./"+example
             command = command.replace('NUM_PROCS',str(N_procs))
-            #print("Submitting command "+command)
+            print("Submitting command "+command)
+            print(command.split())
             sys.stdout.flush()
+
             try:
                 subprocess.call(command.split())
             except:
@@ -287,14 +301,17 @@ for example in examples:
 
             # Copy output file and extract its contents
             lines = []
+#            print(output_filename)
+#            print(os.listdir())
             if os.path.isfile(output_filename):
                 new_output_filename = output_filename+"_"+algorithm+"_"+str(N_procs)+"_"+str(N_worker_groups)
                 shutil.copyfile(output_filename,new_output_filename)
 
                 with open(output_filename) as f:
                     lines = f.readlines()
-
+                print("got here!!")
             if len(lines) > 5:
+                print("got here!!")
                 # This run succeeded
                 summary_header = lines[:5]
                 # Combine 'last' info from the penultimate line with 'best' info from the last line:
@@ -309,7 +326,7 @@ for example in examples:
                 summary_mpi_contents.append(algorithm_with_spaces + mpi_string + " FAILED\n")
                 if j_procs==0:
                     summary_contents.append(algorithm_with_spaces+" FAILED\n")
-
+        print(example)
     # Add both 'best' and 'last' versions of function_evaluation and seconds:
     old_headings = summary_header[-1].split(',')
     headings = "last_function_evaluation,last_seconds,best_function_evaluation,best_seconds," + (",".join(old_headings[2:]))

@@ -28,3 +28,6 @@ make -j
 
 cd ../tests
 ./run_mpi_unit_tests
+
+cd ../examples
+./run_examples
