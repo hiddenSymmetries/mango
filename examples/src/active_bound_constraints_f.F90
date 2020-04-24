@@ -32,7 +32,7 @@
 
 program active_bound_constraints
 
-  use mango
+  use mango_mod
   !use iso_c_binding
 
   implicit none
@@ -140,7 +140,7 @@ end program active_bound_constraints
 
 subroutine worker(problem)
 
-  use mango
+  use mango_mod
 
   implicit none
 

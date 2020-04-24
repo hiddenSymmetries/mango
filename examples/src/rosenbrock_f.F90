@@ -31,7 +31,7 @@
 
 program rosenbrock
 
-  use mango
+  use mango_mod
   use iso_c_binding, only: c_loc
 
   implicit none
@@ -65,7 +65,7 @@ program rosenbrock
   call mango_mpi_init(problem, MPI_COMM_WORLD)
   call mango_mpi_partition_write(problem, "../output/mango_mpi." // extension)
   call mango_set_max_function_evaluations(problem, 2000)
-
+  call mango_set_N_line_search(problem, 3) ! To make results independent of the # of MPI processes, N_line_search must be set to any positive integer.
   call mango_set_user_data(problem, c_loc(my_data))
 
   if (mango_get_proc0_worker_groups(problem)) then
@@ -128,7 +128,7 @@ end program rosenbrock
 
 subroutine worker(problem)
 
-  use mango
+  use mango_mod
 
   implicit none
 

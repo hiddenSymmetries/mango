@@ -25,7 +25,7 @@
 
 program chwirut
 
-  use mango
+  use mango_mod
   !use iso_c_binding
 
   implicit none
@@ -63,6 +63,7 @@ program chwirut
   call mango_mpi_partition_write(problem, "../output/mango_mpi." // extension)
   call mango_set_max_function_evaluations(problem, 2000)
   call mango_set_print_residuals_in_output_file(problem, .false.)
+  call mango_set_N_line_search(problem, 3) ! To make results independent of the # of MPI processes, N_line_search must be set to any positive integer.
 
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
@@ -150,7 +151,7 @@ end subroutine residual_function
 
 subroutine worker(problem)
 
-  use mango
+  use mango_mod
 
   implicit none
 

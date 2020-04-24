@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
   myprob.set_max_function_evaluations(2000);
   myprob.set_print_residuals_in_output_file(false);
   myprob.set_user_data((void*)yt_data); // This passes the (y,t) data to the residual function
+  myprob.set_N_line_search(3); // To make results independent of the # of MPI processes, N_line_search must be set to any positive integer.
 
   double best_objective_function;
   if (myprob.mpi_partition.get_proc0_worker_groups()) {

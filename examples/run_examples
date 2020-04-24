@@ -309,9 +309,7 @@ for example in examples:
 
                 with open(output_filename) as f:
                     lines = f.readlines()
-                print("got here!!")
             if len(lines) > 5:
-                print("got here!!")
                 # This run succeeded
                 summary_header = lines[:5]
                 # Combine 'last' info from the penultimate line with 'best' info from the last line:

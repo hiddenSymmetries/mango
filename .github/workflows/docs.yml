@@ -1,0 +1,23 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install the desired version of Doxygen
+      run: curl -s http://doxygen.nl/files/doxygen-1.8.17.linux.bin.tar.gz | sudo tar -C /usr/local -xz
+    - name: Generate docs
+      working-directory: ./docs
+      run: /usr/local/doxygen-1.8.17/bin/doxygen
+    - name: Deploy docs
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/html
+        force_orphan: true

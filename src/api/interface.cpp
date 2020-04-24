@@ -61,7 +61,7 @@ extern "C" {
   }
 
   mango::Least_squares_problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, 
-						     double* best_residual_function, mango::residual_function_type residual_function) {
+						     double* best_residual_function, mango::vector_function_type residual_function) {
     return new mango::Least_squares_problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
   }
   
@@ -230,6 +230,10 @@ extern "C" {
   void mango_set_relative_bound_constraints(mango::Problem *This, double* min_factor, double* max_factor, double* min_radius, int* preserve_sign) {
     if (*preserve_sign != 0 && *preserve_sign != 1) throw std::runtime_error("preserve_sign should be 0 or 1.");
     This->set_relative_bound_constraints(*min_factor, *max_factor, *min_radius, (*preserve_sign)==1);
+  }
+
+  void mango_set_N_line_search(mango::Problem *This, int* N) {
+    This->set_N_line_search(*N);
   }
 
 }
