@@ -17,9 +17,6 @@ SET (MANGO_BINARY_DIR_SRC ${MANGO_SOURCE_DIR}/build)
 
 #---- Runs the following .cmake files that should be located in the same directory as this file
 INCLUDE (Package_Search.cmake)
-IF (NOT ${HOST_SYSTEM} MATCHES travis)
-  INCLUDE (external_packages/Install_External_Packages.cmake)
-ENDIF ()
 
 #----
 MESSAGE ("===============================================================================")
@@ -36,9 +33,7 @@ MESSAGE ("======================================================================
 
 #---- Directories containing headers or source files
 INCLUDE_DIRECTORIES (src/api)
-INCLUDE_DIRECTORIES (external_packages/hopspack/src)
 INCLUDE_DIRECTORIES (src/api/tests)
-INCLUDE_DIRECTORIES (external_packages/catch2)
 INCLUDE_DIRECTORIES (examples)
 INCLUDE_DIRECTORIES (examples/src)
 INCLUDE_DIRECTORIES (src/algorithms)

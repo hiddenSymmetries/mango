@@ -1,12 +1,12 @@
 #---- "Allocating" empty vector to be filled with -D flags depending on which packages are used
 FILE (WRITE ${MANGO_SOURCE_DIR}/examples/packages_available "mango ")
 
+#---- Install or verify installation for packages that come with MANGO
+INCLUDE (external_packages/Install_External_Packages.cmake)
+
 #---- Built-in module FindPkgConfig.cmake to detect *.pc files
 INCLUDE (FindPkgConfig)
 #---- For most modules loaded on the Cray system, a path will be added to the PKG_CONFIG_PATH environment variable pointing to the *.pc file. If it is not included for some reason, it can be appended to the following command with ":/path/to/*.pc"
-
-#---- Determine which packages to include in MANGO build
-SET (PACKAGE_INCLUDE_LIST "hopspack")
 
 IF (${HOST_SYSTEM} MATCHES cori)
   # Cori had problems detecting the .pc files for cray-petsc
