@@ -18,6 +18,7 @@ cd external_packages
 ./install_catch2.sh
 ./install_nlopt.sh
 ./install_hopspack.sh
+./install_eigen.sh
 
 # Executables need to know where to find the nlopt shared library:
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/travis/build/hiddenSymmetries/mango/external_packages/nlopt/nlopt-2.6.1/install/lib

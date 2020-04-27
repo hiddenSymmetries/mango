@@ -34,15 +34,15 @@ if submitCommand == "":
     print('Running CMake to try to get MANGO_COMMAND_TO_SUBMIT_JOB')
 
     #---- Commands when using CMake build
-    if os.path.exists(os.getcwd()+"/build"):
-        shutil.rmtree(os.getcwd()+"/build")
-    os.mkdir(os.getcwd()+"/build")
-    os.chdir(os.getcwd()+"/build")
-    make_results = subprocess.run(['cmake','..'],stdout=PIPE, universal_newlines=True)
-    result_string = make_results.stdout.split("MANGO_COMMAND_TO_SUBMIT_JOB=")[1]
-    submitCommand = result_string.split("\n")[0]
-    os.chdir("..")
-    shutil.rmtree(os.getcwd()+"/build")
+    if (not os.path.isfile(os.getcwd()+"/jobSubmit.info")):
+        print("There must be a jobSubmit.info file created from the CMake build. Exiting...")
+        exit()
+    f = open("jobSubmit.info",'r')
+    submitCommand = f.readline()
+    #make_results = subprocess.run(['cmake','..'],stdout=PIPE, universal_newlines=True)
+    #result_string = make_results.stdout.split("MANGO_COMMAND_TO_SUBMIT_JOB=")[1]
+    #submitCommand = result_string.split("\n")[0]
+
     #---- Commands when using makefile build
     #make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
     # The 'decode' in the next line is needed to convert the byte sequence returned by subprocess into a regular python string.

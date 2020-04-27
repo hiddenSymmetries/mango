@@ -85,3 +85,7 @@ ELSEIF (MPIEXEC_RESULT EQUAL 0)
 ELSE ()
   MESSAGE (FATAL_ERROR "WARNING!! Neither slurm nor mpiexec was detected. Exiting...")
 ENDIF ()
+
+#---- Create job submit files for unit tests and regression tests
+FILE (WRITE ${MANGO_SOURCE_DIR}/tests/jobSubmit.info ${MANGO_COMMAND_TO_SUBMIT_JOB})
+FILE (WRITE ${MANGO_SOURCE_DIR}/examples/jobSubmit.info ${MANGO_COMMAND_TO_SUBMIT_JOB})

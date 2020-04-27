@@ -1,4 +1,4 @@
-#---- Installation of packages in mango/external_packages (to be moved to separate module)
+#---- Installation of packages in mango/external_packages
 
 #---- HOPSPACK
 IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/hopspack/hopspack-2.0.2-src)
@@ -46,6 +46,27 @@ IF (NOT NO_NLOPT)
       LIST (APPEND INCLUDE_LIST ${NLOPT_INCLUDE_DIR})
       LIST (APPEND LIBRARY_LINK_LIST ${NLOPT_LIBRARY})
       FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "nlopt ")
+    ENDIF ()
+  ENDIF ()
+ENDIF ()
+
+#---- Eigen
+IF (NOT NO_EIGEN)
+  LIST (APPEND PACKAGE_INCLUDE_LIST "eigen")
+  SET (EIGEN_INCLUDE_DIR ${MANGO_SOURCE_DIR}/external_packages/eigen/eigen-3.3.7)
+  IF (EXISTS ${MANGO_SOURCE_DIR}/external_packages/eigen/eigen-3.3.7/Eigen)
+    MESSAGE (STATUS "Found Eigen")
+    LIST (APPEND COMPILE_DEF_LIST MANGO_EIGEN_AVAILABLE)
+    LIST (APPEND INCLUDE_LIST ${EIGEN_INCLUDE_DIR})
+    FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "eigen ")
+  ELSE ()
+    EXECUTE_PROCESS (COMMAND ${MANGO_SOURCE_DIR}/external_packages/install_eigen.sh WORKING_DIRECTORY ${MANGO_SOURCE_DIR}/external_packages)
+    IF (${ierr})
+      MESSAGE (FATAL_ERROR "Unsuccessful Eigen Installation. Exiting...")
+    ELSE ()
+      LIST (APPEND COMPILE_DEF_LIST MANGO_EIGEN_AVAILABLE)
+      LIST (APPEND INCLUDE_LIST ${EIGEN_INCLUDE_DIR})
+      FILE (APPEND ${MANGO_SOURCE_DIR}/examples/packages_available "eigen ")
     ENDIF ()
   ENDIF ()
 ENDIF ()
