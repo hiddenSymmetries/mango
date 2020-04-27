@@ -28,7 +28,6 @@ ELSE ()
 ENDIF ()
 
 #---- nlopt
-IF (${HOST_SYSTEM} MATCHES cori)
 IF (NOT NO_NLOPT)
   LIST (APPEND PACKAGE_INCLUDE_LIST "nlopt")
   SET (NLOPT_LIBRARY ${MANGO_SOURCE_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib64/libnlopt.a)
