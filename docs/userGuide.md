@@ -2,4 +2,6 @@
 
 * @subpage gettingStarted
 * @subpage concepts
+* @subpage cpp
+* @subpage fortran
 * @subpage algorithms

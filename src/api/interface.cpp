@@ -40,7 +40,7 @@ extern "C" {
   mango::Problem *mango_problem_create_least_squares(int N_parameters, int N_terms) {
     return new mango::Problem(N_parameters,N_terms);
     } */
-  mango::Problem *mango_problem_create(int* N_parameters, double* state_vector, int* dummy, mango::objective_function_type objective_function) {
+  mango::Problem *mango_problem_create(int* N_parameters, double* state_vector, mango::objective_function_type objective_function) {
     if (false) {
       std::cout << "interface.cpp subroutine mango_problem_create: objective_function=" << (long int)objective_function << std::endl;
 
@@ -48,7 +48,7 @@ extern "C" {
       for (int j=0; j<*N_parameters; j++) {
 	std::cout << ", state_vector["<<j<<"]=" << state_vector[j];
       }
-      std::cout << std::endl << "dummy=" << *dummy;
+      //std::cout << std::endl << "dummy=" << *dummy;
     }
     /*
     std::cout << "  About to call objective function from interface.cpp\n";
@@ -94,6 +94,14 @@ extern "C" {
 
   void mango_mpi_partition_set_custom(mango::Problem *This, MPI_Fint *comm_world, MPI_Fint *comm_group_leaders, MPI_Fint *comm_worker_groups) {
     This->mpi_partition.set_custom(MPI_Comm_f2c(*comm_world), MPI_Comm_f2c(*comm_group_leaders), MPI_Comm_f2c(*comm_worker_groups));
+  }
+
+  void mango_set_N_worker_groups(mango::Problem *This, int* N_worker_groups) {
+    This->mpi_partition.set_N_worker_groups(*N_worker_groups);
+  }
+
+  int mango_get_N_worker_groups(mango::Problem *This) {
+    return This->mpi_partition.get_N_worker_groups();
   }
 
   double mango_optimize(mango::Problem *This) {

@@ -84,9 +84,9 @@ module mango_mod
 !       integer(C_int) :: N_parameters, N_terms
 !       type(C_ptr) :: this
 !     end function C_mango_problem_create_least_squares
-     function C_mango_problem_create(N_parameters, state_vector, dummy, objective_function) result(this) bind(C,name="mango_problem_create")
+     function C_mango_problem_create(N_parameters, state_vector, objective_function) result(this) bind(C,name="mango_problem_create")
        import
-       integer(C_int) :: N_parameters, dummy
+       integer(C_int) :: N_parameters
        type(C_ptr) :: this
        !real(C_double) :: state_vector(:)
        !real(C_double) :: state_vector(N_parameters)
@@ -134,6 +134,16 @@ module mango_mod
        integer(C_int) :: comm1, comm2, comm3
        type(C_ptr), value :: this
      end subroutine C_mango_mpi_partition_set_custom
+     subroutine C_mango_set_N_worker_groups(this, N) bind(C,name="mango_set_N_worker_groups")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end subroutine C_mango_set_N_worker_groups
+     function C_mango_get_N_worker_groups(this) result(N) bind(C,name="mango_get_N_worker_groups")
+       import
+       integer(C_int) :: N
+       type(C_ptr), value :: this
+     end function C_mango_get_N_worker_groups
      function C_mango_optimize(this) result(optimum) bind(C,name="mango_optimize")
        import
        type(C_ptr), value :: this
@@ -300,7 +310,7 @@ module mango_mod
   !>                    Otherwise the value should be 0.
   !> @param problem A pointer to the class representing this optimization problem. This pointer can be useful for
   !>        getting information about the MPI communicators.
-  !> @param user_data Pointer to user-supplied data, which can be set by mango::Problem::set_user_data().
+  !> @param user_data Pointer to user-supplied data, which can be set by mango_set_user_data().
   subroutine objective_function_interface(N_parameters, state_vector, objective_value, failed, problem, user_data)
     import
     integer(C_int), intent(in) :: N_parameters
@@ -322,7 +332,7 @@ module mango_mod
   !>                    Otherwise the value should be 0.
   !> @param problem A pointer to the class representing this optimization problem. This pointer can be useful for
   !>        getting information about the MPI communicators.
-  !> @param user_data Pointer to user-supplied data, which can be set by mango::Problem::set_user_data().
+  !> @param user_data Pointer to user-supplied data, which can be set by mango_set_user_data().
   subroutine vector_function_interface(N_parameters, state_vector, N_terms, residuals, failed, problem, user_data)
     import
     integer(C_int), intent(in) :: N_parameters, N_terms
@@ -355,11 +365,10 @@ contains
   !> @param state_vector An array of size N_parameters, which will be used to store the initial condition.
   !>                     You can set the values of this array either before or after calling this routine,
   !>                     as long as they are set before calling \ref mango_optimize.
-  !> @param dummy This should be removed.
   !> @param objective_function  A reference to the objective function that will be minimized.
-  subroutine mango_problem_create(this, N_parameters, state_vector, dummy, objective_function)
+  subroutine mango_problem_create(this, N_parameters, state_vector, objective_function)
     type(mango_problem), intent(out) :: this
-    integer, intent(in) :: N_parameters, dummy
+    integer, intent(in) :: N_parameters
     !double precision, intent(in) :: state_vector(:)
     real(C_double), intent(in) :: state_vector(:)
     double precision, dimension(2) :: x = (/ 3.0, 4.0 /)
@@ -379,7 +388,8 @@ contains
     !this%object = C_mango_problem_create(int(N_parameters,C_int), real(state_vector,C_double), C_funloc(objective_function))
     !this%object = C_mango_problem_create(int(N_parameters,C_int), c_loc(state_vector(1)), C_funloc(objective_function))
     !this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector_copy(1), int(dummy,C_int), C_funloc(objective_function))
-    this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector(1), int(dummy,C_int), C_funloc(objective_function))
+    !this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector(1), int(dummy,C_int), C_funloc(objective_function))
+    this%object = C_mango_problem_create(int(N_parameters,C_int), state_vector(1), C_funloc(objective_function))
 
     ! For info on passing function pointers, see
     ! https://gcc.gnu.org/onlinedocs/gcc-4.6.1/gfortran/C_005fFUNLOC.html#C_005fFUNLOC
@@ -516,6 +526,26 @@ contains
     integer, intent(in) :: comm_world, comm_group_leaders, comm_worker_groups
     call C_mango_mpi_partition_set_custom(this%object, int(comm_world,C_int), int(comm_group_leaders,C_int), int(comm_worker_groups,C_int))
   end subroutine mango_mpi_partition_set_custom
+
+  !> Set the number of worker groups
+  !>
+  !> This subroutine (or mango_read_input_file) should be called before mango_mpi_init.
+  !> @param this The optimization problem.
+  !> @param N_worker_groups The requested number of worker groups.
+  subroutine mango_set_N_worker_groups(this, N_worker_groups)
+    type(mango_problem), intent(in) :: this
+    integer, intent(in) :: N_worker_groups
+    call C_mango_set_N_worker_groups(this%object, int(N_worker_groups,C_int))
+  end subroutine mango_set_N_worker_groups
+
+  !> Get the number of worker groups.
+  !>
+  !> @param this The optimization problem.
+  !> @return The number worker groups.
+  integer function mango_get_N_worker_groups(this)
+    type(mango_problem), intent(in) :: this
+    mango_get_N_worker_groups = C_mango_get_N_worker_groups(this%object)
+  end function mango_get_N_worker_groups
 
   !> Carry out the optimization.
   !>
@@ -911,8 +941,10 @@ contains
   !> Sets the number of points considered as a set for parallel line searches
   !>
   !> The default value is 0.
-  !> If the value is \f$<=\f$0, the number will be set to the number of worker groups.
-  !> Normally this default makes sense.
+  !> If the value is \f$\le 0\f$, the number will be set to the number of worker groups.
+  !> Normally this default is the best choice, in terms of load balancing. However you may occasionally
+  !> wish to set the number of points in a line search to some other value, particularly for tests
+  !> involving parallelization.
   !> @param this The optimization problem to control
   !> @param N_line_search The number of points considered as a set for parallel line searches.
   subroutine mango_set_N_line_search(this, N_line_search)

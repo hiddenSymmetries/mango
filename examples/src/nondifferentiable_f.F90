@@ -51,7 +51,6 @@ program nondifferentiable
   double precision :: best_objective_function
   !external objective_function
   !procedure(objective_function_interface), pointer :: objective_function
-  integer :: dummy = 13
   type(my_type), target :: my_data
 
   !---------------------------------------------
@@ -73,7 +72,7 @@ program nondifferentiable
   end if
 
   state_vector = 0
-  call mango_problem_create(problem,N_dim,state_vector,dummy,objective_function)
+  call mango_problem_create(problem,N_dim,state_vector,objective_function)
   if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)
   !call mango_set_algorithm_from_string(problem, "nlopt_ln_praxis")

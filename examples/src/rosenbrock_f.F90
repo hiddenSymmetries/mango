@@ -54,7 +54,6 @@ program rosenbrock
   if (verbose_level > 0) print *,"Hello world from rosenbrock_f"
   call mpi_init(ierr)
 
-  !call mango_problem_create(problem,2,state_vector,dummy,objective_function)
   call mango_problem_create_least_squares(problem, 2, state_vector, 2, targets, sigmas, best_residual_function, residual_function)
   if (verbose_level > 0) print *,"Here comes state vector:",state_vector
   !call mango_set_algorithm(problem, 2)

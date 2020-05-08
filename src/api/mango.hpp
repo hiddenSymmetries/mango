@@ -634,8 +634,10 @@ namespace mango {
     //! Sets the number of points considered as a set for parallel line searches
     /**
      * The default value is 0.
-     * If the value is \f$<=\f$0, the number will be set to the number of worker groups.
-     * Normally this default makes sense.
+     * If the value is \f$\le 0\f$, the number will be set to the number of worker groups.
+     * Normally this default is the best choice, in terms of load balancing. However you may occasionally
+     * wish to set the number of points in a line search to some other value, particularly for tests
+     * involving parallelization.
      * @param N_line_search The number of points considered as a set for parallel line searches.
      */
     void set_N_line_search(int N_line_search);
