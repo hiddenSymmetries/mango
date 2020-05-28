@@ -1,0 +1,25 @@
+! N_procs, N_worker_groups:
+1,1
+2,1
+2,2
+5,1
+5,2
+5,3
+5,5
+! algorithms:
+mango_levenberg_marquardt
+hopspack
+petsc_pounders
+petsc_nm
+petsc_brgn
+nlopt_ln_bobyqa
+nlopt_ln_sbplx
+nlopt_ld_slsqp
+nlopt_ld_lbfgs
+gsl_bfgs
+gsl_conjugate_fr
+gsl_nm
+gsl_lm
+gsl_subspace2d
+! True optimum
+1,1
