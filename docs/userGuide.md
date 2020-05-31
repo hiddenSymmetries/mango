@@ -5,3 +5,4 @@
 * @subpage cpp
 * @subpage fortran
 * @subpage algorithms
+* @subpage plotting

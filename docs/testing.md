@@ -50,3 +50,11 @@ to run both the unit tests and integrated/regression tests. If you want to run o
 
 
 ## Continuous integration
+
+MANGO uses [Travis-CI](https://travis-ci.org/) for continuous integration. Every time there is a commit to any branch of MANGO's GitHub repository,
+MANGO is compiled and linked on Travis's servers, and the unit tests and integrated/regression tests are run.
+If the build fails or any tests fail, the "build passing" badge on MANGO's GitHub page will be replaced with "build failed".
+You can also see the detailed build and test log at
+https://travis-ci.org/github/hiddensymmetries/mango .
+Travis is configured using the file `.travis.yml` in MANGO's root directory, and the build and test
+steps are defined in the script `tests/travis.sh`.	
