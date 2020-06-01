@@ -835,7 +835,7 @@ WARN_LOGFILE           =
 #      installation.md
 
 INPUT = userGuide.md developerGuide.md API.md .
-INPUT += ../src/ ../src/algorithms.dat
+INPUT += ../src/ ../src/algorithms.dat ../src/update_algorithms
 #INPUT +=  ../README.md
 
 #INPUT = ../src/api/mango.F90
