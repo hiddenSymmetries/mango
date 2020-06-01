@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install the desired version of Doxygen
-      run: curl -s http://doxygen.nl/files/doxygen-1.8.17.linux.bin.tar.gz | sudo tar -C /usr/local -xz
+      run: curl -s https://www.doxygen.nl/files/doxygen-1.8.17.linux.bin.tar.gz | sudo tar -C /usr/local -xz
     - name: Generate docs
       working-directory: ./docs
       run: /usr/local/doxygen-1.8.17/bin/doxygen
