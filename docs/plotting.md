@@ -31,5 +31,35 @@ each using 5 MPI processors and 5 worker groups:
 \image html mangoPlot.png width=100%
 
 
+
 # Levenberg-Marquardt history
 
+When MANGO's native Levenberg-Marquardt algorithm is used, an additional output file is saved containing
+details of the algorithm's history. The file has the same name as MANGO's main output file described in the previous section,
+but with `_levenberg_marquardt` appended. The first row is a header line that labels the columns.
+Each row thereafter indicates one step in the Levenberg-Marquardt iterations.
+In this main data, the first column indicates the main (i.e. outer) iteration.
+The next column, `j_line_search` indicates the inner iteration, in which the objective function is evaluated in parallel
+for a batch of values of \f$\lambda\f$. The next `N_line_search` columns give the values of \f$\lambda\f$ used
+for these concurrent evaluations. Next come `N_line_search` columns with the corresponding values of the objective function.
+The penultimate column gives the 0-based index among these `N_line_search` values for which the objective function
+is lowest. The final column is a 0 or 1, indicating whether any of the evaluations in this row successfully reduced
+the objective function compared to the previous outer iteration.
+
+If the algorithm is working well, the last column should be mostly 1, except at the last outer iteration when the iteration reaches the optimum.
+Values of 1 mean the range of \f$\lambda\f$ is appropriate, such that the objective function is reduced in the first set of
+concurrent function evaluations, and further rounds of objective function evaluations are not needed.
+
+The data in one of these Levenberg-Marquardt history files can be plotted with the python script `plotting/LevenbergMarquardtPlot`.
+This script requires `numpy` and `matplotlib`.
+The script requires one command-line argument, the name of the `_levenberg_marquardt` file.
+Here is an example of typical output, showing a case with `N_line_search=8` (corresponding here to the number of worker groups):
+
+\image html LevenbergMarquardtPlot.png width=100%
+
+The vertical coordinate is \f$\lambda\f$.
+Each colored circle represents an evaluation of the objective function, and each column of circles reprents an outer iteration.
+Colors indicate the inner iteration index `j_line_search`. In each column, the red batch of points are evaluated concurrently,
+then the yellow batch of points are evaluated concurrently, etc.  The black curve connects the function evaluations with lowest value of the
+objective function, i.e. the evaluations that were used as the basis for the next outer iteration.
+Overall, the figure shows how  \f$\lambda\f$ evolves during the optimization, and the range of values of \f$\lambda\f$ that are sampled.
