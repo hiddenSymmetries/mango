@@ -119,7 +119,9 @@ void mango::MPI_Partition::mobilize_workers() {
   // This method should only be called from group leaders.
   if (!proc0_worker_groups) throw std::runtime_error("mango::MPI_Partition::mobilize_workers() should only be called from group leaders.");
   int data = 1; // Any nonnegative value will do here.
+  std::cout << "Hello from mango::MPI_Partition::mobilize_workers" << std::endl;
   MPI_Bcast(&data, 1, MPI_INT, 0, comm_worker_groups);
+  std::cout << "Bye from mango::MPI_Partition::mobilize_workers" << std::endl;
 }
 
 bool mango::MPI_Partition::continue_worker_loop() {

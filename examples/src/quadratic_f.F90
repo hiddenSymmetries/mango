@@ -27,7 +27,7 @@
 ! * Passing an integer to the objective/residual function using the user_data field.
 
 #define N_dim 3
-#define verbose_level 0
+#define verbose_level 1
 
 program quadratic
 
@@ -79,6 +79,8 @@ program quadratic
   upper_bounds =  5.0d+0
   call mango_set_bound_constraints(problem, lower_bounds, upper_bounds)
 
+  !print "(a,i15)",">> problem in fortran:",problem%object
+
   if (mango_get_proc0_worker_groups(problem)) then
      best_objective_function = mango_optimize(problem)
      call mango_stop_workers(problem)
@@ -114,6 +116,9 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_
 
   integer, pointer :: user_data
   integer :: j
+
+  print *,"Hello from fortran residual_function"
+  !print "(a,i15)",">> problem in fortran in residual_function:",problem%object
 
   call mango_mobilize_workers(problem)
 

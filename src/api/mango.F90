@@ -70,7 +70,8 @@ module mango_mod
 
   !> An object that represents an optimization problem.
   type mango_problem
-     type(C_ptr), private :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
+     !type(C_ptr), private :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
+     type(C_ptr) :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
   end type mango_problem
 
   interface

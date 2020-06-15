@@ -23,7 +23,7 @@
 ! * Passing a derived data type to the objective/residual function using the user_data field.
 
 #define N_dim 3
-#define verbose_level 0
+#define verbose_level 1
 
 module my_type_module
   type my_type
@@ -133,6 +133,8 @@ subroutine objective_function(N, x, f, failed, problem, void_user_data)
   type(my_type), pointer :: user_data
 
   if (verbose_level > 0) print *,"Hi from fortran. N=",N," size(x)=",size(x)
+  print *,"In objective_function, x=",x
+  print *,"In objective_function, failed=",failed
 
   call mango_mobilize_workers(problem)
   

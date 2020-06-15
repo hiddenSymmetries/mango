@@ -57,12 +57,21 @@ extern "C" {
     objective_function(N_parameters, state_vector, &f, &failed_temp, this);
     std::cout << "Value of objective function: " << f << "\n";
     */
-    return new mango::Problem(*N_parameters, state_vector, objective_function, 0, NULL);
+    //    return new mango::Problem(*N_parameters, state_vector, objective_function, 0, NULL);
+    mango::Problem * temp;
+    temp = new mango::Problem(*N_parameters, state_vector, objective_function, 0, NULL);
+    std::cout << "  New mango::Problem *:" << temp << std::endl;
+    return temp;
+
   }
 
   mango::Least_squares_problem *mango_problem_create_least_squares(int* N_parameters, double* state_vector, int* N_terms, double* targets, double* sigmas, 
 						     double* best_residual_function, mango::vector_function_type residual_function) {
-    return new mango::Least_squares_problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
+    //    return new mango::Least_squares_problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
+    mango::Least_squares_problem * temp;
+    temp = new mango::Least_squares_problem(*N_parameters, state_vector, *N_terms, targets, sigmas, best_residual_function, residual_function, 0, NULL);
+    std::cout << "  New mango::Least_squares_problem *:" << temp << std::endl;
+    return temp;
   }
   
 
@@ -105,6 +114,7 @@ extern "C" {
   }
 
   double mango_optimize(mango::Problem *This) {
+    std::cout << " mango_optimize called with This = " << This << std::endl;
     return This->optimize();
   }
 
@@ -223,6 +233,7 @@ extern "C" {
   }
 
   void mango_mobilize_workers(mango::Problem *This) {
+    std::cout << "In mango_mobilize_workers, This = " << This << std::endl;
     This->mpi_partition.mobilize_workers();
   }
 
