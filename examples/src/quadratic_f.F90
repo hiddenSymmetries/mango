@@ -27,7 +27,7 @@
 ! * Passing an integer to the objective/residual function using the user_data field.
 
 #define N_dim 3
-#define verbose_level 1
+#define verbose_level 0
 
 program quadratic
 
@@ -104,7 +104,7 @@ program quadratic
 contains
 
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_user_data)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_user_data) bind(C)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters, N_terms
@@ -117,7 +117,7 @@ subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_
   integer, pointer :: user_data
   integer :: j
 
-  print *,"Hello from fortran residual_function"
+  !print *,"Hello from fortran residual_function"
   !print "(a,i15)",">> problem in fortran in residual_function:",problem%object
 
   call mango_mobilize_workers(problem)

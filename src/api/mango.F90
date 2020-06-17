@@ -70,8 +70,7 @@ module mango_mod
 
   !> An object that represents an optimization problem.
   type mango_problem
-     !type(C_ptr), private :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
-     type(C_ptr) :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
+     type(C_ptr), private :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
   end type mango_problem
 
   interface
@@ -312,7 +311,7 @@ module mango_mod
   !> @param problem A pointer to the class representing this optimization problem. This pointer can be useful for
   !>        getting information about the MPI communicators.
   !> @param user_data Pointer to user-supplied data, which can be set by mango_set_user_data().
-  subroutine objective_function_interface(N_parameters, state_vector, objective_value, failed, problem, user_data)
+  subroutine objective_function_interface(N_parameters, state_vector, objective_value, failed, problem, user_data) bind(C)
     import
     integer(C_int), intent(in) :: N_parameters
     real(C_double), intent(in) :: state_vector(N_parameters)
@@ -334,7 +333,7 @@ module mango_mod
   !> @param problem A pointer to the class representing this optimization problem. This pointer can be useful for
   !>        getting information about the MPI communicators.
   !> @param user_data Pointer to user-supplied data, which can be set by mango_set_user_data().
-  subroutine vector_function_interface(N_parameters, state_vector, N_terms, residuals, failed, problem, user_data)
+  subroutine vector_function_interface(N_parameters, state_vector, N_terms, residuals, failed, problem, user_data) bind(C)
     import
     integer(C_int), intent(in) :: N_parameters, N_terms
     real(C_double), intent(in) :: state_vector(N_parameters)

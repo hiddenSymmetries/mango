@@ -100,7 +100,7 @@ else
   EXTRA_F_LINK_FLAGS = -L/u/mlan/nlopt/nlopt-2.6.1/install/lib64 -lnlopt -cxxlib 
 endif
 
-ifeq ($(MANGO_PETSC_AVAILABLE),T)
+ifeq ($(MANGO_GSL_AVAILABLE),T)
   EXTRA_C_COMPILE_FLAGS += -I $(GSL_HOME)/include
   EXTRA_C_LINK_FLAGS += -L $(GSL_HOME)/lib -lgsl
   EXTRA_F_LINK_FLAGS += -L $(GSL_HOME)/lib -lgsl

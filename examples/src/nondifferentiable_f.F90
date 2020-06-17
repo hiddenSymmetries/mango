@@ -23,7 +23,7 @@
 ! * Passing a derived data type to the objective/residual function using the user_data field.
 
 #define N_dim 3
-#define verbose_level 1
+#define verbose_level 0
 
 module my_type_module
   type my_type
@@ -107,19 +107,8 @@ program nondifferentiable
 
 contains
 
-!subroutine objective_function(N, x, f)
-!  implicit none
-!  integer, intent(in) :: N
-!  double precision, intent(in) :: x(N)
-!  double precision, intent(out) :: f
-!
-!  print *,"Hi from fortran. N=",N," size(x)=",size(x)
-!  f = sum((x-2)*(x-2))
-!  print *,"In fortran, x=",x,", f=",f
-!
-!end subroutine objective_function
 
-subroutine objective_function(N, x, f, failed, problem, void_user_data)
+subroutine objective_function(N, x, f, failed, problem, void_user_data) bind(C)
   use iso_c_binding
   use my_type_module
   implicit none
@@ -133,8 +122,6 @@ subroutine objective_function(N, x, f, failed, problem, void_user_data)
   type(my_type), pointer :: user_data
 
   if (verbose_level > 0) print *,"Hi from fortran. N=",N," size(x)=",size(x)
-  print *,"In objective_function, x=",x
-  print *,"In objective_function, failed=",failed
 
   call mango_mobilize_workers(problem)
   

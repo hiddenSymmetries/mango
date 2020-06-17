@@ -105,7 +105,7 @@ program active_bound_constraints
 contains
 
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_data)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, user_data) bind(C)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters, N_terms

@@ -48,8 +48,6 @@ double mango::Solver::optimize(MPI_Partition* mpi_partition_in) {
   if (algorithms[algorithm].least_squares)
     throw std::runtime_error("Error! An algorithm for least-squares problems was chosen, but the problem specified is not least-squares.");
 
-  std::cout << "In mango::Solver::optimize, problem = " << problem << std::endl;
-
   // Hand control over to one of the concrete Packages to carry out the main work of the optimization.
   package->optimize(this);
 

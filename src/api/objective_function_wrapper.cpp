@@ -28,7 +28,6 @@ void mango::Solver::objective_function_wrapper(const double* x, double* f, bool*
   if (verbose > 0) std::cout << "Hello from objective_function_wrapper" << std::endl;
 
   int failed_int = 123;
-  std::cout << "In mango::Solver::objective_function_wrapper, problem = " << problem << std::endl;
   objective_function(&N_parameters, x, f, &failed_int, problem, user_data);
   *failed = (failed_int != 0);
 

@@ -89,7 +89,7 @@ program rosenbrock
 
 contains
 
-subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_user_data)
+subroutine residual_function(N_parameters, x, N_terms, f, failed, problem, void_user_data) bind(C)
   use iso_c_binding
   implicit none
   integer(C_int), intent(in) :: N_parameters

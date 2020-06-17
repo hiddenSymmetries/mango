@@ -13,7 +13,7 @@ except:
     # This case works when this module is imported from another script
     from tests.nondeterministic_algorithms import *
 
-def regression_test(example_name, packages_available = 0):
+def regression_test(example_name, packages_available = ['hopspack','nlopt','mango','petsc','gsl']):
     print('Hello from '+__file__+'. Comparing short_summary.'+example_name+' with short_summary.'+example_name+'.reference.')
     import numpy as np
 
@@ -60,6 +60,11 @@ def regression_test(example_name, packages_available = 0):
     for index in range(5, len(reference_lines)):
         # Skip empty lines, as might occur at the end of the file
         if len(reference_lines[index].strip()) == 0:
+            continue
+        # Skip any comment lines
+        firstchar = reference_lines[index].strip()[0]
+        if firstchar=='#' or firstchar == '!':
+            print('  Skipping line of reference file since firstchar=',firstchar)
             continue
         splitline_reference = reference_lines[index].split(',')
         algorithm = splitline_reference[0].strip()
