@@ -69,7 +69,7 @@ module mango_mod
 !       C_mango_set_relative_bound_constraints
 
   !> An object that represents an optimization problem.
-  type mango_problem
+  type, bind(C) ::  mango_problem
      type(C_ptr), private :: object = C_NULL_ptr ! This pointer points to a C++ mango::Problem object.
   end type mango_problem
 
