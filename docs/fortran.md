@@ -45,7 +45,7 @@ For general optimization problems, the objective function is determined by a use
 mango_mod::objective_function_interface:
 
 ~~~~{.f90}
-subroutine objective_function(N_parameters, state_vector, objective_value, failed, problem, user_data)
+subroutine objective_function(N_parameters, state_vector, objective_value, failed, problem, user_data) bind(C)
 ~~~~
 
 where `objective_function` can be replaced with any name you like.
@@ -64,7 +64,7 @@ is useful for passing information to your subroutine for the objective function,
 as discussed further below
 Note that `user_data` has `type(C_ptr)`, defined in the standard `iso_C_binding` module.
 
-
+Your objective function subroutine should be given the attribute `bind(C)` (as shown above) since it will be called from C code in MANGO.
 
 
 # Defining the residuals for a least-squares problem
@@ -74,7 +74,7 @@ you must write a subroutine that computes the vector of residuals \f$R_j\f$ desc
 This subroutine must have the form mango_mod::vector_function_interface:
 
 ~~~~{.f90}
-subroutine residual_function(N_parameters, state_vector, N_terms, residuals, failed, problem, user_data)
+subroutine residual_function(N_parameters, state_vector, N_terms, residuals, failed, problem, user_data) bind(C)
 ~~~~
 
 where `residual_function` can be replaced with any name you like.
