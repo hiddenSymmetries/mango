@@ -3,7 +3,6 @@
 ! algorithms:
 petsc_pounders
 petsc_nm
-petsc_brgn
 nlopt_gn_direct
 nlopt_gn_direct_l
 nlopt_gn_direct_l_rand

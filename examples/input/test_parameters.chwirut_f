@@ -10,7 +10,6 @@
 mango_levenberg_marquardt
 petsc_pounders
 petsc_nm
-petsc_brgn
 nlopt_ln_bobyqa
 nlopt_ln_neldermead
 nlopt_ld_tnewton_precond
