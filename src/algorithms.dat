@@ -26,7 +26,7 @@
     nlopt,             ln_neldermead,             F,                F,        F,                        T,                          F,             T
     nlopt,                  ln_sbplx,             F,                F,        F,                        T,                          F,             T
 
-    nlopt,                    ld_mma,             F,                T,        T,                        T,                          F,             T
+    nlopt,                    ld_mma,             F,                T,        T,                        T,                          F,             F
     nlopt,                  ld_ccsaq,             F,                T,        T,                        T,                          F,             T
     nlopt,                  ld_slsqp,             F,                T,        T,                        T,                          F,             T
     nlopt,                  ld_lbfgs,             F,                T,        T,                        T,                          F,             T
