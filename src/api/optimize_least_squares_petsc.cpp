@@ -67,7 +67,7 @@ void mango::Package_petsc::optimize_least_squares(Least_squares_solver* solver) 
 
   if (solver->verbose > 0) std::cout << "PETSc has been initialized." << std::endl;
 
-#if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 10))
+#if (PETSC_VERSION_MAJOR < 3 || (PETSC_VERSION_MAJOR==3 && PETSC_VERSION_MINOR < 11))
   TaoSetSeparableObjectiveRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)solver);
 #else
   TaoSetResidualRoutine(my_tao, tao_residual_vec, &mango_petsc_residual_function, (void*)solver);

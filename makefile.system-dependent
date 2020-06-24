@@ -43,25 +43,60 @@ REGCOIL_COMMAND_TO_SUBMIT_JOB = srun -n 1 -c 32
 # PPPL cluster
 #####################################################################
 
-else ifneq (,$(findstring pppl,$(HOSTNAME)))
+# 2020-06-24: Tested with the following modules:
+# module load gcc openmpi gsl petsc_real anaconda3
+
+# From external_packages, I ran all the install_* scripts. Note install_nlopt must be run after loading the compiler module (gcc). For some reason, nlopt had a build error when I tried the intel compiler rather than gcc.
+
+# To use nlopt, in your .cshrc file you need to set
+# setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/u/mlandrem/mango/external_packages/nlopt/nlopt-2.6.1/install/lib64
+# (replacing mlandrem with whatever directory you used.)
+
+#else ifneq (,$(findstring pppl,$(HOSTNAME)))
+else ifneq (,$(findstring pppl,$(LD_LIBRARY_PATH)))
 MANGO_HOST = pppl
 
-MANGO_PETSC_AVAILABLE = F
-MANGO_HOPSPACK_AVAILABLE = F
+# Change this next line to point to where you put the mango repository:
+MANGO_DIR = /u/mlandrem/mango
+
+MANGO_PETSC_AVAILABLE = T
+MANGO_HOPSPACK_AVAILABLE = T
 MANGO_NLOPT_AVAILABLE = T
-MANGO_GSL_AVAILABLE = F
+MANGO_GSL_AVAILABLE = T
 MANGO_DAKOTA_AVAILABLE = F
 MANGO_EIGEN_AVAILABLE = T
 
-CC = mpicc
-FC = mpif90
-CLINKER = $(CC)
-FLINKER = $(FC)
+#CC = mpicc
+#FC = mpif90
+#CLINKER = $(CC)
+#FLINKER = $(FC)
 
-EXTRA_C_COMPILE_FLAGS = -O0 -g -I/u/mlandrem/nlopt/nlopt-2.6.1/install/include
-EXTRA_F_COMPILE_FLAGS = -O0 -g -ffree-line-length-none
-EXTRA_C_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnlopt
-EXTRA_F_LINK_FLAGS = -L/u/mlandrem/nlopt/nlopt-2.6.1/install/lib64 -lstdc++ -lnlopt
+# The next line should set CC, FC, CLINKER, and FLINKER
+include ${PETSC_DIR}/lib/petsc/conf/variables
+#include ${PETSC_DIR}/lib/petsc/conf/rules
+
+EXTRA_C_COMPILE_FLAGS = -O0 -g  -I${PETSC_DIR}/include -I${PETSC_DIR}/${PETSC_ARCH}/include
+EXTRA_F_COMPILE_FLAGS = -ffree-line-length-none
+EXTRA_C_LINK_FLAGS = -L$(PETSC_DIR)/lib -lpetsc
+EXTRA_F_LINK_FLAGS = -L$(PETSC_DIR)/lib -lpetsc
+
+ifeq ($(MANGO_NLOPT_AVAILABLE),T)
+  EXTRA_C_COMPILE_FLAGS += -I ${MANGO_DIR}/external_packages/nlopt/nlopt-2.6.1/install/include
+  EXTRA_C_LINK_FLAGS += -L ${MANGO_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib64 -lnlopt
+  EXTRA_F_LINK_FLAGS += -L ${MANGO_DIR}/external_packages/nlopt/nlopt-2.6.1/install/lib64 -lnlopt
+endif
+
+ifeq ($(MANGO_GSL_AVAILABLE),T)
+  EXTRA_C_COMPILE_FLAGS += -I $(GSL_HOME)/include
+  EXTRA_C_LINK_FLAGS += -L $(GSL_HOME)/lib -lgsl
+  EXTRA_F_LINK_FLAGS += -L $(GSL_HOME)/lib -lgsl
+endif
+
+ifeq ($(MANGO_EIGEN_AVAILABLE),T)
+  EXTRA_C_COMPILE_FLAGS += -I external_packages/eigen/eigen-3.3.7
+endif
+
+MANGO_COMMAND_TO_SUBMIT_JOB = srun -n NUM_PROCS 
 
 #####################################################################
 # IPP Draco

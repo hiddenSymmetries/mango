@@ -1,0 +1,15 @@
+#!/bin/bash                                                                     
+#SBATCH -N 1  # Number of nodes                            
+#SBATCH -n 5   # Number of MPI tasks                                          
+#SBATCH -p general                                                              
+#SBATCH -t 00:30:00        # Time limit           
+#SBATCH --export=ALL                                                            
+#SBATCH --mem=100MB
+#SBATCH -J vmec
+#SBATCH -c 1   # Number of openmp threads per MPI task                         
+
+env
+
+make test_make
+
+make test

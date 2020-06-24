@@ -30,7 +30,7 @@ except:
 # If MANGO_COMMAND_TO_SUBMIT_JOB is not set, try getting it by running make in the parent directory:
 if submitCommand == "":
     print('Running make to try to get MANGO_COMMAND_TO_SUBMIT_JOB')
-    make_results = subprocess.run(['make','--directory=..','print_command_to_submit_job'],capture_output=True)
+    make_results = subprocess.run(['make','-s','--directory=..','print_command_to_submit_job'],capture_output=True)
     # The 'decode' in the next line is needed to convert the byte sequence returned by subprocess into a regular python string.
     submitCommand = make_results.stdout.decode('utf-8').strip()
 
