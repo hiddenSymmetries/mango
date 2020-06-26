@@ -16,9 +16,9 @@
 # License along with MANGO.  If not, see
 # <https://www.gnu.org/licenses/>.
 
-.PHONY: all clean examples test test_make unit_tests
+.PHONY: all clean examples test test_make unit_tests write_make_variables
 
-all: lib/libmango.a examples examples/packages_available
+all: lib/libmango.a examples examples/packages_available write_make_variables
 #	cp obj/mango.mod* include
 #	cp obj/mango.MOD* include
 
@@ -104,6 +104,8 @@ TEST_OBJ_FILES = $(patsubst src/api/tests/%.cpp, obj/%.cpp.o, $(TEST_SRC_FILES))
 ALGORITHM_TEST_SRC_FILES = $(wildcard src/algorithms/tests/*.cpp)
 ALGORITHM_TEST_OBJ_FILES = $(patsubst src/algorithms/tests/%.cpp, obj/%.cpp.o, $(ALGORITHM_TEST_SRC_FILES))
 
+MAKE_VARIABLES_FILE = lib/mangoMakeVariables
+
 include makefile.dependencies
 
 # For info about the "Static pattern rules" below, see e.g.
@@ -149,7 +151,7 @@ examples/packages_available:
 	@echo $(MANGO_AVAILABLE_PACKAGES) > examples/packages_available
 
 clean:
-	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ src/api/*~ examples/packages_available tests/unit_tests
+	rm -f obj/* include/*.mod include/*.MOD include/*.Mod lib/* *~ src/*~ src/api/*~ examples/packages_available tests/unit_tests $(MAKE_VARIABLES_FILE)
 	$(MAKE) -C examples clean
 
 tests/unit_tests: $(TEST_OBJ_FILES) $(ALGORITHM_TEST_OBJ_FILES) lib/libmango.a
@@ -164,6 +166,16 @@ test: $(TARGET) unit_tests
 # This next target is used by examples/run_examples to get MANGO_COMMAND_TO_SUBMIT_JOB when run_examples is run standalone.
 print_command_to_submit_job:
 	@echo $(MANGO_COMMAND_TO_SUBMIT_JOB)
+
+# Write a file that can be included in the build system for user applications.
+write_make_variables:
+	@echo MANGO_C_COMPILE_FLAGS = -I $(PWD)/include >  $(MAKE_VARIABLES_FILE)
+	@echo >> $(MAKE_VARIABLES_FILE)
+	@echo MANGO_F_COMPILE_FLAGS = -I $(PWD)/include >> $(MAKE_VARIABLES_FILE)
+	@echo >> $(MAKE_VARIABLES_FILE)
+	@echo MANGO_C_LINK_FLAGS = -L $(PWD)/lib -lmango $(EXTRA_C_LINK_FLAGS) >> $(MAKE_VARIABLES_FILE)
+	@echo >> $(MAKE_VARIABLES_FILE)
+	@echo MANGO_F_LINK_FLAGS = -L $(PWD)/lib -lmango $(EXTRA_F_LINK_FLAGS) >> $(MAKE_VARIABLES_FILE)
 
 test_make:
 	@echo MANGO_HOST is $(MANGO_HOST)
