@@ -1,0 +1,25 @@
+var classmango_1_1Least__squares__solver =
+[
+    [ "Least_squares_solver", "classmango_1_1Least__squares__solver.html#a99e51ea043c3435698d4d09434167765", null ],
+    [ "Least_squares_solver", "classmango_1_1Least__squares__solver.html#a751050aadd90b72ad67dbd2deee797d1", null ],
+    [ "~Least_squares_solver", "classmango_1_1Least__squares__solver.html#a1cb8b95bcf2e76d3dc2980800dfedfaa", null ],
+    [ "finite_difference_gradient", "classmango_1_1Least__squares__solver.html#a3164d1c32d4f0a9537ecbb3393f6639e", null ],
+    [ "finite_difference_Jacobian", "classmango_1_1Least__squares__solver.html#a801691f81a3a07a5d0883819b1fd93ae", null ],
+    [ "group_leaders_loop", "classmango_1_1Least__squares__solver.html#ae3a985378cd98c760b591944eb9a6474", null ],
+    [ "least_squares_to_single_objective", "classmango_1_1Least__squares__solver.html#ab9baf258db8fd39f26f42ace07eefe70", null ],
+    [ "objective_function_wrapper", "classmango_1_1Least__squares__solver.html#a47d17c1d0338e73351ce9b3cba36681c", null ],
+    [ "optimize", "classmango_1_1Least__squares__solver.html#a861d155f83d8fea28bc49c86cf4ad4b1", null ],
+    [ "record_function_evaluation", "classmango_1_1Least__squares__solver.html#a4801b811325cc9b8560f8a2db69c8eee", null ],
+    [ "record_function_evaluation_pointer", "classmango_1_1Least__squares__solver.html#a29756754a2a9a41bcfe4b52b724b1bcc", null ],
+    [ "residual_function_wrapper", "classmango_1_1Least__squares__solver.html#a8a99f0feefcb985baee70bab747b90ef", null ],
+    [ "residuals_to_single_objective", "classmango_1_1Least__squares__solver.html#aa9abfb3a717523ec7e975e54e0e43896", null ],
+    [ "best_residual_function", "classmango_1_1Least__squares__solver.html#ac1f000de18a7b32abfa4d0735098701a", null ],
+    [ "current_residuals", "classmango_1_1Least__squares__solver.html#a69aa8fdb6ccaf93f7f1e64307aecd589", null ],
+    [ "least_squares_problem", "classmango_1_1Least__squares__solver.html#a3e2914a91502e697584180f5acb7fffd", null ],
+    [ "N_terms", "classmango_1_1Least__squares__solver.html#aac068071fdd3021ead09555a13be7d06", null ],
+    [ "print_residuals_in_output_file", "classmango_1_1Least__squares__solver.html#a2d05dd2d5d1e5749e610dae4170c7090", null ],
+    [ "residual_function", "classmango_1_1Least__squares__solver.html#aeaef08939121ef671c49f4714e89e4a5", null ],
+    [ "residuals", "classmango_1_1Least__squares__solver.html#a9d395453218df9ccdbca1b1b28a4db3f", null ],
+    [ "sigmas", "classmango_1_1Least__squares__solver.html#a84888a95c3bbeabed179cc7a7f3728ef", null ],
+    [ "targets", "classmango_1_1Least__squares__solver.html#a26813659bd7b52b1844080d23446a799", null ]
+];

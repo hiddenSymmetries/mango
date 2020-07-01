@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['set_5falgorithm_298',['set_algorithm',['../classmango_1_1Problem.html#a4c942b51660b984659d01955b4b3a90e',1,'mango::Problem::set_algorithm(algorithm_type algorithm)'],['../classmango_1_1Problem.html#a50052fcdc4d80c5e2b0245d396ed1d5b',1,'mango::Problem::set_algorithm(std::string algorithm_str)']]],
+  ['set_5fbound_5fconstraints_299',['set_bound_constraints',['../classmango_1_1Problem.html#a5073840e5f67a229d7000435490f5e46',1,'mango::Problem']]],
+  ['set_5fcentered_5fdifferences_300',['set_centered_differences',['../classmango_1_1Problem.html#aa4db74ed54d36de59eb442e0f0b5b932',1,'mango::Problem']]],
+  ['set_5fcustom_301',['set_custom',['../classmango_1_1MPI__Partition.html#a045da61507d0df8928fa799e307fa756',1,'mango::MPI_Partition']]],
+  ['set_5ffinite_5fdifference_5fstep_5fsize_302',['set_finite_difference_step_size',['../classmango_1_1Problem.html#ad635ede68ce383d8efbc713e0bd31a99',1,'mango::Problem']]],
+  ['set_5fmax_5ffunction_5fevaluations_303',['set_max_function_evaluations',['../classmango_1_1Problem.html#adb4c7df669a9c245548d1ee4b9b759ce',1,'mango::Problem']]],
+  ['set_5fn_5fline_5fsearch_304',['set_N_line_search',['../classmango_1_1Problem.html#a9fba6faf2fb3eadddd0a77876de81342',1,'mango::Problem']]],
+  ['set_5fn_5fworker_5fgroups_305',['set_N_worker_groups',['../classmango_1_1MPI__Partition.html#ae458085adce912463e718c56b9909660',1,'mango::MPI_Partition']]],
+  ['set_5foutput_5ffilename_306',['set_output_filename',['../classmango_1_1Problem.html#a67cf70869bebfa82d20f41af9354025c',1,'mango::Problem::set_output_filename(std::string filename)'],['../classmango_1_1Problem.html#a7705ecaf7f0245d5f795cb0dedf1ffe0',1,'mango::Problem::set_output_filename(std::string &amp;filename)']]],
+  ['set_5fpackage_307',['set_package',['../classmango_1_1Solver.html#a8213157a1a8e253a24c185283930c6b3',1,'mango::Solver']]],
+  ['set_5fpackage_2ecpp_308',['set_package.cpp',['../set__package_8cpp.html',1,'']]],
+  ['set_5fprint_5fresiduals_5fin_5foutput_5ffile_309',['set_print_residuals_in_output_file',['../classmango_1_1Least__squares__problem.html#ad58139fe5bda38d223580bc61bbd98dd',1,'mango::Least_squares_problem']]],
+  ['set_5frelative_5fbound_5fconstraints_310',['set_relative_bound_constraints',['../classmango_1_1Problem.html#a0a9798d017c36128f39a1de07008203b',1,'mango::Problem']]],
+  ['set_5fuser_5fdata_311',['set_user_data',['../classmango_1_1Problem.html#a0f3dd62326265fee1e9b3a30de0cc399',1,'mango::Problem']]],
+  ['set_5fverbose_312',['set_verbose',['../classmango_1_1Problem.html#a564f15194cdb34d07eff8960fdac79ff',1,'mango::Problem']]],
+  ['sigmas_313',['sigmas',['../classmango_1_1Least__squares__solver.html#a84888a95c3bbeabed179cc7a7f3728ef',1,'mango::Least_squares_solver']]],
+  ['solve_314',['solve',['../classmango_1_1Imfil.html#a98ba0234496b100bf493f05ffb8db211',1,'mango::Imfil::solve()'],['../classmango_1_1Levenberg__marquardt.html#af3a488a0786800b3e82acea32a80191a',1,'mango::Levenberg_marquardt::solve()'],['../classmango_1_1Algorithm.html#a649bb3aac2ea740895fa6ecfc46c8250',1,'mango::Algorithm::solve()'],['../classmango_1_1LeastSquaresAlgorithm.html#a9137a9143edf9a8935e43defa24061b3',1,'mango::LeastSquaresAlgorithm::solve()']]],
+  ['solver_315',['Solver',['../classmango_1_1Solver.html',1,'mango::Solver'],['../classmango_1_1Problem.html#ad08abafec0fc3bce76b6be89a731cb68',1,'mango::Problem::solver()'],['../classmango_1_1Problem.html#a16432758b314f3cedad3fba81c895417',1,'mango::Problem::Solver()'],['../classmango_1_1Solver.html#a1cbd7d88680d364c748fdaea9bde035e',1,'mango::Solver::Solver()'],['../classmango_1_1Solver.html#a68465608e00428c4b6ce48fc133a8944',1,'mango::Solver::Solver(Problem *, int)']]],
+  ['solver_2ecpp_316',['Solver.cpp',['../Solver_8cpp.html',1,'']]],
+  ['solver_2ehpp_317',['Solver.hpp',['../Solver_8hpp.html',1,'']]],
+  ['star_5fline_318',['star_line',['../init__optimization_8cpp.html#a5fd4e87bbb0d992c88d375bb35706384',1,'init_optimization.cpp']]],
+  ['start_5ftime_319',['start_time',['../classmango_1_1Solver.html#acea29ed44fce415e2187292bce539e10',1,'mango::Solver']]],
+  ['state_5fvector_320',['state_vector',['../classmango_1_1Solver.html#a79caab008295ffa915d3c87a93437072',1,'mango::Solver']]],
+  ['stop_5fworkers_321',['stop_workers',['../classmango_1_1MPI__Partition.html#a6426ae4080ba7ace81b9f5494fd273d6',1,'mango::MPI_Partition']]]
+];

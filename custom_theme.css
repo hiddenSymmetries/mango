@@ -1,0 +1,487 @@
+/* Light background: #3 5 3 6 2 9; */
+/* New light dark background #3 2 3 6 3 d */
+/* Dark background: #d f e 5 f 2; */
+
+/* TOP MENU */
+.sm-dox {
+	background: #dfe5f2 !important;
+}
+
+.sm-dox a {
+	background: none;
+}
+
+body {
+     	/* background: #282923; */
+	background: #FBFBFB;
+	background-image: none;
+	/* color: #D8D8D8; */
+	color: #000000;
+}
+
+div.fragment, pre.fragment {
+	/* Used for displaying the source code files and multi-line code blocks */
+	border: 1px solid #DDDDDD;
+	padding: 12px;
+	/* background: #32363d; */
+	/* background: #E2EEF9; */
+	background: #FFFFFF;
+}
+
+a, a:link, a:visited {
+	/* color: #67d8ef !important; */
+	color: #226BAB !important;
+}
+
+a:hover {
+	color: #277CC7 !important;
+}
+
+.highlighted {
+	background: none !important;
+}
+
+a.highlighted {
+	background: none !important;
+}
+
+/*********************************************/
+/**              Top main menu              **/
+/*********************************************/
+#main-nav {
+	/* display: none; */
+	border-bottom: 1px solid #32363d;
+}
+
+#main-nav .sm-dox {
+	background: transparent !important;
+}
+
+.sm-dox a {
+	text-shadow: none !important;
+	background: transparent !important;
+}
+
+.sm-dox a:hover {
+	background: #282923 !important;
+}
+
+.sm-dox {
+	text-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.sm-dox ul {
+	border: 1px solid #000000;
+	background: #32363d;
+}
+
+.directory tr.even {
+	/* Even rows in the Class Hierarchy */
+	/* background: #32363d; */
+	background: #EAEAEA;
+}
+
+
+/*********************************************/
+/**               Top search                **/
+/*********************************************/
+#MSearchSelectWindow {
+	border: 1px solid #000000;
+	background: #32363d;
+}
+
+a.selectItem {
+	padding: 3px;
+}
+
+a.SelectItem:hover {
+	background: #282923 !important;
+}
+
+#MSearchResultsWindow {
+	border: 1px solid #000000;
+	background: #32363d;
+	color: #67d8ef !important;;
+}
+
+/*********************************************/
+/**                Main menu                **/
+/*********************************************/
+#nav-tree {
+	/* background: transparent; */
+	background: #272525;
+	color: #00FF00; /* This doesn't appear to do anything */
+}
+
+#nav-tree .label {
+/* This doesn't seem to do anything */
+	color: #A4A4A4;
+}
+
+#nav-tree a {
+/* This doesn't seem to do anything */
+	color: #A4A4A4 !important;
+}
+
+#nav-tree .selected {
+	background-image: none;
+	background: #32363d;
+}
+
+/*********************************************/
+/**               Main content              **/
+/*********************************************/
+
+/*********************************************/
+/**               Inline code               **/
+/*********************************************/
+p code,
+li code,
+td code,
+dd code {
+        /* Used for inline snippets of source code */
+	background-color: #FFFFFF;
+	/* background-color: #E2EEF9; */
+	/* border: 1px solid #A8B8D9; */
+	/* border: 1px solid #DDDDDD; */
+	border: 1px solid #EEEEEE;
+	padding-left: 2px;
+	padding-right: 2px;
+
+	/* color: #D8D8D8; */
+	color: #000000;
+}
+
+/*********************************************/
+/**         Table of Contents (ToC)         **/
+/*********************************************/
+div.toc {
+	background: #32363d;
+	border: 1px solid #000000;
+}
+
+div.toc h3 {
+	font-size: 150%;
+	color: inherit;
+}
+
+/*********************************************/
+/**              Content table              **/
+/*********************************************/
+table.doxtable tr:nth-child(even) td {
+	background: #32363d;
+	/* background: #EEEEEE; */
+}
+
+div.header {
+	background: transparent;
+	border-bottom: 1px solid #32363d;
+}
+
+/*********************************************/
+/**               Field table               **/
+/*********************************************/
+.fieldtable th {
+	/* Used for the header row when listing possible values of an enum. */
+	/* background: #282923; */
+	background: #272525;
+	color: #A4A4A4;
+	/* color: inherit; */
+}
+
+/*********************************************/
+/**           Memitem and memtitle          **/
+/*********************************************/
+.memdoc {
+	border: 1px solid #A8B8D9;
+}
+
+/*********************************************/
+/**             TOP navigation              **/
+/*********************************************/
+.tabs, .tabs2, .tabs3 {
+	background: #DDDDDD;
+}
+
+.tablist li {
+	background: transparent !important;
+}
+
+.tablist a {
+	background-image: none;
+	border-right: 1px solid #999999;
+
+	color: #32363d;
+}
+
+.tablist a:hover,
+.tablist li.current a {
+	text-decoration: none;
+	color: #000000;
+	background: #CCCCCC;
+	background-image: none;
+}
+
+/*********************************************/
+/**              H1 in textblocks           **/
+/*********************************************/
+
+/*********************************************/
+/**               Note, warning             **/
+/*********************************************/
+
+/*********************************************/
+/**               Reference list            **/
+/**Similar to warning/note/todo/... messages**/
+/*********************************************/
+dl.reflist {
+
+}
+
+
+/*********************************************/
+/**               Note, warning             **/
+/*********************************************/
+#docs_list {
+	background: #00FF00;
+	/* background: #32363d; */
+}
+
+#docs_list ul li {
+	border-right: 1px solid #BFBFBF;
+}
+
+#docs_list ul li a {
+	color: #1b1e21;
+}
+
+#docs_list ul li a:hover,
+#docs_list ul li a.docs_current {
+	background: #282923;
+}
+
+/*********************************************/
+/**               Resizable UI              **/
+/*********************************************/
+.ui-resizable-e {
+	background: #32363d;
+}
+
+/*********************************************/
+/**               Download url              **/
+/*********************************************/
+
+/*********************************************/
+/**               Syntax folor              **/
+/*********************************************/
+div.line {
+	background: transparent;
+	color: inherit;
+}
+
+div.line a {
+	color: inherit;
+}
+
+span.keyword {
+	color: #f92472;
+	font-style: italic;
+}
+
+span.keywordtype {
+	color: #67cfc1;
+	font-style: italic;
+}
+
+span.keywordflow {
+	color: #f92472;
+	font-style: italic;
+}
+
+span.comment {
+	color: #74705a;
+}
+
+span.preprocessor {
+	/* color: #a6e22b; */
+	color: #009900;
+}
+
+span.stringliteral {
+	/* color: #e7db74; */
+	color: #e79900;
+}
+
+span.charliteral {
+	/* color: #e7db74; */
+	color: #e79900;
+}
+
+span.vhdldigit { 
+	color: #ff00ff;
+}
+
+span.vhdlchar { 
+	color: #000000;
+}
+
+span.vhdlkeyword { 
+	color: #700070;
+}
+
+span.vhdllogic { 
+	color: #ff0000;
+}
+
+span.lineno {
+	background: transparent;
+}
+
+span.lineno a {
+	background: transparent;
+}
+
+/*********************************************/
+/**          Modules/Directory table        **/
+/*********************************************/
+.mdescLeft, .mdescRight, .memItemLeft, .memItemRight,
+.memTemplItemLeft, .memTemplItemRight, .memTemplParams {
+ /* Used for the summary of member functions on a class page */
+	/* background: #32363d; */
+	background: #EAEAEA;
+	color: inherit;
+}
+
+.memSeparator {
+	border: none;
+	background: transparent;
+}
+
+h2.groupheader {
+	/* Sets the headings in the pages for class descriptions */
+	/* color: #67d8ef; */
+	/* color: #990000; */
+	color: #313131;
+}
+
+/*********************************************/
+/**                 Mem items               **/
+/*********************************************/
+.memtitle {
+	/* This sets the top "tab" of the boxes for detailed documentation */
+	background: #EAEAEA !important;
+	/* background: #32363d !important; */
+	border-color: #000000;
+}
+
+.memitem {
+	/* This sets the body of the boxes for detailed documentation
+	/* background: #32363d !important; */
+	background: #EAEAEA !important;
+	color: inherit;<
+	text-shadow: none;
+}
+
+.memproto {
+	background: inherit;
+	border-color: #000000;
+	color: inherit;
+	text-shadow: none;
+}
+
+.memproto table td {
+	font-family: monospace, fixed !important;
+}
+
+td.memItemLeft, td.memItemRight {
+	font-family: monospace, fixed;
+}
+
+.paramname, .paramname em {
+	/* Used for the Parameters list in the detailed subroutine descriptions */
+	color: #bf5f82;
+	font-family: monospace, fixed;
+	font-weight: normal !important;
+}
+
+.memdoc {
+	background: inherit;
+	border-color: #000000;
+}
+
+
+/*********************************************/
+/**                 Footer                  **/
+/*********************************************/
+.titlearea {
+	border-bottom: 1px solid #32363d;
+}
+
+/*********************************************/
+/**                 Footer                  **/
+/*********************************************/
+#nav-path {
+	background: transparent;
+}
+
+#nav-path ul {
+	background: transparent;
+	color: inherit;
+	border: none;
+	border-top: 1px solid #32363d;
+}
+
+.navpath li.footer {
+	color: inherit;
+}
+
+.navpath li.navelem a {
+	text-shadow: none;
+}
+
+/*********************************************/
+/**             Custom scrollbar            **/
+/*********************************************/
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+	/* background: #234567; */
+	background: #949494;
+	border: none;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	/*background: #32363d;  */
+	background: #A4A4A4; 
+}
+
+/*********************************************/
+/**             Custom scrollbar            **/
+/*********************************************/
+h1.glow, h2.glow, h3.glow,
+h4.glow, h5.glow, h6.glow {
+	text-shadow: 0 0 15px #67d8ef;
+}
+
+/*
+h1, h2, h3, h4, h5, h6 {
+    color: #00FFFF;
+}
+*/
+
+h1 {
+   font-size: 14pt;
+}
+h2 {
+   font-size: 12pt;
+}

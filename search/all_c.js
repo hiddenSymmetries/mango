@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['overview_236',['Overview',['../index.html',1,'']]],
+  ['objective_5ffunction_237',['objective_function',['../classmango_1_1Solver.html#aa4de89d9e325c19cae25fceb239b87a4',1,'mango::Solver']]],
+  ['objective_5ffunction_5f1_238',['objective_function_1',['../finite__difference__tests_8cpp.html#a1d254fad524f3ef34c3728b18c1573ce',1,'finite_difference_tests.cpp']]],
+  ['objective_5ffunction_5finterface_239',['objective_function_interface',['../interfacemango__mod_1_1objective__function__interface.html',1,'mango_mod::objective_function_interface'],['../interfacemango__mod_1_1objective__function__interface.html#aae0c8418ea0c10b4be30c1b8db4102ed',1,'mango_mod::objective_function_interface::objective_function_interface()']]],
+  ['objective_5ffunction_5ftype_240',['objective_function_type',['../namespacemango.html#a00722de214a374d91aff46c5c42d00be',1,'mango']]],
+  ['objective_5ffunction_5fwrapper_241',['objective_function_wrapper',['../classmango_1_1Least__squares__solver.html#a47d17c1d0338e73351ce9b3cba36681c',1,'mango::Least_squares_solver::objective_function_wrapper()'],['../classmango_1_1Solver.html#a78406024f5231dbfd012838168dcd334',1,'mango::Solver::objective_function_wrapper()']]],
+  ['objective_5ffunction_5fwrapper_2ecpp_242',['objective_function_wrapper.cpp',['../objective__function__wrapper_8cpp.html',1,'']]],
+  ['objective_5fto_5fvector_5ffunction_243',['objective_to_vector_function',['../classmango_1_1Solver.html#aa0edcdc5c111b1cb4a0c67809f3cc609',1,'mango::Solver']]],
+  ['optimize_244',['optimize',['../classmango_1_1Least__squares__solver.html#a861d155f83d8fea28bc49c86cf4ad4b1',1,'mango::Least_squares_solver::optimize()'],['../classmango_1_1Problem.html#a3084257fa4b76e9a8d42bf15aada7f12',1,'mango::Problem::optimize()'],['../classmango_1_1Package.html#a4124e287a75f84301cd4f69b47aa9e37',1,'mango::Package::optimize()'],['../classmango_1_1Package__gsl.html#a348603ad6e6afbbd84b9559cefa2b79b',1,'mango::Package_gsl::optimize()'],['../classmango_1_1Package__hopspack.html#abec9b567c94c4faa4244bffd6ff46e8c',1,'mango::Package_hopspack::optimize()'],['../classmango_1_1Package__mango.html#a4e4ea9aed6fe155499e26c9a84e20be4',1,'mango::Package_mango::optimize()'],['../classmango_1_1Package__nlopt.html#a5c25b94b3e0240e76f00636cc8492340',1,'mango::Package_nlopt::optimize()'],['../classmango_1_1Package__petsc.html#aeda023f61792c7bb9a4f6bb20a15d47e',1,'mango::Package_petsc::optimize()'],['../classmango_1_1Solver.html#ad515309fea23b298e29afaa0839e60a0',1,'mango::Solver::optimize()']]],
+  ['optimize_2ecpp_245',['optimize.cpp',['../optimize_8cpp.html',1,'']]],
+  ['optimize_5fgsl_2ecpp_246',['optimize_gsl.cpp',['../optimize__gsl_8cpp.html',1,'']]],
+  ['optimize_5fhopspack_2ecpp_247',['optimize_hopspack.cpp',['../optimize__hopspack_8cpp.html',1,'']]],
+  ['optimize_5fleast_5fsquares_248',['optimize_least_squares',['../classmango_1_1Package.html#aa06ec9abdeb33945a78e09ed88658f6f',1,'mango::Package::optimize_least_squares()'],['../classmango_1_1Package__gsl.html#a0fa53bf2da0b0a91ea025f4f5a9f93d3',1,'mango::Package_gsl::optimize_least_squares()'],['../classmango_1_1Package__hopspack.html#add43742cf89c9b228540b670396dd931',1,'mango::Package_hopspack::optimize_least_squares()'],['../classmango_1_1Package__mango.html#ac9f26a918161faa0d9756bff3c1e3a74',1,'mango::Package_mango::optimize_least_squares()'],['../classmango_1_1Package__nlopt.html#ab05b1db058ecae0e510be72096fd422a',1,'mango::Package_nlopt::optimize_least_squares()'],['../classmango_1_1Package__petsc.html#abc976c24f9c46ed8463c1f6b498c1226',1,'mango::Package_petsc::optimize_least_squares()']]],
+  ['optimize_5fleast_5fsquares_2ecpp_249',['optimize_least_squares.cpp',['../optimize__least__squares_8cpp.html',1,'']]],
+  ['optimize_5fleast_5fsquares_5fgsl_2ecpp_250',['optimize_least_squares_gsl.cpp',['../optimize__least__squares__gsl_8cpp.html',1,'']]],
+  ['optimize_5fleast_5fsquares_5fmango_2ecpp_251',['optimize_least_squares_mango.cpp',['../optimize__least__squares__mango_8cpp.html',1,'']]],
+  ['optimize_5fleast_5fsquares_5fpetsc_2ecpp_252',['optimize_least_squares_petsc.cpp',['../optimize__least__squares__petsc_8cpp.html',1,'']]],
+  ['optimize_5fmango_2ecpp_253',['optimize_mango.cpp',['../optimize__mango_8cpp.html',1,'']]],
+  ['optimize_5fnlopt_2ecpp_254',['optimize_nlopt.cpp',['../optimize__nlopt_8cpp.html',1,'']]],
+  ['optimize_5fpetsc_2ecpp_255',['optimize_petsc.cpp',['../optimize__petsc_8cpp.html',1,'']]],
+  ['output_5ffilename_256',['output_filename',['../classmango_1_1Solver.html#a7e853a01aee5b8c7c0fcef8f03f2ac39',1,'mango::Solver']]],
+  ['output_20files_20and_20plotting_257',['Output files and plotting',['../plotting.html',1,'userGuide']]]
+];

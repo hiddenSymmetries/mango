@@ -1,0 +1,26 @@
+var classmango_1_1MPI__Partition =
+[
+    [ "MPI_Partition", "classmango_1_1MPI__Partition.html#ae6ce37fe54569b1af3aa6e1671819833", null ],
+    [ "~MPI_Partition", "classmango_1_1MPI__Partition.html#a26d04bdc793ceee350450e063be6748e", null ],
+    [ "continue_worker_loop", "classmango_1_1MPI__Partition.html#a9c054d572a105a510cb5f6436dddfd31", null ],
+    [ "get_comm_group_leaders", "classmango_1_1MPI__Partition.html#a0dca546564af54d62f5cb4a29800e37c", null ],
+    [ "get_comm_worker_groups", "classmango_1_1MPI__Partition.html#aec90074e9d1d80abaac83cdf8cd6daf7", null ],
+    [ "get_comm_world", "classmango_1_1MPI__Partition.html#a0242188fdd59e2574273618a9e78eb51", null ],
+    [ "get_N_procs_group_leaders", "classmango_1_1MPI__Partition.html#a3c0badbbfcf6a39838592f1706ca3caf", null ],
+    [ "get_N_procs_worker_groups", "classmango_1_1MPI__Partition.html#a8bc5e256147123d59c9ed8e75476426e", null ],
+    [ "get_N_procs_world", "classmango_1_1MPI__Partition.html#aae7a7fdb006336be42b47a654ca1fd6b", null ],
+    [ "get_N_worker_groups", "classmango_1_1MPI__Partition.html#adc3a4a24041ee4051b7629473bf8dfc1", null ],
+    [ "get_proc0_worker_groups", "classmango_1_1MPI__Partition.html#a4d5cb2c4cc80866f562e5a429fb3ed17", null ],
+    [ "get_proc0_world", "classmango_1_1MPI__Partition.html#aaf8ba1d9f8df15f56e1ca937678a2804", null ],
+    [ "get_rank_group_leaders", "classmango_1_1MPI__Partition.html#a3f01f33ea2b75605565d9531ebf74d4f", null ],
+    [ "get_rank_worker_groups", "classmango_1_1MPI__Partition.html#a87f2f659e8b17da68c9dc48a54d58010", null ],
+    [ "get_rank_world", "classmango_1_1MPI__Partition.html#ac839a1e5ba8b167dba9a632103983682", null ],
+    [ "get_worker_group", "classmango_1_1MPI__Partition.html#a6df1119cf20b64c5cab6525df1ac3639", null ],
+    [ "init", "classmango_1_1MPI__Partition.html#a4155c79504efafb9b40e12a4e5c57df2", null ],
+    [ "mobilize_workers", "classmango_1_1MPI__Partition.html#ac94eaaeb86706c8a66a7c6516c43f678", null ],
+    [ "set_custom", "classmango_1_1MPI__Partition.html#a045da61507d0df8928fa799e307fa756", null ],
+    [ "set_N_worker_groups", "classmango_1_1MPI__Partition.html#ae458085adce912463e718c56b9909660", null ],
+    [ "stop_workers", "classmango_1_1MPI__Partition.html#a6426ae4080ba7ace81b9f5494fd273d6", null ],
+    [ "write", "classmango_1_1MPI__Partition.html#a781d9e624cb017791268c4aac3842ea7", null ],
+    [ "verbose", "classmango_1_1MPI__Partition.html#a17b39a7c23bb82cd40130285d8af5b0f", null ]
+];
